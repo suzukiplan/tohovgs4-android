@@ -7,7 +7,7 @@
 
 ## Download
 
-- https://play.google.com/store/apps/details?id=com.suzukiplan.TOHOVGS
+https://play.google.com/store/apps/details?id=com.suzukiplan.TOHOVGS
 
 ## License
 
