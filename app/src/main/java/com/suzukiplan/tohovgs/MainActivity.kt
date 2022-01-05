@@ -164,6 +164,16 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         currentPage = page
     }
 
+    private fun refreshAlbumPagerFragment() {
+        if (currentPage != Page.PerTitle) return
+        stopSong()
+        val fragment = AlbumPagerFragment.create()
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(fragmentContainer.id, fragment)
+        currentFragment = fragment
+        transaction.commit()
+    }
+
     override fun onBackPressed() = finish()
 
     override fun finish() {
@@ -176,10 +186,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         AskDialog.start(this, getString(R.string.ask_lock, song.name), object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (isYes) {
+                    val previousStatus = musicManager?.isExistLockedSong(settings)
                     settings.lock(song)
-                    (currentFragment as? AlbumPagerFragment)?.reload(
-                        musicManager?.isExistLockedSong(settings)
-                    )
+                    if (false == previousStatus) {
+                        refreshAlbumPagerFragment()
+                    }
                     done()
                 }
             }
@@ -196,17 +207,17 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         })
     }
 
-    override fun onRequestUnlockAll(done: (unlocked: Boolean) -> Unit) {
+    override fun onRequestUnlockAll() {
         val message = getString(R.string.ask_unlock_all)
         AskDialog.start(this, message, object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (!isYes) return
-                startRewardForUnlock(null, done)
+                startRewardForUnlock(null, null)
             }
         })
     }
 
-    private fun startRewardForUnlock(album: Album?, done: (unlocked: Boolean) -> Unit) {
+    private fun startRewardForUnlock(album: Album?, done: ((unlocked: Boolean) -> Unit)?) {
         startProgress()
         stopSong()
         if (null == album) {
@@ -221,7 +232,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 Logger.e("Rewarded Ad load failed: $error")
                 endProgress()
                 MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
-                done.invoke(false)
+                done?.invoke(false)
             }
 
             override fun onAdLoaded(ad: RewardedAd) {
@@ -233,7 +244,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                             Logger.e("onAdFailedToShowFullScreenContent: $error")
                             endProgress()
                             MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
-                            done.invoke(false)
+                            done?.invoke(false)
                         }
 
                         override fun onAdDismissedFullScreenContent() {
@@ -245,14 +256,15 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     Logger.d("RewardItem: type=${rewardItem.type}, amount=${rewardItem.amount}")
                     if (null == album) {
                         musicManager?.albums?.forEach { settings.unlock(it) }
+                        refreshAlbumPagerFragment()
                     } else {
                         settings.unlock(album)
-                        (currentFragment as? AlbumPagerFragment)?.reload(
-                            musicManager?.isExistLockedSong(settings)
-                        )
+                        if (false == musicManager?.isExistLockedSong(settings)) {
+                            refreshAlbumPagerFragment()
+                        }
                     }
                     endProgress()
-                    done.invoke(true)
+                    done?.invoke(true)
                 }
             }
         }

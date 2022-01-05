@@ -4,7 +4,6 @@
  */
 package com.suzukiplan.tohovgs
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -69,21 +68,11 @@ class AlbumPagerFragment : Fragment() {
         TabLayoutMediator(tabLayout, pager) { tab, position ->
             tab.text = items[position].name
         }.attach()
-        reload(MusicManager.getInstance(mainActivity)?.isExistLockedSong(settings))
-        return view
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun reload(allUnlocked: Boolean?) {
+        val allUnlocked = MusicManager.getInstance(mainActivity)?.isExistLockedSong(settings)
         unlockAllContainer.visibility =
             if (true == allUnlocked) {
                 unlockAll.setOnClickListener {
-                    mainActivity.onRequestUnlockAll {
-                        if (it) {
-                            unlockAllContainer.visibility = View.GONE
-                            pager.adapter?.notifyDataSetChanged()
-                        }
-                    }
+                    mainActivity.onRequestUnlockAll()
                 }
                 hideUnlockAll.setOnClickListener {
                     unlockAllContainer.visibility = View.GONE
@@ -92,6 +81,7 @@ class AlbumPagerFragment : Fragment() {
             } else {
                 View.GONE
             }
+        return view
     }
 
     inner class Adapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {

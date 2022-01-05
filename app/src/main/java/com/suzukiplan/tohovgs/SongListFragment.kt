@@ -47,7 +47,7 @@ class SongListFragment : Fragment() {
     }
 
     interface Listener {
-        fun onRequestUnlockAll(done: (unlocked: Boolean) -> Unit)
+        fun onRequestUnlockAll()
         fun onRequestUnlock(album: Album, done: (unlocked: Boolean) -> Unit)
         fun onRequestLock(song: Song, done: () -> Unit)
         fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit)
