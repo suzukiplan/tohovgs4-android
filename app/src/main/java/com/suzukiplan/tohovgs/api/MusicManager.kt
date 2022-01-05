@@ -4,6 +4,7 @@
  */
 package com.suzukiplan.tohovgs.api
 
+import android.annotation.SuppressLint
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
@@ -18,6 +19,7 @@ import com.suzukiplan.tohovgs.model.Song
 
 class MusicManager {
     companion object {
+        @SuppressLint("StaticFieldLeak")
         private var instance: MusicManager? = null
 
         fun getInstance(mainActivity: MainActivity): MusicManager? {
@@ -49,6 +51,12 @@ class MusicManager {
     var infinity = false
     var isBackground = false
     private var startedContext: Context? = null
+
+    fun isExistLockedSong(settings: Settings): Boolean {
+        return null != albums?.find { album ->
+            null != album.songs.find { settings.isLocked(it) }
+        }
+    }
 
     private fun load(mainActivity: MainActivity) {
         val songListInput = mainActivity.assets.open("songlist.json")

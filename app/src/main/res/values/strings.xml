@@ -8,10 +8,13 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="ask_unlock">You can unlock all songs in %s by playing reward ads.\nAre you sure you want to play it?</string>
+    <string name="ask_unlock_all">You can unlock all songs by playing reward ads.\nAre you sure you want to play it?</string>
     <string name="ask_lock">Are you sure you want to lock the %s?\n\nNote: You will need to play the reward ad when you unlock it again.</string>
     <string name="generating_shuffle_play_list">Generating shuffle play list…</string>
     <string name="all_songs_are_locked">All songs are locked</string>
     <string name="infinity">INFINITY</string>
     <string name="error_ads">Failed to load ads.</string>
     <string name="seek_bar">Seek Bar</string>
+    <string name="unlock_all_songs">Unlock All Songs</string>
+    <string name="hide_unlock_all_button">Hide unlock all button</string>
 </resources>
