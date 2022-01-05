@@ -141,7 +141,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     private fun movePage(page: Page) {
         if (page == currentPage) return
-        val currentFragment = this.currentFragment ?: return
         stopSong()
         val fragment = when (page) {
             Page.PerTitle -> AlbumPagerFragment.create()
@@ -158,7 +157,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             transaction.setCustomAnimations(R.anim.slide_in_from_left, R.anim.slide_out_to_right)
         }
         transaction.replace(fragmentContainer.id, fragment)
-        this.currentFragment = fragment
+        currentFragment = fragment
         transaction.commit()
         footers[currentPage]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
         footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
