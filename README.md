@@ -11,7 +11,7 @@
 
 ## License
 
-- オリジナル楽曲の著作権は上海アリス幻樂団に帰属し、そのライセンスは二次創作ガイドラインに基づきます
+- オリジナル楽曲の著作権は上海アリス幻樂団に帰属し、本アプリは [東方Projectの二次創作ガイドライン](https://touhou-project.news/guideline/) に基づいて公開しています
 - 使用している第三者OSS（[build.gradle](https://github.com/suzukiplan/tohovgs4-android/blob/master/app/build.gradle)のdependenciesセクションを参照）のライセンスは各OSSライセンスに基づきます
 - 本リポジトリで公開しているソースコード, MML データ のライセンスは [GPLv3](LICENSE.txt) です
 
