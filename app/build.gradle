@@ -1,0 +1,86 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.firebase-perf'
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        applicationId "com.suzukiplan.TOHOVGS"
+        minSdk 26
+        targetSdk 31
+        versionCode 403
+        versionName "4.3"
+        ndk {
+            moduleName "native-lib"
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_static"
+                cFlags "-fPIC " +
+                        "-ffast-math " +
+                        "-fsigned-char " +
+                        "-Ofast " +
+                        "-D__ANDROID__ " +
+                        "-DFIXED_POINT " +
+                        "-DNDEBUG "
+                cppFlags "-std=c++1y " +
+                        "-frtti " +
+                        "-fexceptions " +
+                        "-fPIC " +
+                        "-ffast-math " +
+                        "-fsigned-char " +
+                        "-Ofast " +
+                        "-DFORCE_DISABLE_ALIGNED_UNION " +
+                        "-D__ANDROID__ " +
+                        "-DFIXED_POINT " +
+                        "-DNDEBUG "
+            }
+        }
+        def properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        def ADS_ID_BANNER = properties.getProperty("ads_id_banner")
+        buildConfigField("String", "ADS_ID_BANNER", "\"${ADS_ID_BANNER}\"")
+        def ADS_ID_REWARD = properties.getProperty("ads_id_reward")
+        buildConfigField("String", "ADS_ID_REWARD", "\"${ADS_ID_REWARD}\"")
+        def ADS_ID_INTERSTITIAL = properties.getProperty("ads_id_interstitial")
+        buildConfigField("String", "ADS_ID_INTERSTITIAL", "\"${ADS_ID_INTERSTITIAL}\"")
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.android.gms:play-services-ads:20.5.0'
+    implementation platform('com.google.firebase:firebase-bom:29.0.3')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-perf-ktx'
+}

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">東方VGS</string>
+    <string name="app_name_long">東方BGM on VGS</string>
+    <string name="sequential">ALL</string>
+    <string name="shuffle">SHUFFLE</string>
+    <string name="home">HOME</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="ask_unlock">You can unlock all songs in %s by playing reward ads.\nAre you sure you want to play it?</string>
+    <string name="ask_lock">Are you sure you want to lock the %s?\n\nNote: You will need to play the reward ad when you unlock it again.</string>
+    <string name="generating_shuffle_play_list">Generating shuffle play list…</string>
+    <string name="all_songs_are_locked">All songs are locked</string>
+    <string name="infinity">INFINITY</string>
+    <string name="error_ads">Failed to load ads.</string>
+    <string name="seek_bar">Seek Bar</string>
+</resources>
