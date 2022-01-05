@@ -4,10 +4,12 @@
  */
 package com.suzukiplan.tohovgs
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -26,6 +28,7 @@ class AlbumPagerFragment : Fragment() {
     }
 
     private lateinit var mainActivity: MainActivity
+    private lateinit var unlockAll: Button
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
     private lateinit var settings: Settings
@@ -42,6 +45,7 @@ class AlbumPagerFragment : Fragment() {
         settings = Settings(context)
         musicManager = MusicManager.getInstance(mainActivity)
         val view = inflater.inflate(R.layout.fragment_album_pager, container, false)
+        unlockAll = view.findViewById(R.id.unlock_all)
         tabLayout = view.findViewById(R.id.tab)
         pager = view.findViewById(R.id.pager)
         items = musicManager?.albums!!
@@ -60,7 +64,26 @@ class AlbumPagerFragment : Fragment() {
         TabLayoutMediator(tabLayout, pager) { tab, position ->
             tab.text = items[position].name
         }.attach()
+        reload(MusicManager.getInstance(mainActivity)?.isExistLockedSong(settings))
         return view
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun reload(allUnlocked: Boolean?) {
+        unlockAll.visibility =
+            if (true == allUnlocked) {
+                unlockAll.setOnClickListener {
+                    mainActivity.onRequestUnlockAll {
+                        if (it) {
+                            unlockAll.visibility = View.GONE
+                            pager.adapter?.notifyDataSetChanged()
+                        }
+                    }
+                }
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
     }
 
     inner class Adapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {

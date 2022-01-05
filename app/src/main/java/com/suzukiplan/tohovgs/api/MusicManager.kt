@@ -50,6 +50,12 @@ class MusicManager {
     var isBackground = false
     private var startedContext: Context? = null
 
+    fun isExistLockedSong(settings: Settings): Boolean {
+        return null != albums?.find { album ->
+            null != album.songs.find { settings.isLocked(it) }
+        }
+    }
+
     private fun load(mainActivity: MainActivity) {
         val songListInput = mainActivity.assets.open("songlist.json")
         val songListJson = String(songListInput.readBytes(), Charsets.UTF_8)

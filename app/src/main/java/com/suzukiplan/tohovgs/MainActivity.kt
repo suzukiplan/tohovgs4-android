@@ -194,9 +194,24 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         })
     }
 
-    private fun startRewardForUnlock(album: Album, done: (unlocked: Boolean) -> Unit) {
+    override fun onRequestUnlockAll(done: (unlocked: Boolean) -> Unit) {
+        val message = getString(R.string.ask_unlock_all)
+        AskDialog.start(this, message, object : AskDialog.Listener {
+            override fun onClick(isYes: Boolean) {
+                if (!isYes) return
+                startRewardForUnlock(null, done)
+            }
+        })
+    }
+
+    private fun startRewardForUnlock(album: Album?, done: (unlocked: Boolean) -> Unit) {
         startProgress()
         stopSong()
+        if (null == album) {
+            Logger.d("Unlocking all songs")
+        } else {
+            Logger.d("Unlocking ${album.name}")
+        }
         val request = AdManagerAdRequest.Builder().build()
         val callback = object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(error: LoadAdError) {
@@ -226,7 +241,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     }
                 ad.show(this@MainActivity) { rewardItem ->
                     Logger.d("RewardItem: type=${rewardItem.type}, amount=${rewardItem.amount}")
-                    settings.unlock(album)
+                    if (null == album) {
+                        musicManager?.albums?.forEach { settings.unlock(it) }
+                    } else {
+                        settings.unlock(album)
+                        (currentFragment as? AlbumPagerFragment)?.reload(
+                            musicManager?.isExistLockedSong(settings)
+                        )
+                    }
                     endProgress()
                     done.invoke(true)
                 }
