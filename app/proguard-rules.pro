@@ -1,3 +1,1 @@
--keep class com.google.**  { *; }
--keep interface com.google.**  { *; }
--keep class com.suzukiplan.tohovgs.model.** { *; }
+-keepnames class com.suzukiplan.tohovgs.model.** { *; }
