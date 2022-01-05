@@ -5,6 +5,10 @@
 - このリポジトリは、Android版「東方BGM on VGS」(version 4) のソースコード公開とサポートサイトを兼用しています
 - ご意見・ご要望などあれば [Issues](https://github.com/suzukiplan/tohovgs4-android/issues) でお願いします
 
+## Download
+
+- https://play.google.com/store/apps/details?id=com.suzukiplan.TOHOVGS
+
 ## License
 
 - オリジナル楽曲の著作権は上海アリス幻樂団に帰属し、そのライセンスは二次創作ガイドラインに基づきます
