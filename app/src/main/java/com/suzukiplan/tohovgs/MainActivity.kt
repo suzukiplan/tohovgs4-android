@@ -178,6 +178,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             override fun onClick(isYes: Boolean) {
                 if (isYes) {
                     settings.lock(song)
+                    (currentFragment as? AlbumPagerFragment)?.reload(
+                        musicManager?.isExistLockedSong(settings)
+                    )
                     done()
                 }
             }
