@@ -16,4 +16,5 @@
     <string name="error_ads">広告の読み込みに失敗しました。</string>
     <string name="seek_bar">シークバー</string>
     <string name="unlock_all_songs">全ての楽曲をアンロックする</string>
+    <string name="hide_unlock_all_button">一時的に全ての楽曲アンロックボタンを隠す</string>
 </resources>

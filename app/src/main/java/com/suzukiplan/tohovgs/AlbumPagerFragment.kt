@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -28,7 +29,9 @@ class AlbumPagerFragment : Fragment() {
     }
 
     private lateinit var mainActivity: MainActivity
+    private lateinit var unlockAllContainer: View
     private lateinit var unlockAll: Button
+    private lateinit var hideUnlockAll: ImageButton
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
     private lateinit var settings: Settings
@@ -45,7 +48,9 @@ class AlbumPagerFragment : Fragment() {
         settings = Settings(context)
         musicManager = MusicManager.getInstance(mainActivity)
         val view = inflater.inflate(R.layout.fragment_album_pager, container, false)
+        unlockAllContainer = view.findViewById(R.id.unlock_all_container)
         unlockAll = view.findViewById(R.id.unlock_all)
+        hideUnlockAll = view.findViewById(R.id.unlock_all_hide)
         tabLayout = view.findViewById(R.id.tab)
         pager = view.findViewById(R.id.pager)
         items = musicManager?.albums!!
@@ -70,15 +75,18 @@ class AlbumPagerFragment : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     fun reload(allUnlocked: Boolean?) {
-        unlockAll.visibility =
+        unlockAllContainer.visibility =
             if (true == allUnlocked) {
                 unlockAll.setOnClickListener {
                     mainActivity.onRequestUnlockAll {
                         if (it) {
-                            unlockAll.visibility = View.GONE
+                            unlockAllContainer.visibility = View.GONE
                             pager.adapter?.notifyDataSetChanged()
                         }
                     }
+                }
+                hideUnlockAll.setOnClickListener {
+                    unlockAllContainer.visibility = View.GONE
                 }
                 View.VISIBLE
             } else {
