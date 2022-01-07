@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="64dp"
@@ -21,7 +22,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:layout_margin="8dp"
-            android:src="@drawable/ic_baseline_lock_24" />
+            android:src="@drawable/ic_baseline_lock_24"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/play"
@@ -29,7 +31,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:layout_margin="8dp"
-            android:src="@drawable/ic_baseline_play_circle_filled_24" />
+            android:src="@drawable/ic_baseline_play_circle_filled_24"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/song_title"
