@@ -209,10 +209,8 @@ class MusicManager {
     }
 
     private fun jobIdOfSong(song: Song?): Int {
-        song ?: return 1
-        song.parentAlbum ?: return 1
-        val albumIndex = albums?.indexOf(song.parentAlbum) ?: return 1
-        val songIndex = song.parentAlbum?.songs?.indexOf(song) ?: return 1
+        val albumIndex = albums?.indexOf(song?.parentAlbum) ?: 0
+        val songIndex = song?.parentAlbum?.songs?.indexOf(song) ?: 0
         return (albumIndex + 1) * 1000 + songIndex + 1
     }
 
