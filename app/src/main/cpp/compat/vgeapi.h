@@ -13,7 +13,7 @@ void vge_boxSP(int fx,int fy,int tx,int ty,unsigned char c);
 void vge_boxfSP(int fx,int fy,int tx,int ty,unsigned char c);
 void vge_touch(int* s,int* cx,int* cy,int* dx,int* dy);
 unsigned char vge_getmute();
-void vge_bplay(unsigned char n);
+void vge_bplay(const char* mmlPath);
 void vge_bstop();
 void vge_bresume();
 const char* vge_getdata(unsigned char n,unsigned int* size);

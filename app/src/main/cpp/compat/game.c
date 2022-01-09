@@ -31,6 +31,7 @@ struct SongData {
     int no;
     int loop;
     int col;
+    char mmlPath[1024];
     char text[64];
 };
 
@@ -212,7 +213,7 @@ int vge_loop() {
         playwait--;
         if (0 == playwait) {
             g_songChanged++;
-            vge_bplay(g_list[fs_musicCursor].no);
+            vge_bplay(g_list[fs_musicCursor].mmlPath);
             vgsdec_set_value(_psg, VGSDEC_REG_KOBUSHI, kobushi);
             focus = 1;
             whourai = 120;

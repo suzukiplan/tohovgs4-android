@@ -16,6 +16,7 @@
 #include "vge.h"
 #include "vgeint.h"
 #include "vgsdec.h"
+#include "vgsmml.h"
 
 /* マクロ定義 */
 #define abs(x) (x >= 0 ? (x) : -(x)) /* 変数の絶対値を得る */
@@ -187,22 +188,6 @@ static inline void pixel(unsigned char *p, int x, int y, unsigned char c) {
     if (0 <= x && x < XSIZE && 0 <= y && y < YSIZE) {
         p[y * XSIZE + x] = c;
     }
-}
-
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_lineBG: BG面にラインを描画する
- *----------------------------------------------------------------------------
- * 引数:
- * - fx [I] X座標(基点)
- * - fy [I] Y座標(基点)
- * - tx [I] X座標(終点)
- * - ty [I] Y座標(終点)
- * - c [I] パレット番号
- *----------------------------------------------------------------------------
- */
-void vge_lineBG(int fx, int fy, int tx, int ty, unsigned char c) {
-    line(_vram.bg, fx, fy, tx, ty, c);
 }
 
 /*
@@ -411,7 +396,10 @@ unsigned char vge_getmute() {
  *----------------------------------------------------------------------------
  */
 void vge_bplay(const char *mmlPath) {
-    vgsdec_load_bgm_from_memory(_psg, _note[n], _notelen[n]);
+    struct VgsMmlErrorInfo err;
+    struct VgsBgmData *data = vgsmml_compile_from_file(mmlPath, &err);
+    vgsdec_load_bgm_from_memory(_psg, data->data, data->size);
+    vgsmml_free_bgm_data(data);
     vgsdec_set_value(_psg, VGSDEC_REG_RESET, 1);
     vgsdec_set_value(_psg, VGSDEC_REG_SYNTHESIS_BUFFER, 1);
     vgsdec_set_value(_psg, VGSDEC_REG_TIME, 0);
