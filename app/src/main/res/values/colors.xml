@@ -12,4 +12,5 @@
     <color name="dark_grey">#FF888888</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00000000</color>
+    <color name="vgs_blue_screen">#FF000040</color>
 </resources>

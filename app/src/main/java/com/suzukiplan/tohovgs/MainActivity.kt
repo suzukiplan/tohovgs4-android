@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         PerTitle(1),
         Sequential(2),
         Shuffle(3),
+        Retro(4),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
         footers[Page.Shuffle] = findViewById(R.id.footer_shuffle)
+        footers[Page.Retro] = findViewById(R.id.footer_retro_ui)
         footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager?.infinity = checked
@@ -145,9 +147,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         val fragment = when (page) {
             Page.PerTitle -> AlbumPagerFragment.create()
             Page.Sequential -> SongListFragment.createAsSequential()
-            Page.Shuffle -> {
-                SongListFragment.createAsShuffle()
-            }
+            Page.Shuffle -> SongListFragment.createAsShuffle()
+            Page.Retro -> RetroFragment.create()
         }
         if (fragment is SongListFragment) fragment.listener = this
         val transaction = supportFragmentManager.beginTransaction()
