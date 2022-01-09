@@ -14,10 +14,6 @@
 
 int _bstop;
 
-static inline void setNote(unsigned char cn, unsigned char t, unsigned char n);
-
-inline int getNextNote();
-
 /*
  *----------------------------------------------------------------------------
  * サウンド情報のバッファリング

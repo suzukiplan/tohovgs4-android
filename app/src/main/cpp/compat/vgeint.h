@@ -39,14 +39,6 @@ struct _SLOT {
     unsigned char *dat;
 };
 
-/* 効果音 */
-struct _EFF {
-    unsigned int size;   /* サイズ */
-    unsigned short flag; /* 再生フラグ */
-    unsigned int pos;    /* 再生位置 */
-    unsigned char *dat;  /* PCMデータ */
-};
-
 /*
  *----------------------------------------------------------------------------
  * 入力情報
@@ -58,6 +50,8 @@ struct _TOUCH {
     int dy; /* Y方向移動ドット数 */
     int cx; /* 現在のX座標 */
     int cy; /* 現在のY座標 */
+    int px; /* 直前のX座標 */
+    int py; /* 直前のY座標 */
 };
 
 /*

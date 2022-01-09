@@ -39,7 +39,7 @@ static void line(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char
 
 static void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c);
 
-int vge_gload(unsigned char n, const char *bin, int size) {
+int vge_gload(unsigned char n, const char *bin) {
     int gSize;
     if (_slot[n].dat) return 0; // skip multiple loading
     if ('S' != bin[0] || 'Z' != bin[1]) {
@@ -404,34 +404,13 @@ unsigned char vge_getmute() {
 
 /*
  *----------------------------------------------------------------------------
- * [VGE-API] vge_bload: BGM(独自形式)をスロットにロードする
- *----------------------------------------------------------------------------
- * 引数:
- * - n [I] スロット番号
- * - name [I] ファイル名
- *----------------------------------------------------------------------------
- * 戻り値: 成功は0、失敗時は非0を返す.
- *----------------------------------------------------------------------------
- */
-int vge_bload(unsigned char n, const char *name) {
-    int size;
-    _note[n] = (char *) getbin(name, &size);
-    if (NULL == _note[n]) {
-        return -1;
-    }
-    _notelen[n] = (int) size;
-    return 0;
-}
-
-/*
- *----------------------------------------------------------------------------
  * [VGE-API] vge_bplay: BGMを演奏する
  *----------------------------------------------------------------------------
  * 引数:
  * - n [I] スロット番号
  *----------------------------------------------------------------------------
  */
-void vge_bplay(unsigned char n) {
+void vge_bplay(const char *mmlPath) {
     vgsdec_load_bgm_from_memory(_psg, _note[n], _notelen[n]);
     vgsdec_set_value(_psg, VGSDEC_REG_RESET, 1);
     vgsdec_set_value(_psg, VGSDEC_REG_SYNTHESIS_BUFFER, 1);
