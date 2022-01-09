@@ -35,6 +35,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         random = Random(System.currentTimeMillis())
         val view = inflater.inflate(R.layout.fragment_retro, container, false)
         surfaceView = view.findViewById(R.id.surface_view)
+        surfaceView.setZOrderOnTop(true)
         holder = surfaceView.holder
         holder.addCallback(this)
         return view
