@@ -69,7 +69,7 @@ extern "C" {
  * ログ出力ルーチン
  *----------------------------------------------------------------------------
  */
-void putlog(const char* fn,int ln,const char* msg,...);
+void putlog(const char *fn, int ln, const char *msg, ...);
 
 /*
  *----------------------------------------------------------------------------
@@ -120,24 +120,8 @@ void vge_reset();
  *----------------------------------------------------------------------------
  * [VGE-API] vge_gload: グラフィック(独自形式)をスロットにロードする
  *----------------------------------------------------------------------------
- * 引数:
- * - n [I] スロット番号
- * - name [I] ファイル名
- *----------------------------------------------------------------------------
- * 戻り値: 成功は0、失敗時は非0を返す.
- *----------------------------------------------------------------------------
- * 解説:
- * - VRAMのパレット情報は、ロードしたグラフィックのパレット情報に上書きされる.
- * - スロット番号とは、画像の保管庫を意味する識別子である.
- *   (vge_put を呼び出す際に用いる)
- * - スロットの情報は、プログラム停止時にVGEが自動的に開放する.
- * - 既にロード済みのスロットに再ロードを行った場合、以前のスロットの情報は、
- *   自動的に破棄される.
- * - スロットの格納領域はヒープ領域であるため、ロードはvge_init内でのみ行う事
- *   を推奨する.
- *----------------------------------------------------------------------------
  */
-int vge_gload(unsigned char n,const char* name);
+int vge_gload(unsigned char n, const char *bin, int size);
 
 /*
  *----------------------------------------------------------------------------
@@ -159,7 +143,7 @@ int vge_gload(unsigned char n,const char* name);
  * - VRAMからはみ出る部分の領域は表示しない
  *----------------------------------------------------------------------------
  */
-void vge_putBG(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
+void vge_putBG(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy);
 
 /*
  *----------------------------------------------------------------------------
@@ -167,7 +151,7 @@ void vge_putBG(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
  * 引数: vge_putBGと同じ
  *----------------------------------------------------------------------------
  */
-void vge_putBG2(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
+void vge_putBG2(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy);
 
 /*
  *----------------------------------------------------------------------------
@@ -176,7 +160,7 @@ void vge_putBG2(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSP(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
+void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy);
 
 /*
  *----------------------------------------------------------------------------
@@ -185,7 +169,7 @@ void vge_putSP(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-int vge_putSPX(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy,int px,int py);
+int vge_putSPX(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy, int px, int py);
 
 /*
  *----------------------------------------------------------------------------
@@ -194,7 +178,7 @@ int vge_putSPX(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy,int px,
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSPM(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy,unsigned char c);
+void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -203,7 +187,7 @@ void vge_putSPM(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy,unsign
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSPH(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
+void vge_putSPH(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy);
 
 /*
  *----------------------------------------------------------------------------
@@ -212,7 +196,7 @@ void vge_putSPH(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSPMH(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy,unsigned char c);
+void vge_putSPMH(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -221,7 +205,7 @@ void vge_putSPMH(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy,unsig
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSPD(unsigned char n,int sx,int sy,int xs,int ys,int dx,int dy);
+void vge_putSPD(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy);
 
 /*
  *----------------------------------------------------------------------------
@@ -245,7 +229,7 @@ void vge_clear(unsigned char c);
  * - スクロール後の領域はパレット0でクリア
  *----------------------------------------------------------------------------
  */
-void vge_scroll(int x,int y);
+void vge_scroll(int x, int y);
 
 /*
  *----------------------------------------------------------------------------
@@ -257,7 +241,7 @@ void vge_scroll(int x,int y);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_pixelBG(int x,int y,unsigned char c);
+void vge_pixelBG(int x, int y, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -269,7 +253,7 @@ void vge_pixelBG(int x,int y,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_pixelSP(int x,int y,unsigned char c);
+void vge_pixelSP(int x, int y, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -283,7 +267,7 @@ void vge_pixelSP(int x,int y,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_lineBG(int fx,int fy,int tx,int ty,unsigned char c);
+void vge_lineBG(int fx, int fy, int tx, int ty, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -297,7 +281,7 @@ void vge_lineBG(int fx,int fy,int tx,int ty,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_lineSP(int fx,int fy,int tx,int ty,unsigned char c);
+void vge_lineSP(int fx, int fy, int tx, int ty, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -310,7 +294,7 @@ void vge_lineSP(int fx,int fy,int tx,int ty,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_circleBG(int x,int y,int r,unsigned char c);
+void vge_circleBG(int x, int y, int r, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -323,7 +307,7 @@ void vge_circleBG(int x,int y,int r,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_circleSP(int x,int y,int r,unsigned char c);
+void vge_circleSP(int x, int y, int r, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -337,7 +321,7 @@ void vge_circleSP(int x,int y,int r,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_boxBG(int fx,int fy,int tx,int ty,unsigned char c);
+void vge_boxBG(int fx, int fy, int tx, int ty, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -351,7 +335,7 @@ void vge_boxBG(int fx,int fy,int tx,int ty,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_boxSP(int fx,int fy,int tx,int ty,unsigned char c);
+void vge_boxSP(int fx, int fy, int tx, int ty, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -365,7 +349,7 @@ void vge_boxSP(int fx,int fy,int tx,int ty,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_boxfBG(int fx,int fy,int tx,int ty,unsigned char c);
+void vge_boxfBG(int fx, int fy, int tx, int ty, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -379,7 +363,7 @@ void vge_boxfBG(int fx,int fy,int tx,int ty,unsigned char c);
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_boxfSP(int fx,int fy,int tx,int ty,unsigned char c);
+void vge_boxfSP(int fx, int fy, int tx, int ty, unsigned char c);
 
 /*
  *----------------------------------------------------------------------------
@@ -393,7 +377,7 @@ void vge_boxfSP(int fx,int fy,int tx,int ty,unsigned char c);
  * - dy [O] Y方向の移動距離（非タッチ中は不定）
  *----------------------------------------------------------------------------
  */
-void vge_touch(int* s,int* cx,int* cy,int* dx,int* dy);
+void vge_touch(int *s, int *cx, int *cy, int *dx, int *dy);
 
 /*
  *----------------------------------------------------------------------------
@@ -415,7 +399,7 @@ unsigned char vge_getmute();
  * 戻り値: 成功は0、失敗時は非0を返す.
  *----------------------------------------------------------------------------
  */
-int vge_bload(unsigned char n,const char* name);
+int vge_bload(unsigned char n, const char *name);
 
 /*
  *----------------------------------------------------------------------------

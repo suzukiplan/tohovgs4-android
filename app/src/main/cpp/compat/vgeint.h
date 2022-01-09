@@ -36,7 +36,7 @@ struct _VRAM {
 struct _SLOT {
     int xs;
     int ys;
-    unsigned char* dat;
+    unsigned char *dat;
 };
 
 /* 効果音 */
@@ -44,7 +44,7 @@ struct _EFF {
     unsigned int size;   /* サイズ */
     unsigned short flag; /* 再生フラグ */
     unsigned int pos;    /* 再生位置 */
-    unsigned char* dat;  /* PCMデータ */
+    unsigned char *dat;  /* PCMデータ */
 };
 
 /*
@@ -71,12 +71,11 @@ extern unsigned short ADPAL[256];
 extern struct _TOUCH _touch;
 extern unsigned char _mute;
 extern unsigned char _pause;
-extern short* TONE1[85];
-extern short* TONE2[85];
-extern short* TONE3[85];
-extern short* TONE4[85];
-extern int isIphone5;
-extern void* _psg;
+extern short *TONE1[85];
+extern short *TONE2[85];
+extern short *TONE3[85];
+extern short *TONE4[85];
+extern void *_psg;
 extern int _bstop;
 
 /*
@@ -84,8 +83,7 @@ extern int _bstop;
  * 内部関数(VGE/VGEAPI間)
  *----------------------------------------------------------------------------
  */
-char* getbin(const char* name, int* size);
-void vgsbuf(char* buf, size_t size);
+void vgsbuf(char *buf, size_t size);
 
 #ifdef __cplusplus
 };

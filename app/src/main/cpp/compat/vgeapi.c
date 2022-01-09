@@ -9,6 +9,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,67 +24,34 @@
 /* グローバル変数の実体宣言 */
 struct _VRAM _vram;
 struct _SLOT _slot[MAXSLOT];
-char* _note[MAXSLOT];
+char *_note[MAXSLOT];
 static int _notelen[MAXSLOT];
 struct _TOUCH _touch;
 unsigned char _mute;
 unsigned char _pause;
 
 /* 内部関数 */
-static int gclip(unsigned char n, int* sx, int* sy, int* xs, int* ys, int* dx, int* dy);
-static void pixel(unsigned char* p, int x, int y, unsigned char c);
-static void line(unsigned char* p, int fx, int fy, int tx, int ty, unsigned char c);
-static void boxf(unsigned char* p, int fx, int fy, int tx, int ty, unsigned char c);
+static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy);
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_gload: グラフィック(独自形式)をスロットにロードする
- *----------------------------------------------------------------------------
- * 引数:
- * - n [I] スロット番号
- * - name [I] ファイル名
- *----------------------------------------------------------------------------
- * 戻り値: 成功は0、失敗時は非0を返す.
- *----------------------------------------------------------------------------
- * 解説:
- * - VRAMのパレット情報は、ロードしたグラフィックのパレット情報に上書きされる.
- * - スロット番号とは、画像の保管庫を意味する識別子である.
- *   (vge_put を呼び出す際に用いる)
- * - スロットの情報は、プログラム停止時にVGEが自動的に開放する.
- * - 既にロード済みのスロットに再ロードを行った場合、以前のスロットの情報は、
- *   自動的に破棄される.
- * - スロットの格納領域はヒープ領域であるため、ロードはvge_init内でのみ行う事
- *   を推奨する.
- *----------------------------------------------------------------------------
- */
-int vge_gload(unsigned char n, const char* name)
-{
-    unsigned char* bin;
-    int rc = -1;
-    int gsize;
-    int size;
+static void pixel(unsigned char *p, int x, int y, unsigned char c);
 
-    /* 古いスロット情報を破棄 */
-    if (_slot[n].dat) {
-        free(_slot[n].dat);
-        _slot[n].dat = NULL;
-    }
+static void line(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c);
 
-    /* ロムデータの取得 */
-    if (NULL == (bin = (unsigned char*)getbin(name, &size))) {
-        goto ENDPROC;
-    }
+static void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c);
 
+int vge_gload(unsigned char n, const char *bin, int size) {
+    int gSize;
+    if (_slot[n].dat) return 0; // skip multiple loading
     if ('S' != bin[0] || 'Z' != bin[1]) {
-        goto ENDPROC;
+        return -1;
     }
     _slot[n].xs = bin[2] + 1;
     _slot[n].ys = bin[3] + 1;
-    gsize = (_slot[n].xs) * (_slot[n].ys);
+    gSize = (_slot[n].xs) * (_slot[n].ys);
 
     /* データ領域を確保 */
-    if (NULL == (_slot[n].dat = (unsigned char*)malloc(gsize))) {
-        goto ENDPROC;
+    if (NULL == (_slot[n].dat = (unsigned char *) malloc(gSize))) {
+        return -1;
     }
 
     /* パレット情報を読み込む */
@@ -92,20 +60,9 @@ int vge_gload(unsigned char n, const char* name)
 
     /* 画像データを読み込む */
     bin += sizeof(_vram.pal);
-    memcpy(_slot[n].dat, bin, gsize);
+    memcpy(_slot[n].dat, bin, gSize);
 
-    /* 終了処理 */
-    rc = 0;
-ENDPROC:
-    if (rc) {
-        if (_slot[n].dat) {
-            free(_slot[n].dat);
-            _slot[n].dat = NULL;
-        }
-        _slot[n].xs = 0;
-        _slot[n].ys = 0;
-    }
-    return rc;
+    return 0;
 }
 
 /*
@@ -115,8 +72,7 @@ ENDPROC:
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy)
-{
+void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy) {
     int i, j;
     int posT;
     int posF;
@@ -146,8 +102,7 @@ void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy)
  * 解説: スプライトは、一度表示したら消える妖精のような存在
  *----------------------------------------------------------------------------
  */
-void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy, unsigned char c)
-{
+void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy, unsigned char c) {
     int i, j;
     int posT;
     int posF;
@@ -175,14 +130,14 @@ void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy,
  * vge_putBG/vge_putSP共通のクリッピング処理
  *----------------------------------------------------------------------------
  */
-static int gclip(unsigned char n, int* sx, int* sy, int* xs, int* ys, int* dx, int* dy)
-{
+static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy) {
     /* スロットがロード済みか？ */
     if (NULL == _slot[n].dat) {
         return -1;
     }
     /* モロにはみだしてないか？ */
-    if ((*sx) < 0 || _slot[n].xs < (*sx) + (*xs) || (*sy) < 0 || _slot[n].ys < (*sy) + (*ys) || (*dx) + (*xs) < 0 || XSIZE <= *dx || (*dy) + (*ys) < 0 ||
+    if ((*sx) < 0 || _slot[n].xs < (*sx) + (*xs) || (*sy) < 0 || _slot[n].ys < (*sy) + (*ys) ||
+        (*dx) + (*xs) < 0 || XSIZE <= *dx || (*dy) + (*ys) < 0 ||
         YSIZE <= *dy) {
         return -1; /* モロはみだし刑事 */
     }
@@ -219,8 +174,7 @@ static int gclip(unsigned char n, int* sx, int* sy, int* xs, int* ys, int* dx, i
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_pixelSP(int x, int y, unsigned char c)
-{
+void vge_pixelSP(int x, int y, unsigned char c) {
     pixel(_vram.sp, x, y, c);
 }
 
@@ -229,8 +183,7 @@ void vge_pixelSP(int x, int y, unsigned char c)
  * vge_pixelBG, vge_pixelSPの内部処理
  *----------------------------------------------------------------------------
  */
-static inline void pixel(unsigned char* p, int x, int y, unsigned char c)
-{
+static inline void pixel(unsigned char *p, int x, int y, unsigned char c) {
     if (0 <= x && x < XSIZE && 0 <= y && y < YSIZE) {
         p[y * XSIZE + x] = c;
     }
@@ -248,8 +201,7 @@ static inline void pixel(unsigned char* p, int x, int y, unsigned char c)
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_lineBG(int fx, int fy, int tx, int ty, unsigned char c)
-{
+void vge_lineBG(int fx, int fy, int tx, int ty, unsigned char c) {
     line(_vram.bg, fx, fy, tx, ty, c);
 }
 
@@ -265,8 +217,7 @@ void vge_lineBG(int fx, int fy, int tx, int ty, unsigned char c)
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_lineSP(int fx, int fy, int tx, int ty, unsigned char c)
-{
+void vge_lineSP(int fx, int fy, int tx, int ty, unsigned char c) {
     line(_vram.sp, fx, fy, tx, ty, c);
 }
 
@@ -275,8 +226,7 @@ void vge_lineSP(int fx, int fy, int tx, int ty, unsigned char c)
  * vge_lineBGとvge_lineSPの共通処理
  *----------------------------------------------------------------------------
  */
-static inline void line(unsigned char* p, int fx, int fy, int tx, int ty, unsigned char c)
-{
+static inline void line(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c) {
     int idx, idy;
     int ia, ib, ie;
     int w;
@@ -350,8 +300,7 @@ static inline void line(unsigned char* p, int fx, int fy, int tx, int ty, unsign
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_boxSP(int fx, int fy, int tx, int ty, unsigned char c)
-{
+void vge_boxSP(int fx, int fy, int tx, int ty, unsigned char c) {
     vge_lineSP(fx, fy, tx, fy, c);
     vge_lineSP(fx, ty, tx, ty, c);
     vge_lineSP(fx, fy, fx, ty, c);
@@ -370,8 +319,7 @@ void vge_boxSP(int fx, int fy, int tx, int ty, unsigned char c)
  * - c [I] パレット番号
  *----------------------------------------------------------------------------
  */
-void vge_boxfSP(int fx, int fy, int tx, int ty, unsigned char c)
-{
+void vge_boxfSP(int fx, int fy, int tx, int ty, unsigned char c) {
     boxf(_vram.sp, fx, fy, tx, ty, c);
 }
 
@@ -380,8 +328,7 @@ void vge_boxfSP(int fx, int fy, int tx, int ty, unsigned char c)
  * vge_lineBGとvge_lineSPの共通処理
  *----------------------------------------------------------------------------
  */
-static inline void boxf(unsigned char* p, int fx, int fy, int tx, int ty, unsigned char c)
-{
+static inline void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c) {
     int w;
     /* form -> to変換 */
     if (tx < fx) {
@@ -432,8 +379,7 @@ static inline void boxf(unsigned char* p, int fx, int fy, int tx, int ty, unsign
  * - dy [O] Y方向の移動距離（非タッチ中は不定）
  *----------------------------------------------------------------------------
  */
-void vge_touch(int* s, int* cx, int* cy, int* dx, int* dy)
-{
+void vge_touch(int *s, int *cx, int *cy, int *dx, int *dy) {
     *s = _touch.s;
     *cx = _touch.cx;
     *cy = _touch.cy;
@@ -452,8 +398,7 @@ void vge_touch(int* s, int* cx, int* cy, int* dx, int* dy)
  * 戻り値: 非0=ミュート、0=発音
  *----------------------------------------------------------------------------
  */
-unsigned char vge_getmute()
-{
+unsigned char vge_getmute() {
     return _mute;
 }
 
@@ -468,14 +413,13 @@ unsigned char vge_getmute()
  * 戻り値: 成功は0、失敗時は非0を返す.
  *----------------------------------------------------------------------------
  */
-int vge_bload(unsigned char n, const char* name)
-{
+int vge_bload(unsigned char n, const char *name) {
     int size;
-    _note[n] = (char*)getbin(name, &size);
+    _note[n] = (char *) getbin(name, &size);
     if (NULL == _note[n]) {
         return -1;
     }
-    _notelen[n] = (int)size;
+    _notelen[n] = (int) size;
     return 0;
 }
 
@@ -487,8 +431,7 @@ int vge_bload(unsigned char n, const char* name)
  * - n [I] スロット番号
  *----------------------------------------------------------------------------
  */
-void vge_bplay(unsigned char n)
-{
+void vge_bplay(unsigned char n) {
     vgsdec_load_bgm_from_memory(_psg, _note[n], _notelen[n]);
     vgsdec_set_value(_psg, VGSDEC_REG_RESET, 1);
     vgsdec_set_value(_psg, VGSDEC_REG_SYNTHESIS_BUFFER, 1);
@@ -501,8 +444,7 @@ void vge_bplay(unsigned char n)
  * [VGE-API] vge_bstop: BGMの演奏を中断する
  *----------------------------------------------------------------------------
  */
-void vge_bstop()
-{
+void vge_bstop() {
     _bstop = 1;
 }
 
@@ -511,8 +453,7 @@ void vge_bstop()
  * [VGE-API] vge_bresume: BGMの演奏を中断したところから再開する
  *----------------------------------------------------------------------------
  */
-void vge_bresume()
-{
+void vge_bresume() {
     _bstop = 0;
 }
 
@@ -524,8 +465,7 @@ void vge_bresume()
  * - p [I] ポーズ状態
  *----------------------------------------------------------------------------
  */
-void vge_setPause(unsigned char p)
-{
+void vge_setPause(unsigned char p) {
     _pause = p;
 }
 
@@ -540,13 +480,12 @@ void vge_setPause(unsigned char p)
  * 戻り値: 非NULL=データの先頭ポインタ、NULL=指定スロットにデータは無い
  *----------------------------------------------------------------------------
  */
-const char* vge_getdata(unsigned char n, unsigned int* size)
-{
-    const char* ret;
+const char *vge_getdata(unsigned char n, unsigned int *size) {
+    const char *ret;
     int size2;
-    int* sp = (int*)size;
+    int *sp = (int *) size;
     char name[32];
-    sprintf(name, "DSLOT%03d.DAT", (int)n);
+    sprintf(name, "DSLOT%03d.DAT", (int) n);
     if (NULL == sp) {
         sp = &size2;
     }
