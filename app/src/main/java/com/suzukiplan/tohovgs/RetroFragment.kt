@@ -3,6 +3,7 @@ package com.suzukiplan.tohovgs
 import android.graphics.Bitmap
 import android.graphics.Paint
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -46,6 +47,9 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         Logger.d("surfaceCreated")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            holder.surface.setFrameRate(60.0f, Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
+        }
         stopRenderThread()
         startRenderThread()
     }
