@@ -32,6 +32,7 @@
             android:layout_weight="1" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/seek_bar_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/black_alpha12"
@@ -198,34 +199,40 @@
                     android:textSize="12sp" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/black_alpha12" />
-
-            <androidx.appcompat.widget.LinearLayoutCompat
+            <FrameLayout
+                android:id="@+id/infinity_container"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/black_alpha12" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/infinity"
-                    android:textColor="@color/black"
-                    android:textSize="12sp" />
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
 
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/infinity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/infinity"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
 
-            </androidx.appcompat.widget.LinearLayoutCompat>
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/infinity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+            </FrameLayout>
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
