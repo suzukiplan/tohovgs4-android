@@ -81,6 +81,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                 else -> 16L
             }
         }
+        val baseTime = intervals.minOf { it }
         var currentInterval = 0
         paint.isAntiAlias = false
         while (alive) {
@@ -89,7 +90,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             procTime = System.currentTimeMillis() - start
             currentInterval++
             currentInterval %= intervals.size
-            if (procTime < 16) {
+            if (procTime < baseTime) {
                 Thread.sleep(intervals[currentInterval] - procTime)
             }
         }
