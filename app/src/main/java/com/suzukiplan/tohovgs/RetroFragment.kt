@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import com.suzukiplan.tohovgs.api.Logger
-import kotlin.random.Random
 
 class RetroFragment : Fragment(), SurfaceHolder.Callback {
     companion object {
@@ -18,7 +17,6 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var surfaceView: SurfaceView
     private lateinit var holder: SurfaceHolder
     private lateinit var vram: Bitmap
-    private lateinit var random: Random
     private val vramRect = Rect(0, 0, 240, 320)
     private val surfaceRect = Rect()
     private val paint = Paint()
@@ -32,7 +30,6 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         vram = Bitmap.createBitmap(vramRect.width(), vramRect.height(), Bitmap.Config.RGB_565)
-        random = Random(System.currentTimeMillis())
         val view = inflater.inflate(R.layout.fragment_retro, container, false)
         surfaceView = view.findViewById(R.id.surface_view)
         surfaceView.setZOrderOnTop(true)
@@ -104,11 +101,6 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     private fun tick() {
-        vram.setPixel(
-            random.nextInt(vramRect.width()),
-            random.nextInt(vramRect.height()),
-            random.nextInt(65536)
-        )
         val canvas = holder.lockHardwareCanvas() ?: return
         canvas.drawBitmap(vram, vramRect, surfaceRect, paint)
         holder.unlockCanvasAndPost(canvas)
