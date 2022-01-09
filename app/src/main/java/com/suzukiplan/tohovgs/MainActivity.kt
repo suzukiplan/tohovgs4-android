@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var playTime: TextView
     private lateinit var leftTime: TextView
     private lateinit var seekBar: AppCompatSeekBar
-    private lateinit var infinityContainer: View
     private lateinit var seekBarContainer: View
     private var footers = HashMap<Page, View>()
     private var currentFragment: Fragment? = null
@@ -69,7 +68,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         playTime = findViewById(R.id.play_time)
         leftTime = findViewById(R.id.left_time)
         seekBar = findViewById(R.id.seek_bar)
-        infinityContainer = findViewById(R.id.infinity_container)
         seekBarContainer = findViewById(R.id.seek_bar_container)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -148,12 +146,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun movePage(page: Page) {
         if (page == currentPage) return
         stopSong()
-        infinityContainer.visibility = if (page == Page.Retro) {
+        seekBarContainer.visibility = if (page == Page.Retro) {
             View.GONE
         } else {
             View.VISIBLE
         }
-        seekBarContainer.visibility = infinityContainer.visibility
         val fragment = when (page) {
             Page.PerTitle -> AlbumPagerFragment.create()
             Page.Sequential -> SongListFragment.createAsSequential()

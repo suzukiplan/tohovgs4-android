@@ -12,7 +12,7 @@
     <string name="ask_lock">「%s」をロックしてもよろしいですか?</string>
     <string name="generating_shuffle_play_list">シャッフル・プレイリストを生成中…</string>
     <string name="all_songs_are_locked">全ての楽曲がロックされています</string>
-    <string name="infinity">Inifinity</string>
+    <string name="infinity">∞</string>
     <string name="error_ads">広告の読み込みに失敗しました。</string>
     <string name="seek_bar">シークバー</string>
     <string name="unlock_all_songs">全ての楽曲をアンロックする</string>
