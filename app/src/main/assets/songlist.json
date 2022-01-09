@@ -584,6 +584,11 @@
       "defaultLocked": true,
       "songs": [
         {
+          "mml": "TH11-02",
+          "loop": 1,
+          "name": "暗闇の風穴"
+        },
+        {
           "mml": "TH11-05",
           "loop": 1,
           "name": "緑眼のジェラシー"
