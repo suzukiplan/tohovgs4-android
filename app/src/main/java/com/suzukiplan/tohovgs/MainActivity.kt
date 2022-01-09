@@ -160,7 +160,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         currentFragment = fragment
         transaction.commit()
         footers[currentPage]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
-        footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+        executeAsync {
+            Thread.sleep(300L)
+            runOnUiThread {
+                if (page == currentPage) {
+                    footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+                }
+            }
+        }
         currentPage = page
     }
 
