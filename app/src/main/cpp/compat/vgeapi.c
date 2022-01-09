@@ -23,7 +23,6 @@
 /* グローバル変数の実体宣言 */
 struct _VRAM _vram;
 struct _SLOT _slot[MAXSLOT];
-struct _EFF _eff[MAXSLOT];
 char* _note[MAXSLOT];
 static int _notelen[MAXSLOT];
 struct _TOUCH _touch;

@@ -68,7 +68,6 @@ struct _TOUCH {
 extern struct _VRAM _vram;
 extern struct _SLOT _slot[MAXSLOT];
 extern unsigned short ADPAL[256];
-extern struct _EFF _eff[MAXSLOT];
 extern struct _TOUCH _touch;
 extern unsigned char _mute;
 extern unsigned char _pause;
@@ -85,8 +84,6 @@ extern int _bstop;
  * 内部関数(VGE/VGEAPI間)
  *----------------------------------------------------------------------------
  */
-void eff_flag(struct _EFF* e, unsigned int f);
-void eff_pos(struct _EFF* e, unsigned int f);
 char* getbin(const char* name, int* size);
 void vgsbuf(char* buf, size_t size);
 
