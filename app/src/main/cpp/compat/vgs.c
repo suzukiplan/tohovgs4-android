@@ -20,8 +20,6 @@ int _bstop;
  *----------------------------------------------------------------------------
  */
 void vgsbuf(char *buf, size_t size) {
-    static int an;
-    an = 1 - an;
     memset(buf, 0, size);
     if (_pause || vge_getmute()) return;
     if (_bstop) return;

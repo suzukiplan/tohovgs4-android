@@ -3,7 +3,8 @@
    * [概要] VGE内部のデータ宣言（vge.cpp/vgeapi.c間で共有する情報群）
    *----------------------------------------------------------------------------
    */
-
+#ifndef INCLUDE_VGEINT_H
+#define INCLUDE_VGEINT_H
 #define MAXSLOT 2
 
 #ifdef __cplusplus
@@ -49,4 +50,6 @@ void vgsbuf(char *buf, size_t size);
 
 #ifdef __cplusplus
 };
+#endif
+
 #endif

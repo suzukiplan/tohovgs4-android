@@ -6,14 +6,16 @@
 #include <android/bitmap.h>
 #include <android/asset_manager_jni.h>
 #include <android/log.h>
-#include <string.h>
+#include <cstring>
 #include "vgsdec.h"
 #include "vgsmml.h"
 #include "vge.h"
 #include "vgeint.h"
 #include "android_fopen.h"
+#include "audio.hpp"
 
 static jobject android_java_asset_manager = nullptr;
+static VgsAudioSystem *compatAudioSystem = nullptr;
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_createDecoder(JNIEnv *, jclass) {
@@ -106,6 +108,10 @@ Java_com_suzukiplan_tohovgs_api_JNI_seek(JNIEnv *, jclass, jlong context, jint p
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *env, jclass) {
+    if (compatAudioSystem) {
+        delete compatAudioSystem;
+        compatAudioSystem = nullptr;
+    }
     tohovgs_cleanUp();
     if (android_java_asset_manager != nullptr) {
         env->DeleteGlobalRef(android_java_asset_manager);
@@ -123,6 +129,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAllocate(JNIEnv *env,
     android_java_asset_manager = env->NewGlobalRef(assetManager);
     android_fopen_set_asset_manager(AAssetManager_fromJava(env, android_java_asset_manager));
     tohovgs_allocate(nTitle, nSong);
+    compatAudioSystem = new VgsAudioSystem(22050, 16, 1);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -207,12 +214,12 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatOnTouch(JNIEnv *,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_compatOnReleaseTouch(JNIEnv *env, jclass) {
+Java_com_suzukiplan_tohovgs_api_JNI_compatOnReleaseTouch(JNIEnv *, jclass) {
     _touch.s = 0;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_compatOnFling(JNIEnv *env, jclass, jint fx, jint fy) {
+Java_com_suzukiplan_tohovgs_api_JNI_compatOnFling(JNIEnv *, jclass, jint fx, jint fy) {
     g_flingX += fx;
     g_flingY += fy;
 }
