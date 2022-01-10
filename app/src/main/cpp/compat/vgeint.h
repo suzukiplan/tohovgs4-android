@@ -4,7 +4,7 @@
    *----------------------------------------------------------------------------
    */
 
-#define MAXSLOT 256
+#define MAXSLOT 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,7 +18,7 @@ struct _VRAM {
 struct _SLOT {
     int xs;
     int ys;
-    unsigned char *dat;
+    unsigned char dat[65536];
 };
 
 struct _TOUCH {

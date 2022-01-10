@@ -42,18 +42,12 @@ static void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char
 int vge_gload(unsigned char n, const char *bin) {
     int gSize;
     int i;
-    if (_slot[n].dat) return 0; // skip multiple loading
     if ('S' != bin[0] || 'Z' != bin[1]) {
         return -1;
     }
     _slot[n].xs = bin[2] + 1;
     _slot[n].ys = bin[3] + 1;
     gSize = (_slot[n].xs) * (_slot[n].ys);
-
-    /* データ領域を確保 */
-    if (NULL == (_slot[n].dat = (unsigned char *) malloc(gSize))) {
-        return -1;
-    }
 
     /* パレット情報を読み込む */
     bin += 4;
