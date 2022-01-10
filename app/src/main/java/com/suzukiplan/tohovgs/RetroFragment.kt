@@ -98,13 +98,15 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         JNI.compatCleanUp()
         val albums = MusicManager.getInstance(activity as MainActivity)?.albums ?: return
         val unlockedSongs = HashMap<String, List<Song>>(albums.size)
+        var unlockedSongsCount = 0
         albums.forEach { album ->
             unlockedSongs[album.id] = album.songs.filter { song ->
                 !settings.isLocked(song)
             }
+            unlockedSongsCount += unlockedSongs[album.id]?.size ?: 0
         }
         val unlockedAlbums = albums.filter { true == unlockedSongs[it.id]?.isNotEmpty() }
-        JNI.compatAllocate(unlockedAlbums.size, unlockedSongs.size)
+        JNI.compatAllocate(unlockedAlbums.size, unlockedSongsCount)
         var titleIndex = 0
         var songIndex = 0
         var compatId = 0x0010
