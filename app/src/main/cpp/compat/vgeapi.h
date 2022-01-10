@@ -27,6 +27,8 @@ void vge_bstop();
 
 void vge_bresume();
 
+void vge_restartCurrentSong();
+
 #ifdef __cplusplus
 };
 #endif

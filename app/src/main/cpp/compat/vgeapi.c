@@ -401,3 +401,7 @@ void vge_bstop() {
 void vge_bresume() {
     _bstop = 0;
 }
+
+void vge_restartCurrentSong() {
+    vgsdec_set_value(_psg, VGSDEC_REG_TIME, 0);
+}
