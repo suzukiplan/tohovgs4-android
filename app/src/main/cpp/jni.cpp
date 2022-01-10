@@ -150,7 +150,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAddSong(JNIEnv *env, jclass,
                                                   jint col,
                                                   jbyteArray mmlPath_,
                                                   jbyteArray title_) {
-    __android_log_print(ANDROID_LOG_DEBUG, "TOHOVGS", "addSong:%04X-%d", id, no);
+    //__android_log_print(ANDROID_LOG_DEBUG, "TOHOVGS", "addSong:%04X-%d", id, no);
     jbyte *title = env->GetByteArrayElements(title_, nullptr);
     size_t titleSize = (uint32_t) env->GetArrayLength(title_);
     jbyte *mmlPath = env->GetByteArrayElements(mmlPath_, nullptr);
