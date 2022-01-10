@@ -42,6 +42,8 @@ extern short *TONE3[85];
 extern short *TONE4[85];
 extern void *_psg;
 extern int _bstop;
+extern int g_flingY;
+extern int g_flingX;
 
 void vgsbuf(char *buf, size_t size);
 

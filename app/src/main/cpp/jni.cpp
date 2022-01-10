@@ -6,6 +6,7 @@
 #include <android/bitmap.h>
 #include <android/asset_manager_jni.h>
 #include <android/log.h>
+#include <string.h>
 #include "vgsdec.h"
 #include "vgsmml.h"
 #include "vge.h"
@@ -110,6 +111,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *env, jclass) {
         env->DeleteGlobalRef(android_java_asset_manager);
         android_java_asset_manager = nullptr;
     }
+    memset(&_touch, 0, sizeof(_touch));
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -177,6 +179,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAddSong(JNIEnv *env, jclass,
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatTick(JNIEnv *env, jclass, jobject bitmap) {
     unsigned short *pixels;
+    memset(_vram.sp, 0, sizeof(_vram.sp));
     vge_tick();
     if (AndroidBitmap_lockPixels(env, bitmap, (void **) &pixels) < 0) return;
     int index = 0;
@@ -187,4 +190,29 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatTick(JNIEnv *env, jclass, jobject bitm
         }
     }
     AndroidBitmap_unlockPixels(env, bitmap);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatOnTouch(JNIEnv *,
+                                                  jclass,
+                                                  jint cx,
+                                                  jint cy,
+                                                  jint dx,
+                                                  jint dy) {
+    _touch.s = 1;
+    _touch.cx = cx;
+    _touch.cy = cy;
+    _touch.dx += dx;
+    _touch.dy += dy;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatOnReleaseTouch(JNIEnv *env, jclass) {
+    _touch.s = 0;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatOnFling(JNIEnv *env, jclass, jint fx, jint fy) {
+    g_flingX += fx;
+    g_flingY += fy;
 }

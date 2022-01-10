@@ -41,4 +41,10 @@ public class JNI {
     public static native void compatAddSong(int index, int id, int no, int loop, int col, byte[] mmlPath, byte[] title);
 
     public static native void compatTick(Bitmap bitmap);
+
+    public static native void compatOnTouch(int cx, int cy, int dx, int dy);
+
+    public static native void compatOnReleaseTouch();
+
+    public static native void compatOnFling(int fx, int fy);
 }
