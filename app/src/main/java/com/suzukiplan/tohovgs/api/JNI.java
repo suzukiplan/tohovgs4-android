@@ -4,6 +4,8 @@
  */
 package com.suzukiplan.tohovgs.api;
 
+import android.graphics.Bitmap;
+
 public class JNI {
     public static native long createDecoder();
 
@@ -24,4 +26,18 @@ public class JNI {
     public static native int getTime(long context);
 
     public static native void seek(long context, int progress);
+
+    public static native void compatCleanUp();
+
+    public static native void compatAllocate(int nTitle, int nSong);
+
+    public static native void compatLoadGraphic(int n, byte[] data);
+
+    public static native void compatLoadKanji(byte[] data);
+
+    public static native void compatAddTitle(int index, int id, int songNum, byte[] title, byte[] copyright);
+
+    public static native void compatAddSong(int index, int id, int no, int loop, int col, byte[] mmlPath, byte[] title);
+
+    public static native void compatTick(Bitmap bitmap);
 }

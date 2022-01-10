@@ -13,8 +13,6 @@
 
 /* Macro */
 #define HIT_CHECK(X1, Y1, XS1, YS1, X2, Y2, XS2, YS2) (X1 < X2 + XS2 && X2 < X1 + XS1 && Y1 < Y2 + YS2 && Y2 < Y1 + YS1)
-#define TITLE_NUM 10
-#define SONG_NUM 107
 
 /* Structure */
 struct InputInf {
@@ -44,9 +42,75 @@ struct TitleData {
 };
 
 /* play list */
-static struct TitleData g_title[TITLE_NUM];
-static struct SongData g_listJ[SONG_NUM];
-static struct SongData *g_list = g_listJ;
+static int fs_TitleNum = 0;
+static int fs_SongNum = 0;
+static struct TitleData *fs_title;
+static struct SongData *fs_list;
+static unsigned char *fs_kanji;
+
+void tohovgs_cleanUp() {
+    if (fs_title) free(fs_title);
+    fs_title = NULL;
+    if (fs_list) free(fs_list);
+    fs_list = NULL;
+    if (fs_kanji) free(fs_kanji);
+    fs_kanji = NULL;
+    if (_psg) vgsdec_release_context(_psg);
+    _psg = NULL;
+}
+
+void tohovgs_allocate(int nTitle, int nSong) {
+    fs_title = (struct TitleData *) malloc(sizeof(struct TitleData) * nTitle);
+    fs_TitleNum = nTitle;
+    memset(fs_title, 0, sizeof(struct TitleData) * nTitle);
+    fs_list = (struct SongData *) malloc(sizeof(struct SongData) * nSong);
+    fs_SongNum = nSong;
+    memset(fs_list, 0, sizeof(struct SongData) * nSong);
+    _psg = vgsdec_create_context();
+}
+
+void tohovgs_loadKanji(const void *data, size_t size) {
+    fs_kanji = (unsigned char *) malloc(size);
+    memcpy(fs_kanji, data, size);
+}
+
+void tohovgs_setTitle(int index,
+                      int id,
+                      int songNum,
+                      void *title,
+                      size_t titleSize,
+                      void *copyright,
+                      size_t copyrightSize) {
+    size_t ts = titleSize < sizeof(fs_title[index].title) - 1 ?
+                titleSize : sizeof(fs_title[index].title) - 1;
+    size_t cs = copyrightSize < sizeof(fs_title[index].copyright) - 1 ?
+                copyrightSize : sizeof(fs_title[index].copyright) - 1;
+    fs_title[index].id = id;
+    fs_title[index].songNum = songNum;
+    memcpy(fs_title[index].title, title, ts);
+    memcpy(fs_title[index].copyright, copyright, cs);
+}
+
+void tohovgs_setSong(int index,
+                     int id,
+                     int no,
+                     int loop,
+                     int col,
+                     void *mmlPath,
+                     size_t mmlPathSize,
+                     void *title,
+                     size_t titleSize) {
+    size_t ts = titleSize < sizeof(fs_list[index].text) - 1 ?
+                titleSize : sizeof(fs_list[index].text) - 1;
+    size_t ms = mmlPathSize < sizeof(fs_list[index].mmlPath) - 1 ?
+                mmlPathSize : sizeof(fs_list[index].mmlPath) - 1;
+    fs_list[index].id = id;
+    fs_list[index].no = no;
+    fs_list[index].loop = loop;
+    fs_list[index].col = col;
+    memcpy(fs_list[index].mmlPath, mmlPath, ms);
+    memcpy(fs_list[index].text, title, ts);
+}
 
 /* Proto types */
 static void nextSong();
@@ -61,9 +125,8 @@ static void put_kanji(int x, int y, int col, const char *msg, ...);
 
 /* Static variables */
 int g_songChanged = 0;
-extern int g_flingY;
-extern int g_flingX;
-static unsigned char *fs_kanji;
+int g_flingY;
+int g_flingX;
 static int fs_musicCursor = -1;
 static int fs_listType = 1;
 static int fs_currentTitle = 4;
@@ -73,7 +136,7 @@ struct Preferences {
     int currentTitleId;
     int base;
     int listType;
-    int infy;
+    int infinity;
     int loop;
     int kobushi;
 };
@@ -81,38 +144,10 @@ static struct Preferences PRF;
 
 /*
  *----------------------------------------------------------------------------
- * Initialization
- *----------------------------------------------------------------------------
- */
-int vge_init() {
-    unsigned int sz;
-    char *bin;
-    int i, j;
-    bin = (char *) vge_getdata(0, &sz);
-    memcpy(g_listJ, bin, sizeof(g_listJ));
-    g_list = g_listJ;
-    bin = (char *) vge_getdata(2, &sz);
-    memcpy(g_title, bin, sizeof(g_title));
-    for (i = 0; i < SONG_NUM; i++) {
-        for (j = 0; j < TITLE_NUM; j++) {
-            if ((g_list[i].id & 0xFFFF00) >> 8 == g_title[j].id) {
-                g_title[j].songNum++;
-                break;
-            }
-        }
-    }
-    memset(fs_msg, 0, sizeof(fs_msg));
-    strcpy(fs_msg, "Touhou BGM on VGS");
-    fs_kanji = (unsigned char *) vge_getdata(255, &sz);
-    return 0;
-}
-
-/*
- *----------------------------------------------------------------------------
  * Main
  *----------------------------------------------------------------------------
  */
-int vge_loop() {
+int vge_tick() {
     static const char *tn[4] = {"TRI", "SAW", "SQ", "NOZ"};
     static int isFirst = 1;
     static double base = 4.0;
@@ -125,7 +160,7 @@ int vge_loop() {
     static int touch_off = 0;
     static int px, py;
     static int paused = 1;
-    static int infy = 0;
+    static int infinity = 0;
     static int loop = 1;
     static int focus = 0;
     static int interval = 0;
@@ -160,11 +195,10 @@ int vge_loop() {
         PRF.currentTitleId = 0x60;
         PRF.loop = 1;
         base = (double) PRF.base;
-        g_list = g_listJ;
-        for (i = 0; i < TITLE_NUM; i++) {
-            if (g_title[i].id == PRF.currentTitleId) break;
+        for (i = 0; i < fs_TitleNum; i++) {
+            if (fs_title[i].id == PRF.currentTitleId) break;
         }
-        if (i == TITLE_NUM) {
+        if (i == fs_TitleNum) {
             fs_currentTitle = 0;
         } else {
             fs_currentTitle = i;
@@ -174,10 +208,10 @@ int vge_loop() {
         } else {
             fs_listType = 0;
         }
-        if (PRF.infy) {
-            infy = 1;
+        if (PRF.infinity) {
+            infinity = 1;
         } else {
-            infy = 0;
+            infinity = 0;
         }
         if (PRF.loop < 1) {
             PRF.loop = 1;
@@ -193,18 +227,18 @@ int vge_loop() {
     } else {
         /* store preferences */
         PRF.base = (int) base;
-        PRF.currentTitleId = g_title[fs_currentTitle].id;
+        PRF.currentTitleId = fs_title[fs_currentTitle].id;
         PRF.listType = fs_listType;
-        PRF.infy = infy;
+        PRF.infinity = infinity;
         PRF.loop = loop;
         PRF.kobushi = kobushi;
     }
 
     /* calc bmin */
     if (fs_listType) {
-        songNum = g_title[fs_currentTitle].songNum;
+        songNum = fs_title[fs_currentTitle].songNum;
     } else {
-        songNum = SONG_NUM;
+        songNum = fs_SongNum;
     }
     bmin = -(songNum * 20 - 106 + fs_listType * 40);
 
@@ -213,7 +247,7 @@ int vge_loop() {
         playwait--;
         if (0 == playwait) {
             g_songChanged++;
-            vge_bplay(g_list[fs_musicCursor].mmlPath);
+            vge_bplay(fs_list[fs_musicCursor].mmlPath);
             vgsdec_set_value(_psg, VGSDEC_REG_KOBUSHI, kobushi);
             focus = 1;
             whourai = 120;
@@ -225,7 +259,6 @@ int vge_loop() {
     vge_touch(&ci.s, &ci.cx, &ci.cy, &ci.dx, &ci.dy);
     if (ci.s) {
         focus = 0;
-        vge_rand();
         pflag = 1;
         if (0 == touching) {
             if (!fs_listType && HIT_CHECK(ci.cx - 4, ci.cy - 4, 8, 8, 224, 130, 16, 190)) {
@@ -274,7 +307,7 @@ int vge_loop() {
                 } else {
                     fs_currentTitle--;
                     if (fs_currentTitle < 0) {
-                        fs_currentTitle = TITLE_NUM - 1;
+                        fs_currentTitle = fs_TitleNum - 1;
                     }
                     pageChange = 0;
                     baseX = 0;
@@ -291,7 +324,7 @@ int vge_loop() {
                     }
                 } else {
                     fs_currentTitle++;
-                    if (TITLE_NUM <= fs_currentTitle) {
+                    if (fs_TitleNum <= fs_currentTitle) {
                         fs_currentTitle = 0;
                     }
                     pageChange = 0;
@@ -429,18 +462,18 @@ int vge_loop() {
     /* Auto focus */
     if (focus) {
         if (fs_listType &&
-            ((g_list[fs_musicCursor].id & 0xFFFF00) >> 8 != g_title[fs_currentTitle].id)) {
-            playingTitle = (g_list[fs_musicCursor].id & 0xFFFF00) >> 8;
-            if (playingTitle != g_title[fs_currentTitle].id) {
+            ((fs_list[fs_musicCursor].id & 0xFFFF00) >> 8 != fs_title[fs_currentTitle].id)) {
+            playingTitle = (fs_list[fs_musicCursor].id & 0xFFFF00) >> 8;
+            if (playingTitle != fs_title[fs_currentTitle].id) {
                 /* check pop count of right */
-                for (i = 0, iii = fs_currentTitle; playingTitle != g_title[iii].id; i++) {
+                for (i = 0, iii = fs_currentTitle; playingTitle != fs_title[iii].id; i++) {
                     iii++;
-                    if (TITLE_NUM <= iii) iii = 0;
+                    if (fs_TitleNum <= iii) iii = 0;
                 }
                 /* check pop count of left */
-                for (ii = 0, iii = fs_currentTitle; playingTitle != g_title[iii].id; ii++) {
+                for (ii = 0, iii = fs_currentTitle; playingTitle != fs_title[iii].id; ii++) {
                     iii--;
-                    if (iii < 0) iii = TITLE_NUM - 1;
+                    if (iii < 0) iii = fs_TitleNum - 1;
                 }
                 /* set auto focus direction */
                 if (ii < i) {
@@ -451,8 +484,8 @@ int vge_loop() {
             }
         } else {
             if (fs_listType) {
-                for (k = 0, i = 0; i < SONG_NUM; i++) {
-                    if ((g_list[i].id & 0xFFFF00) >> 8 == g_title[fs_currentTitle].id) {
+                for (k = 0, i = 0; i < fs_SongNum; i++) {
+                    if ((fs_list[i].id & 0xFFFF00) >> 8 == fs_title[fs_currentTitle].id) {
                         if (i == fs_musicCursor) break;
                         k++;
                     }
@@ -488,32 +521,32 @@ int vge_loop() {
             if (0 < baseX) {
                 bx -= 240;
                 ct--;
-                if (ct < 0) ct = TITLE_NUM - 1;
+                if (ct < 0) ct = fs_TitleNum - 1;
             } else {
                 bx += 240;
                 ct++;
-                if (TITLE_NUM <= ct) ct = 0;
+                if (fs_TitleNum <= ct) ct = 0;
             }
         }
         if (fs_listType) {
             /* Draw song title */
-            put_kanji(4 + bx, 134 + (int) base, 255, "%s", g_title[ct].title);
-            put_kanji(236 + bx - ((int) strlen(g_title[ct].copyright)) * 4, 152 + (int) base, 255,
-                      "%s", g_title[ct].copyright);
-            if (g_title[ct].id == 0x60) {
+            put_kanji(4 + bx, 134 + (int) base, 255, "%s", fs_title[ct].title);
+            put_kanji(236 + bx - ((int) strlen(fs_title[ct].copyright)) * 4, 152 + (int) base, 255,
+                      "%s", fs_title[ct].copyright);
+            if (fs_title[ct].id == 0x60) {
                 put_kanji((240 - (((int) strlen(fs_msg)) * 4)) / 2 + bx, 40 + (int) base, 255, "%s",
                           fs_msg);
             }
         }
         /* Draw music list */
-        for (dp = 0, i = 0, ii = 0; i < SONG_NUM; i++) {
+        for (dp = 0, i = 0, ii = 0; i < fs_SongNum; i++) {
             if (fs_listType) {
-                if ((g_list[i].id & 0xFFFF00) >> 8 != g_title[ct].id) {
+                if ((fs_list[i].id & 0xFFFF00) >> 8 != fs_title[ct].id) {
                     continue;
                 }
             }
             dp = fs_listType * 40 + (ii++) * 20 + 130 + (int) base;
-            if (i < SONG_NUM && 114 < dp && dp < 320) {
+            if (i < fs_SongNum && 114 < dp && dp < 320) {
                 if (fs_musicCursor == i) {
                     vge_boxfSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16, 75);
                     vge_boxSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16, 111);
@@ -531,7 +564,7 @@ int vge_loop() {
                         }
                         if (selectTime < 4) {
                             vge_boxfSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16,
-                                       g_list[i].col);
+                                       fs_list[i].col);
                             vge_boxSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16, 105);
                         } else {
                             vge_boxfSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16, 60);
@@ -548,17 +581,17 @@ int vge_loop() {
                         }
                     } else {
                         vge_boxfSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16,
-                                   g_list[i].col);
+                                   fs_list[i].col);
                         vge_boxSP(4 + bx, dp, 220 + fs_listType * 16 + bx, dp + 16, 105);
                     }
                 }
                 if (fs_listType) {
-                    put_font_S(8 + bx, dp + 7, "%3d.", g_list[i].id & 0xff);
+                    put_font_S(8 + bx, dp + 7, "%3d.", fs_list[i].id & 0xff);
                 } else {
                     put_font_S(8 + bx, dp + 7, "%3d.", ii);
                 }
-                put_kanji(27 + bx, dp + 4, 1, "%s", g_list[i].text);
-                put_kanji(26 + bx, dp + 3, 255, "%s", g_list[i].text);
+                put_kanji(27 + bx, dp + 4, 1, "%s", fs_list[i].text);
+                put_kanji(26 + bx, dp + 3, 255, "%s", fs_list[i].text);
             }
         }
         dp += 20;
@@ -638,9 +671,9 @@ int vge_loop() {
         vge_boxfSP(0, 300, 240, 320, 3);
         vge_lineSP(0, 300, 240, 300, 111);
         vge_lineSP(0, 302, 240, 302, 106);
-        ii = (240 - TITLE_NUM * 8) / 2;
+        ii = (240 - fs_TitleNum * 8) / 2;
         j = ii - 1;
-        for (i = 0; i < TITLE_NUM; i++, ii += 8) {
+        for (i = 0; i < fs_TitleNum; i++, ii += 8) {
             vge_putSP(0, 216, 64, 8, 8, ii, 307);
             if (fs_currentTitle == i) {
                 int bx = (int) baseX / 32;
@@ -649,8 +682,8 @@ int vge_loop() {
                 else if (8 < bx)
                     bx = 8;
                 vge_putSP(0, 224, 64, 8, 8, ii - bx, 307);
-                vge_putSP(0, 224, 64, 8, 8, ii - bx + TITLE_NUM * 8, 307);
-                vge_putSP(0, 224, 64, 8, 8, ii - bx - TITLE_NUM * 8, 307);
+                vge_putSP(0, 224, 64, 8, 8, ii - bx + fs_TitleNum * 8, 307);
+                vge_putSP(0, 224, 64, 8, 8, ii - bx - fs_TitleNum * 8, 307);
             }
         }
         vge_boxfSP(0, 307, j, 315, 3);
@@ -707,8 +740,8 @@ int vge_loop() {
     if (fs_musicCursor < 0) {
         put_font_S(8, 16, "INDEX     %05d", vgsdec_get_value(_psg, VGSDEC_REG_LENGTH));
     } else {
-        if (g_list[fs_musicCursor].loop) {
-            if (infy) {
+        if (fs_list[fs_musicCursor].loop) {
+            if (infinity) {
                 put_font_S(8, 16, "INDEX     %05d  PLAYING %d",
                            vgsdec_get_value(_psg, VGSDEC_REG_INDEX),
                            vgsdec_get_value(_psg, VGSDEC_REG_LOOP_COUNT) + 1);
@@ -727,10 +760,10 @@ int vge_loop() {
                        vgsdec_get_value(_psg, VGSDEC_REG_INDEX));
         }
     }
-    if (0 == infy) {
+    if (0 == infinity) {
         int ss;
         int sm;
-        if (g_list[fs_musicCursor].loop) {
+        if (fs_list[fs_musicCursor].loop) {
             int introLen = vgsdec_get_value(_psg, VGSDEC_REG_LOOP_TIME);
             int loopLen = vgsdec_get_value(_psg, VGSDEC_REG_TIME_LENGTH) - introLen;
             ss = introLen + loopLen * loop;
@@ -908,15 +941,15 @@ int vge_loop() {
     if (ci.s && touch_off == 0 && HIT_CHECK(28 + ii, 92, 24, 32, ci.cx - 4, ci.cy - 4, 8, 8)) {
         vge_putSP(0, 168, 80, 24, 12, 28 + ii, 112);
         if (push) {
-            infy = 1 - infy;
+            infinity = 1 - infinity;
         }
     } else {
-        vge_putSP(0, 144 + (1 - infy) * 48, 80, 24, 12, 28 + ii, 112);
+        vge_putSP(0, 144 + (1 - infinity) * 48, 80, 24, 12, 28 + ii, 112);
     }
 
-    if (!infy) {
+    if (!infinity) {
         /* LOOP COUNTER */
-        if (-1 == fs_musicCursor || (0 <= fs_musicCursor && g_list[fs_musicCursor].loop)) {
+        if (-1 == fs_musicCursor || (0 <= fs_musicCursor && fs_list[fs_musicCursor].loop)) {
             if (ci.s && touch_off == 0 &&
                 HIT_CHECK(80 + ii, 92, 24, 32, ci.cx - 4, ci.cy - 4, 8, 8)) {
                 vge_putSP(0, (loop - 1) * 24, 176, 24, 12, 80 + ii, 112);
@@ -956,7 +989,7 @@ int vge_loop() {
         } else {
             interval2++;
             if (60 <= interval2) {
-                if (infy == 0) {
+                if (infinity == 0) {
                     nextSong();
                 }
                 paused = 0;
@@ -972,7 +1005,7 @@ int vge_loop() {
     }
 
     // cyclic songs
-    if (-1 != fs_musicCursor && 0 == infy && g_list[fs_musicCursor].loop &&
+    if (-1 != fs_musicCursor && 0 == infinity && fs_list[fs_musicCursor].loop &&
         loop <= vgsdec_get_value(_psg, VGSDEC_REG_LOOP_COUNT)) {
         if (vgsdec_get_value(_psg, VGSDEC_REG_FADEOUT_COUNTER) == 0) {
             vgsdec_set_value(_psg, VGSDEC_REG_FADEOUT, 1);
@@ -1010,7 +1043,7 @@ static void nextSong() {
     /* calc songTop */
     if (fs_listType) {
         for (songTop = 0;; songTop++) {
-            if ((g_list[songTop].id & 0xFFFF00) >> 8 == g_title[ct].id) {
+            if ((fs_list[songTop].id & 0xFFFF00) >> 8 == fs_title[ct].id) {
                 break;
             }
         }
@@ -1018,7 +1051,7 @@ static void nextSong() {
 
     /* secuencial mode */
     fs_musicCursor++;
-    if (SONG_NUM <= fs_musicCursor) {
+    if (fs_SongNum <= fs_musicCursor) {
         fs_musicCursor = 0;
     }
 }

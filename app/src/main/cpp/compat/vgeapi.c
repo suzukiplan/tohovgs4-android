@@ -25,11 +25,10 @@
 /* グローバル変数の実体宣言 */
 struct _VRAM _vram;
 struct _SLOT _slot[MAXSLOT];
-char *_note[MAXSLOT];
-static int _notelen[MAXSLOT];
 struct _TOUCH _touch;
 unsigned char _mute;
 unsigned char _pause;
+void* _psg;
 
 /* 内部関数 */
 static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy);
@@ -434,33 +433,6 @@ void vge_bresume() {
  */
 void vge_setPause(unsigned char p) {
     _pause = p;
-}
-
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_getdata: DSLOTのデータを取得
- *----------------------------------------------------------------------------
- * 引数:
- * - n [I] スロット番号
- * - size [O] データサイズ
- *----------------------------------------------------------------------------
- * 戻り値: 非NULL=データの先頭ポインタ、NULL=指定スロットにデータは無い
- *----------------------------------------------------------------------------
- */
-const char *vge_getdata(unsigned char n, unsigned int *size) {
-    const char *ret;
-    int size2;
-    int *sp = (int *) size;
-    char name[32];
-    sprintf(name, "DSLOT%03d.DAT", (int) n);
-    if (NULL == sp) {
-        sp = &size2;
-    }
-    ret = getbin(name, sp);
-    if (NULL == ret) {
-        *sp = 0;
-    }
-    return ret;
 }
 
 /* End of vgeapi.c */

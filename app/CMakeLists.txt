@@ -19,5 +19,7 @@ include_directories(
 
 target_link_libraries(
         native-lib
+        jnigraphics
+        OpenSLES
         log
 )
