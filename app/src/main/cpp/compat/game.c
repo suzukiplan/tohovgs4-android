@@ -1170,7 +1170,7 @@ static void put_kanji(int x, int y, int col, const char *msg, ...) {
             i++;
         } else {
             c[0] -= 0x20;
-            vge_putSPM(255, c[0] % 16 * 4, c[0] / 16 * 12, 4, 12, x, y, col);
+            vge_putSPM(1, c[0] % 16 * 4, c[0] / 16 * 12, 4, 12, x, y, col);
             x += 4;
         }
     }
