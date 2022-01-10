@@ -3,6 +3,9 @@
     {
       "albumId": "th04",
       "name": "東方幻想郷",
+      "formalName": "東方幻想郷　〜 Lotus Land Story",
+      "copyright": "(c)1997 ZUN Soft",
+      "compatColor": 35,
       "defaultLocked": true,
       "songs": [
         {
@@ -75,6 +78,9 @@
     {
       "albumId": "th05",
       "name": "東方怪綺談",
+      "formalName": "東方怪綺談　〜 Mystic Square",
+      "copyright": "(c)1997 ZUN Soft,",
+      "compatColor": 196,
       "defaultLocked": true,
       "songs": [
         {
@@ -92,6 +98,9 @@
     {
       "albumId": "zsw",
       "name": "東方幻想的音楽",
+      "formalName": "東方幻想的音楽　〜 ZUN''s Strange Works",
+      "copyright": "(c)2000 ZUN",
+      "compatColor": 7,
       "defaultLocked": true,
       "songs": [
         {
@@ -114,6 +123,9 @@
     {
       "albumId": "hourai",
       "name": "蓬莱人形",
+      "formalName": "蓬莱人形　〜 Dolls in Pseudo Paradise",
+      "copyright": "(c)2002 上海アリス幻樂団",
+      "compatColor": 196,
       "defaultLocked": true,
       "songs": [
         {
@@ -126,6 +138,9 @@
     {
       "albumId": "th06",
       "name": "東方紅魔郷",
+      "formalName": "東方紅魔郷　〜 the Embodiment of Scarlet Devil.",
+      "copyright": "(c)2002 上海アリス幻樂団",
+      "compatColor": 7,
       "defaultLocked": false,
       "songs": [
         {
@@ -218,6 +233,9 @@
     {
       "albumId": "th07",
       "name": "東方妖々夢",
+      "formalName": "東方妖々夢　〜 Perfect Cherry Blossom.",
+      "copyright": "(c)2003 上海アリス幻樂団",
+      "compatColor": 35,
       "defaultLocked": true,
       "songs": [
         {
@@ -330,6 +348,9 @@
     {
       "albumId": "th08",
       "name": "東方永夜抄",
+      "formalName": "東方永夜抄　〜 Imperishable Night.",
+      "copyright": "(c)2004 上海アリス幻樂団",
+      "compatColor": 196,
       "defaultLocked": true,
       "songs": [
         {
@@ -437,6 +458,9 @@
     {
       "albumId": "th09",
       "name": "東方花映塚",
+      "formalName": "東方花映塚　〜 Phantasmagoria of Flower View.",
+      "copyright": "(c)2005 上海アリス幻樂団",
+      "compatColor": 35,
       "defaultLocked": true,
       "songs": [
         {
@@ -484,6 +508,9 @@
     {
       "albumId": "th10",
       "name": "東方風神録",
+      "formalName": "東方風神録　〜 Mountain of Faith.",
+      "copyright": "(c)2007 上海アリス幻樂団",
+      "compatColor": 7,
       "defaultLocked": true,
       "songs": [
         {
@@ -581,6 +608,9 @@
     {
       "albumId": "th11",
       "name": "東方地霊殿",
+      "formalName": "東方地霊殿　〜 Subterranean Animism.",
+      "copyright": "(c)2008 上海アリス幻樂団",
+      "compatColor": 196,
       "defaultLocked": true,
       "songs": [
         {

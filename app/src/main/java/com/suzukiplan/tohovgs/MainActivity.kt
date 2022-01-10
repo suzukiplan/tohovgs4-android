@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var playTime: TextView
     private lateinit var leftTime: TextView
     private lateinit var seekBar: AppCompatSeekBar
+    private lateinit var seekBarContainer: View
     private var footers = HashMap<Page, View>()
     private var currentFragment: Fragment? = null
     private var currentLength = 0
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         PerTitle(1),
         Sequential(2),
         Shuffle(3),
+        Retro(4),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +68,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         playTime = findViewById(R.id.play_time)
         leftTime = findViewById(R.id.left_time)
         seekBar = findViewById(R.id.seek_bar)
+        seekBarContainer = findViewById(R.id.seek_bar_container)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -95,6 +98,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
         footers[Page.Shuffle] = findViewById(R.id.footer_shuffle)
+        footers[Page.Retro] = findViewById(R.id.footer_retro_ui)
         footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager?.infinity = checked
@@ -142,12 +146,16 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun movePage(page: Page) {
         if (page == currentPage) return
         stopSong()
+        seekBarContainer.visibility = if (page == Page.Retro) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
         val fragment = when (page) {
             Page.PerTitle -> AlbumPagerFragment.create()
             Page.Sequential -> SongListFragment.createAsSequential()
-            Page.Shuffle -> {
-                SongListFragment.createAsShuffle()
-            }
+            Page.Shuffle -> SongListFragment.createAsShuffle()
+            Page.Retro -> RetroFragment.create()
         }
         if (fragment is SongListFragment) fragment.listener = this
         val transaction = supportFragmentManager.beginTransaction()
@@ -160,7 +168,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         currentFragment = fragment
         transaction.commit()
         footers[currentPage]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
-        footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+        executeAsync {
+            Thread.sleep(300L)
+            runOnUiThread {
+                if (page == currentPage) {
+                    footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+                }
+            }
+        }
         currentPage = page
     }
 
