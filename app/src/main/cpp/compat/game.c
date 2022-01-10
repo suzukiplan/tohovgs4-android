@@ -41,12 +41,17 @@ struct TitleData {
     char title[80];
 };
 
-/* play list */
 static int fs_TitleNum = 0;
 static int fs_SongNum = 0;
 static struct TitleData *fs_title;
 static struct SongData *fs_list;
 static unsigned char *fs_kanji;
+static int fs_musicCursor = -1;
+static int fs_currentTitle = 4;
+static char fs_msg[256];
+int g_songChanged = 0;
+int g_flingY;
+int g_flingX;
 
 void tohovgs_cleanUp() {
     if (fs_title) free(fs_title);
@@ -57,6 +62,7 @@ void tohovgs_cleanUp() {
     fs_kanji = NULL;
     if (_psg) vgsdec_release_context(_psg);
     _psg = NULL;
+    fs_musicCursor = -1;
 }
 
 void tohovgs_allocate(int nTitle, int nSong) {
@@ -122,14 +128,6 @@ static void put_font_S(int x, int y, const char *msg, ...);
 static unsigned short get_code(unsigned const char *sjis);
 
 static void put_kanji(int x, int y, int col, const char *msg, ...);
-
-/* Static variables */
-int g_songChanged = 0;
-int g_flingY;
-int g_flingX;
-static int fs_musicCursor = -1;
-static int fs_currentTitle = 4;
-static char fs_msg[256];
 
 struct Preferences {
     int currentTitleId;
