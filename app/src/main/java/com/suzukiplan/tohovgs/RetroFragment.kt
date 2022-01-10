@@ -127,6 +127,22 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         renderThread = null
     }
 
+    // UTF-8 を SJIS に変換しつつ 0xFCFC を 0x8160 (SJIS の全角チルダ）に変換
+    private fun convertToSJIS(source: String): ByteArray {
+        val result = source.toByteArray(Charset.forName("SJIS"))
+        for (i in result.indices) {
+            if (0xFC.toByte() == result[i]) {
+                if (i < result.size - 1) {
+                    if (0xFC.toByte() == result[i + 1]) {
+                        result[i] = 0x81.toByte()
+                        result[i + 1] = 0x60.toByte()
+                    }
+                }
+            }
+        }
+        return result
+    }
+
     private fun renderThreadMain() {
         Logger.d("Start render thread")
         var start: Long
@@ -156,15 +172,14 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         var titleIndex = 0
         var songIndex = 0
         var compatId = 0x0010
-        val sjis = Charset.forName("SJIS")
         unlockedAlbums.forEach { album ->
             val songNum = unlockedSongs[album.id]?.size ?: 0
             JNI.compatAddTitle(
                 titleIndex,
                 compatId,
                 songNum,
-                album.formalName.toByteArray(sjis),
-                album.copyright.toByteArray(sjis)
+                convertToSJIS(album.formalName),
+                convertToSJIS(album.copyright)
             )
             unlockedSongs[album.id]?.forEach { song ->
                 val songNo = song.mml.substring(song.mml.indexOf('-') + 1).toInt()
@@ -175,7 +190,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                     song.loop,
                     album.compatColor,
                     "mml/${song.mml}.mml".toByteArray(Charsets.UTF_8),
-                    song.name.toByteArray(sjis)
+                    convertToSJIS(song.name)
                 )
             }
             titleIndex++
