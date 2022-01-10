@@ -34,7 +34,7 @@ void tohovgs_setSong(int index,
 
 int vge_tick();
 
-int vge_gload(unsigned char n, const char *bin);
+int vge_gload(unsigned char n, const unsigned char *bin);
 
 void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy);
 

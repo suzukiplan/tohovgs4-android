@@ -113,7 +113,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatLoadGraphic(JNIEnv *env, jclass, jint n,
                                                       jbyteArray data_) {
     jbyte *data = env->GetByteArrayElements(data_, nullptr);
-    vge_gload(n & 0xFF, (const char *) data);
+    vge_gload(n & 0xFF, (const unsigned char *) data);
     env->ReleaseByteArrayElements(data_, data, 0);
 }
 

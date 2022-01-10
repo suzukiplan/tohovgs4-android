@@ -39,7 +39,7 @@ static void line(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char
 
 static void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c);
 
-int vge_gload(unsigned char n, const char *bin) {
+int vge_gload(unsigned char n, const unsigned char *bin) {
     int gSize;
     int i;
     if ('S' != bin[0] || 'Z' != bin[1]) {
