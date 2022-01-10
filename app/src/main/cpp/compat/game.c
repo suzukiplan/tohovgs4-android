@@ -541,7 +541,7 @@ int vge_tick() {
         /* Draw music list */
         for (dp = 0, i = 0, ii = 0; i < fs_SongNum; i++) {
             if (fs_listType) {
-                if ((fs_list[i].id & 0xFFFF00) >> 8 != fs_title[ct].id) {
+                if (fs_list[i].id != fs_title[ct].id) {
                     continue;
                 }
             }
