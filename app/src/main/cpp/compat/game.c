@@ -548,7 +548,7 @@ int vge_tick() {
                         vge_boxSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 105);
                     }
                 }
-                put_font_S(8 + bx, dp + 7, "%3d.", fs_list[i].id & 0xff);
+                put_font_S(8 + bx, dp + 7, "%3d.", fs_list[i].no);
                 put_kanji(27 + bx, dp + 4, 1, "%s", fs_list[i].text);
                 put_kanji(26 + bx, dp + 3, 255, "%s", fs_list[i].text);
             }
