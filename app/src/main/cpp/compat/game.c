@@ -30,7 +30,7 @@ struct SongData {
     int loop;
     int col;
     char mmlPath[1024];
-    char text[64];
+    char text[2][64];
 };
 
 /* title data */
@@ -106,10 +106,14 @@ void tohovgs_setSong(int index,
                      int col,
                      void *mmlPath,
                      size_t mmlPathSize,
-                     void *title,
-                     size_t titleSize) {
-    size_t ts = titleSize < sizeof(fs_list[index].text) - 1 ?
-                titleSize : sizeof(fs_list[index].text) - 1;
+                     void *titleJ,
+                     size_t titleSizeJ,
+                     void *titleE,
+                     size_t titleSizeE) {
+    size_t tsJ = titleSizeJ < sizeof(fs_list[index].text[0]) - 1 ?
+                 titleSizeJ : sizeof(fs_list[index].text[0]) - 1;
+    size_t tsE = titleSizeE < sizeof(fs_list[index].text[1]) - 1 ?
+                 titleSizeE : sizeof(fs_list[index].text[1]) - 1;
     size_t ms = mmlPathSize < sizeof(fs_list[index].mmlPath) - 1 ?
                 mmlPathSize : sizeof(fs_list[index].mmlPath) - 1;
     fs_list[index].id = id;
@@ -117,20 +121,23 @@ void tohovgs_setSong(int index,
     fs_list[index].loop = loop;
     fs_list[index].col = col;
     memcpy(fs_list[index].mmlPath, mmlPath, ms);
-    memcpy(fs_list[index].text, title, ts);
+    memcpy(fs_list[index].text[0], titleJ, tsJ);
+    memcpy(fs_list[index].text[1], titleE, tsE);
 }
 
 void tohovgs_setPreference(int currentTitleId,
                            int loop,
                            int base,
                            int infinity,
-                           int kobushi) {
+                           int kobushi,
+                           int localeId) {
     memset(&PRF, 0, sizeof(PRF));
     PRF.currentTitleId = currentTitleId; // default: 0x0010
     PRF.loop = loop; // default: 1
     PRF.base = base; // default: 0
     PRF.infinity = infinity; // default: 0
     PRF.kobushi = kobushi; // default: 0
+    PRF.localeId = localeId; // default: 0
 }
 
 struct Preferences *tohovgs_getPreference() {
@@ -210,6 +217,7 @@ int vge_tick() {
         } else {
             infinity = 0;
         }
+        PRF.localeId = PRF.localeId ? 1 : 0;
         if (PRF.loop < 1) {
             PRF.loop = 1;
         } else if (3 < PRF.loop) {
@@ -562,8 +570,8 @@ int vge_tick() {
                     }
                 }
                 put_font_S(8 + bx, dp + 7, "%3d.", fs_list[i].no);
-                put_kanji(27 + bx, dp + 4, 1, "%s", fs_list[i].text);
-                put_kanji(26 + bx, dp + 3, 255, "%s", fs_list[i].text);
+                put_kanji(27 + bx, dp + 4, 1, "%s", fs_list[i].text[PRF.localeId]);
+                put_kanji(26 + bx, dp + 3, 255, "%s", fs_list[i].text[PRF.localeId]);
             }
         }
         dp += 20;
@@ -634,7 +642,23 @@ int vge_tick() {
 
     /* Draw play pannel */
     vge_boxfSP(0, 0, 240, 130, 3);
-    put_font_S(2, 2, "VIDEO GAME SYSTEM  ORIGINAL UI EMULATOR");
+    put_font_S(24, 2, "VIDEO GAME SYSTEM  ORIGINAL UI EMULATOR");
+    if (ci.s && touch_off == 0 && HIT_CHECK(0, 0, 24, 12, ci.cx - 4, ci.cy - 4, 8, 8)) {
+        if (0 == PRF.localeId) {
+            vge_putSP(0, 88, 176, 16, 8, 4, 3);
+        } else {
+            vge_putSP(0, 104, 176, 16, 8, 4, 3);
+        }
+        if (push) {
+            PRF.localeId = 1 - PRF.localeId;
+        }
+    } else {
+        if (0 == PRF.localeId) {
+            vge_putSP(0, 88, 160, 16, 8, 4, 3);
+        } else {
+            vge_putSP(0, 104, 160, 16, 8, 4, 3);
+        }
+    }
 
     /* RegBoard */
     vge_boxfSP(0, 14, 240, 105, 51);

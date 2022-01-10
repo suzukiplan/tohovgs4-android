@@ -38,6 +38,7 @@ struct Preferences {
     int infinity;
     int loop;
     int kobushi;
+    int localeId;
 };
 
 extern struct _VRAM _vram;

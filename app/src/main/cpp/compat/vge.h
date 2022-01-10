@@ -29,14 +29,17 @@ void tohovgs_setSong(int index,
                      int col,
                      void *mmlPath,
                      size_t mmlPathSize,
-                     void *title,
-                     size_t titleSize);
+                     void *titleJ,
+                     size_t titleSizeJ,
+                     void *titleE,
+                     size_t titleSizeE);
 
 void tohovgs_setPreference(int currentTitleId,
                            int loop,
                            int base,
                            int infinity,
-                           int kobushi);
+                           int kobushi,
+                           int localeId);
 
 struct Preferences *tohovgs_getPreference();
 
