@@ -123,16 +123,14 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             var songNo = 1
             unlockedSongs[album.id]?.forEach { song ->
                 JNI.compatAddSong(
-                    songIndex,
+                    songIndex++,
                     compatId,
-                    songNo,
+                    songNo++,
                     song.loop,
                     album.compatColor,
                     song.mml.toByteArray(Charsets.UTF_8),
                     song.name.toByteArray(sjis)
                 )
-                songIndex++
-                songNo++
             }
             titleIndex++
             compatId += 0x10
