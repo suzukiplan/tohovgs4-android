@@ -28,7 +28,7 @@ struct _SLOT _slot[MAXSLOT];
 struct _TOUCH _touch;
 unsigned char _mute;
 unsigned char _pause;
-void* _psg;
+void *_psg;
 
 /* 内部関数 */
 static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy);
@@ -41,6 +41,7 @@ static void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char
 
 int vge_gload(unsigned char n, const char *bin) {
     int gSize;
+    int i;
     if (_slot[n].dat) return 0; // skip multiple loading
     if ('S' != bin[0] || 'Z' != bin[1]) {
         return -1;
@@ -57,6 +58,14 @@ int vge_gload(unsigned char n, const char *bin) {
     /* パレット情報を読み込む */
     bin += 4;
     memcpy(_vram.pal, bin, sizeof(_vram.pal));
+
+    /* パレットを ARGB8888 -> RGB565 に変換 */
+    for (i = 0; i < 256; i++) {
+        unsigned int r = (_vram.pal[i] & 0x00F80000) >> 8;
+        unsigned int g = (_vram.pal[i] & 0x0000FC00) >> 5;
+        unsigned int b = (_vram.pal[i] & 0x000000F8) >> 3;
+        _vram.pal[i] = r | g | b;
+    }
 
     /* 画像データを読み込む */
     bin += sizeof(_vram.pal);
