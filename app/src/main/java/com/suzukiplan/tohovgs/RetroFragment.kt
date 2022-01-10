@@ -44,49 +44,55 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         vram = Bitmap.createBitmap(vramRect.width(), vramRect.height(), Bitmap.Config.RGB_565)
         val view = inflater.inflate(R.layout.fragment_retro, container, false)
         surfaceView = view.findViewById(R.id.surface_view)
-        surfaceView.setZOrderOnTop(true)
-        holder = surfaceView.holder
-        holder.addCallback(this)
-        surfaceView.isClickable = true
-        surfaceView.isFocusable = false
-        gestureDetector = GestureDetector(context,
-            object : GestureDetector.SimpleOnGestureListener() {
-                override fun onFling(
-                    e1: MotionEvent?,
-                    e2: MotionEvent?,
-                    velocityX: Float,
-                    velocityY: Float
-                ): Boolean {
-                    val zx = vramRect.width().toFloat() / surfaceRect.width().toFloat()
-                    val vx = (velocityX * zx * 0.25252).toInt()
-                    val zy = vramRect.height().toFloat() / surfaceRect.height().toFloat()
-                    val vy = (velocityY * zy * 0.25252).toInt()
-                    JNI.compatOnFling(vx, vy)
-                    return super.onFling(e1, e2, velocityX, velocityY)
-                }
-            })
-        surfaceView.setOnTouchListener { _, motionEvent ->
-            when (motionEvent.actionMasked) {
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_POINTER_DOWN,
-                MotionEvent.ACTION_MOVE -> {
-                    val zx = vramRect.width().toFloat() / surfaceRect.width().toFloat()
-                    val cx = (motionEvent.x * zx).toInt()
-                    val zy = vramRect.height().toFloat() / surfaceRect.height().toFloat()
-                    val cy = (motionEvent.y * zy).toInt()
-                    if (motionEvent.actionMasked == MotionEvent.ACTION_MOVE) {
-                        JNI.compatOnTouch(cx, cy, cx - previousX, cy - previousY)
-                    } else {
-                        JNI.compatOnTouch(cx, cy, 0, 0)
+        if (true == MusicManager.getInstance(activity as MainActivity)
+                ?.isExistUnlockedSong(settings)
+        ) {
+            surfaceView.setZOrderOnTop(true)
+            holder = surfaceView.holder
+            holder.addCallback(this)
+            surfaceView.isClickable = true
+            surfaceView.isFocusable = false
+            gestureDetector = GestureDetector(context,
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onFling(
+                        e1: MotionEvent?,
+                        e2: MotionEvent?,
+                        velocityX: Float,
+                        velocityY: Float
+                    ): Boolean {
+                        val zx = vramRect.width().toFloat() / surfaceRect.width().toFloat()
+                        val vx = (velocityX * zx * 0.25252).toInt()
+                        val zy = vramRect.height().toFloat() / surfaceRect.height().toFloat()
+                        val vy = (velocityY * zy * 0.25252).toInt()
+                        JNI.compatOnFling(vx, vy)
+                        return super.onFling(e1, e2, velocityX, velocityY)
                     }
-                    previousX = cx
-                    previousY = cy
+                })
+            surfaceView.setOnTouchListener { _, motionEvent ->
+                when (motionEvent.actionMasked) {
+                    MotionEvent.ACTION_DOWN,
+                    MotionEvent.ACTION_POINTER_DOWN,
+                    MotionEvent.ACTION_MOVE -> {
+                        val zx = vramRect.width().toFloat() / surfaceRect.width().toFloat()
+                        val cx = (motionEvent.x * zx).toInt()
+                        val zy = vramRect.height().toFloat() / surfaceRect.height().toFloat()
+                        val cy = (motionEvent.y * zy).toInt()
+                        if (motionEvent.actionMasked == MotionEvent.ACTION_MOVE) {
+                            JNI.compatOnTouch(cx, cy, cx - previousX, cy - previousY)
+                        } else {
+                            JNI.compatOnTouch(cx, cy, 0, 0)
+                        }
+                        previousX = cx
+                        previousY = cy
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_POINTER_UP,
+                    MotionEvent.ACTION_CANCEL -> JNI.compatOnReleaseTouch()
                 }
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_POINTER_UP,
-                MotionEvent.ACTION_CANCEL -> JNI.compatOnReleaseTouch()
+                gestureDetector.onTouchEvent(motionEvent)
             }
-            gestureDetector.onTouchEvent(motionEvent)
+        } else {
+            surfaceView.visibility = View.GONE
         }
         return view
     }

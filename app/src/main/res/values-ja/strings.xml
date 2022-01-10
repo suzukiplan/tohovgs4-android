@@ -18,4 +18,5 @@
     <string name="unlock_all_songs">全ての楽曲をアンロックする</string>
     <string name="hide_unlock_all_button">一時的に全ての楽曲アンロックボタンを隠す</string>
     <string name="retro_ui">RETRO</string>
+    <string name="launch_emulator_error">Cannot launch the VGS emulator.\nALL SONGS ARE LOCKED.</string>
 </resources>
