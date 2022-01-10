@@ -621,7 +621,7 @@ int vge_tick() {
 
     /* Draw play pannel */
     vge_boxfSP(0, 0, 240, 130, 3);
-    my_print(22, 2, "Touhou BGM on VGS");
+    put_font_S(2, 2, "VIDEO GAME SYSTEM  ORIGINAL UI EMULATOR");
 
     /* RegBoard */
     vge_boxfSP(0, 14, 240, 105, 51);
