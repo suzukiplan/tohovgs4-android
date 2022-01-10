@@ -134,10 +134,6 @@ void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy,
  *----------------------------------------------------------------------------
  */
 static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy) {
-    /* スロットがロード済みか？ */
-    if (NULL == _slot[n].dat) {
-        return -1;
-    }
     /* モロにはみだしてないか？ */
     if ((*sx) < 0 || _slot[n].xs < (*sx) + (*xs) || (*sy) < 0 || _slot[n].ys < (*sy) + (*ys) ||
         (*dx) + (*xs) < 0 || XSIZE <= *dx || (*dy) + (*ys) < 0 ||
