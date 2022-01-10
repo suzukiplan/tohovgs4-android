@@ -439,7 +439,7 @@ int vge_tick() {
     /* Auto focus */
     if (focus) {
         if (fs_list[fs_musicCursor].id != fs_title[fs_currentTitle].id) {
-            playingTitle = (fs_list[fs_musicCursor].id & 0xFFFF00) >> 8;
+            playingTitle = fs_list[fs_musicCursor].id;
             if (playingTitle != fs_title[fs_currentTitle].id) {
                 /* check pop count of right */
                 for (i = 0, iii = fs_currentTitle; playingTitle != fs_title[iii].id; i++) {
@@ -460,7 +460,7 @@ int vge_tick() {
             }
         } else {
             for (k = 0, i = 0; i < fs_SongNum; i++) {
-                if ((fs_list[i].id & 0xFFFF00) >> 8 == fs_title[fs_currentTitle].id) {
+                if (fs_list[i].id == fs_title[fs_currentTitle].id) {
                     if (i == fs_musicCursor) break;
                     k++;
                 }
