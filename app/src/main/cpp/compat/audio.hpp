@@ -10,7 +10,7 @@
 #include <cstring>
 #include "vgeint.h"
 
-#define SOUND_BUFFER_SIZE 4410
+#define SOUND_BUFFER_SIZE 735
 
 class VgsAudioSystem {
 private:
