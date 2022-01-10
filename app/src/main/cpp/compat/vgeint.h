@@ -32,6 +32,14 @@ struct _TOUCH {
     int py; /* 直前のY座標 */
 };
 
+struct Preferences {
+    int currentTitleId;
+    int base;
+    int infinity;
+    int loop;
+    int kobushi;
+};
+
 extern struct _VRAM _vram;
 extern struct _SLOT _slot[MAXSLOT];
 extern struct _TOUCH _touch;

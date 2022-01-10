@@ -32,6 +32,14 @@ void tohovgs_setSong(int index,
                      void *title,
                      size_t titleSize);
 
+void tohovgs_setPreference(int currentTitleId,
+                           int loop,
+                           int base,
+                           int infinity,
+                           int kobushi);
+
+struct Preferences *tohovgs_getPreference();
+
 int vge_tick();
 
 int vge_gload(unsigned char n, const unsigned char *bin);

@@ -52,4 +52,24 @@ class Settings(context: Context?) {
             song.needReload = true
         }
     }
+
+    var compatCurrentTitleId: Int
+        get() = preferences?.getInt("compat_current_title_id", 0x0010) ?: 0x0010
+        set(value) = save { editor -> editor.putInt("compat_current_title_id", value) }
+
+    var compatLoop: Int
+        get() = preferences?.getInt("compat_loop", 1) ?: 1
+        set(value) = save { editor -> editor.putInt("compat_loop", value) }
+
+    var compatBase: Int
+        get() = preferences?.getInt("compat_base", 0) ?: 0
+        set(value) = save { editor -> editor.putInt("compat_base", value) }
+
+    var compatInfinity: Int
+        get() = preferences?.getInt("compat_infinity", 0) ?: 0
+        set(value) = save { editor -> editor.putInt("compat_infinity", value) }
+
+    var compatKobushi: Int
+        get() = preferences?.getInt("compat_kobushi", 0) ?: 0
+        set(value) = save { editor -> editor.putInt("compat_kobushi", value) }
 }

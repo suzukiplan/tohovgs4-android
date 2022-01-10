@@ -41,6 +41,8 @@ struct TitleData {
     char title[80];
 };
 
+static struct Preferences PRF;
+
 static int fs_TitleNum = 0;
 static int fs_SongNum = 0;
 static struct TitleData *fs_title;
@@ -118,6 +120,23 @@ void tohovgs_setSong(int index,
     memcpy(fs_list[index].text, title, ts);
 }
 
+void tohovgs_setPreference(int currentTitleId,
+                           int loop,
+                           int base,
+                           int infinity,
+                           int kobushi) {
+    memset(&PRF, 0, sizeof(PRF));
+    PRF.currentTitleId = currentTitleId; // default: 0x0010
+    PRF.loop = loop; // default: 1
+    PRF.base = base; // default: 0
+    PRF.infinity = infinity; // default: 0
+    PRF.kobushi = kobushi; // default: 0
+}
+
+struct Preferences *tohovgs_getPreference() {
+    return &PRF;
+}
+
 /* Proto types */
 static void nextSong();
 
@@ -128,15 +147,6 @@ static void put_font_S(int x, int y, const char *msg, ...);
 static unsigned short get_code(unsigned const char *sjis);
 
 static void put_kanji(int x, int y, int col, const char *msg, ...);
-
-struct Preferences {
-    int currentTitleId;
-    int base;
-    int infinity;
-    int loop;
-    int kobushi;
-};
-static struct Preferences PRF;
 
 /*
  *----------------------------------------------------------------------------
@@ -186,9 +196,6 @@ int vge_tick() {
     if (isFirst) {
         /* load preferences and setup */
         isFirst = 0;
-        memset(&PRF, 0, sizeof(PRF));
-        PRF.currentTitleId = 0x0010;
-        PRF.loop = 1;
         base = (double) PRF.base;
         for (i = 0; i < fs_TitleNum; i++) {
             if (fs_title[i].id == PRF.currentTitleId) break;

@@ -199,6 +199,13 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         JNI.compatLoadKanji(compatAsset("DSLOT255.DAT"))
         JNI.compatLoadGraphic(0, compatAsset("GSLOT000.CHR"))
         JNI.compatLoadGraphic(1, compatAsset("GSLOT255.CHR"))
+        JNI.compatSetPreference(
+            settings.compatCurrentTitleId,
+            settings.compatLoop,
+            settings.compatBase,
+            settings.compatInfinity,
+            settings.compatKobushi
+        )
         while (alive) {
             start = System.currentTimeMillis()
             val canvas = holder.lockHardwareCanvas()
@@ -215,6 +222,11 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             }
         }
         Logger.d("End render thread")
+        settings.compatCurrentTitleId = JNI.compatGetCurrentTitleId()
+        settings.compatLoop = JNI.compatGetLoop()
+        settings.compatBase = JNI.compatGetBase()
+        settings.compatInfinity = JNI.compatGetInfinity()
+        settings.compatKobushi = JNI.compatGetKobushi()
         JNI.compatCleanUp()
     }
 

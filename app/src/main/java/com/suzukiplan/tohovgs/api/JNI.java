@@ -47,4 +47,20 @@ public class JNI {
     public static native void compatOnReleaseTouch();
 
     public static native void compatOnFling(int fx, int fy);
+
+    public static native void compatSetPreference(int currentTitleId,
+                                                  int loop,
+                                                  int base,
+                                                  int infinity,
+                                                  int kobushi);
+
+    public static native int compatGetCurrentTitleId();
+
+    public static native int compatGetLoop();
+
+    public static native int compatGetBase();
+
+    public static native int compatGetInfinity();
+
+    public static native int compatGetKobushi();
 }

@@ -223,3 +223,38 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatOnFling(JNIEnv *, jclass, jint fx, jin
     g_flingX += fx;
     g_flingY += fy;
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatSetPreference(JNIEnv *, jclass,
+                                                        jint currentTitleId,
+                                                        jint loop,
+                                                        jint base,
+                                                        jint infinity,
+                                                        jint kobushi) {
+    tohovgs_setPreference(currentTitleId, loop, base, infinity, kobushi);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetCurrentTitleId(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->currentTitleId;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetLoop(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->loop;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetBase(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->base;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetInfinity(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->infinity;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetKobushi(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->kobushi;
+}
