@@ -19,10 +19,6 @@
 #include "vgsmml.h"
 #include "android_fopen.h"
 
-/* マクロ定義 */
-#define abs(x) (x >= 0 ? (x) : -(x)) /* 変数の絶対値を得る */
-#define sgn(x) (x >= 0 ? (1) : (-1)) /* 変数の符号を得る   */
-
 /* グローバル変数の実体宣言 */
 struct _VRAM _vram;
 struct _SLOT _slot[MAXSLOT];
@@ -212,7 +208,6 @@ void vge_lineSP(int fx, int fy, int tx, int ty, unsigned char c) {
  */
 static inline void line(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c) {
     int idx, idy;
-    int ia, ib, ie;
     int w;
     idx = tx - fx;
     idy = ty - fy;
@@ -240,35 +235,6 @@ static inline void line(unsigned char *p, int fx, int fy, int tx, int ty, unsign
             }
         }
         return;
-    }
-    /* 斜線(DDA) */
-    w = 1;
-    ia = abs(idx);
-    ib = abs(idy);
-    if (ia >= ib) {
-        ie = -abs(idy);
-        while (w) {
-            pixel(p, fx, fy, c);
-            if (fx == tx) break;
-            fx += sgn(idx);
-            ie += 2 * ib;
-            if (ie >= 0) {
-                fy += sgn(idy);
-                ie -= 2 * ia;
-            }
-        }
-    } else {
-        ie = -abs(idx);
-        while (w) {
-            pixel(p, fx, fy, c);
-            if (fy == ty) break;
-            fy += sgn(idy);
-            ie += 2 * ia;
-            if (ie >= 0) {
-                fx += sgn(idx);
-                ie -= 2 * ib;
-            }
-        }
     }
 }
 
@@ -435,17 +401,3 @@ void vge_bstop() {
 void vge_bresume() {
     _bstop = 0;
 }
-
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_setPause: ポーズ状態の設定・解除
- *----------------------------------------------------------------------------
- * 引数:
- * - p [I] ポーズ状態
- *----------------------------------------------------------------------------
- */
-void vge_setPause(unsigned char p) {
-    _pause = p;
-}
-
-/* End of vgeapi.c */
