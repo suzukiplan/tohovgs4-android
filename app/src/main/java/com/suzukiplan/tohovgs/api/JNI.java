@@ -4,6 +4,7 @@
  */
 package com.suzukiplan.tohovgs.api;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 
 public class JNI {
@@ -29,7 +30,7 @@ public class JNI {
 
     public static native void compatCleanUp();
 
-    public static native void compatAllocate(int nTitle, int nSong);
+    public static native void compatAllocate(int nTitle, int nSong, AssetManager assetManager);
 
     public static native void compatLoadGraphic(int n, byte[] data);
 

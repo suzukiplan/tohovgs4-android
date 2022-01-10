@@ -106,7 +106,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             unlockedSongsCount += unlockedSongs[album.id]?.size ?: 0
         }
         val unlockedAlbums = albums.filter { true == unlockedSongs[it.id]?.isNotEmpty() }
-        JNI.compatAllocate(unlockedAlbums.size, unlockedSongsCount)
+        JNI.compatAllocate(unlockedAlbums.size, unlockedSongsCount, context?.assets)
         var titleIndex = 0
         var songIndex = 0
         var compatId = 0x0010
@@ -128,7 +128,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                     songNo,
                     song.loop,
                     album.compatColor,
-                    song.mml.toByteArray(Charsets.UTF_8),
+                    "mml/${song.mml}.mml".toByteArray(Charsets.UTF_8),
                     song.name.toByteArray(sjis)
                 )
             }

@@ -4,11 +4,15 @@
  */
 #include <jni.h>
 #include <android/bitmap.h>
+#include <android/asset_manager_jni.h>
 #include <android/log.h>
 #include "vgsdec.h"
 #include "vgsmml.h"
 #include "vge.h"
 #include "vgeint.h"
+#include "android_fopen.h"
+
+static jobject android_java_asset_manager = nullptr;
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_createDecoder(JNIEnv *, jclass) {
@@ -100,12 +104,22 @@ Java_com_suzukiplan_tohovgs_api_JNI_seek(JNIEnv *, jclass, jlong context, jint p
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *, jclass) {
+Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *env, jclass) {
     tohovgs_cleanUp();
+    if (android_java_asset_manager != nullptr) {
+        env->DeleteGlobalRef(android_java_asset_manager);
+        android_java_asset_manager = nullptr;
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_compatAllocate(JNIEnv *, jclass, jint nTitle, jint nSong) {
+Java_com_suzukiplan_tohovgs_api_JNI_compatAllocate(JNIEnv *env,
+                                                   jclass,
+                                                   jint nTitle,
+                                                   jint nSong,
+                                                   jobject assetManager) {
+    android_java_asset_manager = env->NewGlobalRef(assetManager);
+    android_fopen_set_asset_manager(AAssetManager_fromJava(env, android_java_asset_manager));
     tohovgs_allocate(nTitle, nSong);
 }
 
