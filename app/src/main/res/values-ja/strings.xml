@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">東方VGS</string>
     <string name="app_name_long">東方BGM on VGS</string>
-    <string name="sequential">All</string>
-    <string name="shuffle">Shuffle</string>
-    <string name="home">Home</string>
+    <string name="sequential">ALL</string>
+    <string name="shuffle">SHUFFLE</string>
+    <string name="home">HOME</string>
     <string name="please_wait">しばらくお待ち下さい…</string>
     <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
@@ -17,5 +17,5 @@
     <string name="seek_bar">シークバー</string>
     <string name="unlock_all_songs">全ての楽曲をアンロックする</string>
     <string name="hide_unlock_all_button">一時的に全ての楽曲アンロックボタンを隠す</string>
-    <string name="retro_ui">Retro</string>
+    <string name="retro_ui">RETRO</string>
 </resources>
