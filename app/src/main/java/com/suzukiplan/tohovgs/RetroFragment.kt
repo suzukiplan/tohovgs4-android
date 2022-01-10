@@ -12,6 +12,7 @@ import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.MusicManager
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Song
+import java.nio.charset.Charset
 
 class RetroFragment : Fragment(), SurfaceHolder.Callback {
     companion object {
@@ -107,14 +108,15 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         var titleIndex = 0
         var songIndex = 0
         var compatId = 0x0010
+        val sjis = Charset.forName("SJIS")
         unlockedAlbums.forEach { album ->
             val songNum = unlockedSongs[album.id]?.size ?: 0
             JNI.compatAddTitle(
                 titleIndex,
                 compatId,
                 songNum,
-                album.formalName.toByteArray(Charsets.ISO_8859_1),
-                album.copyright.toByteArray(Charsets.ISO_8859_1)
+                album.formalName.toByteArray(sjis),
+                album.copyright.toByteArray(sjis)
             )
             var songNo = 1
             unlockedSongs[album.id]?.forEach { song ->
@@ -126,7 +128,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                         song.loop,
                         album.compatColor,
                         song.mml.toByteArray(Charsets.UTF_8),
-                        song.name.toByteArray(Charsets.ISO_8859_1)
+                        song.name.toByteArray(sjis)
                     )
                     songIndex++
                     songNo++
