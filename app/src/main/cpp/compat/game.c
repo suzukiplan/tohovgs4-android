@@ -187,7 +187,7 @@ int vge_tick() {
         /* load preferences and setup */
         isFirst = 0;
         memset(&PRF, 0, sizeof(PRF));
-        PRF.currentTitleId = 0x60;
+        PRF.currentTitleId = 0x0010;
         PRF.loop = 1;
         base = (double) PRF.base;
         for (i = 0; i < fs_TitleNum; i++) {
