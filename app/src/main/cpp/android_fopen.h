@@ -16,7 +16,9 @@
 
 #ifndef ANDROID_FOPEN_H
 #define ANDROID_FOPEN_H
-#define  __USE_BSD
+#ifndef __USE_BSD
+#define __USE_BSD
+#endif
 
 #include <stdio.h>
 #include <android/asset_manager.h>

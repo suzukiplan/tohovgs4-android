@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
-#include "vgeint.h"
+#include "vge.h"
 
 #define SOUND_BUFFER_SIZE 800
 

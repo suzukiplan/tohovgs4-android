@@ -7,8 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include "vgeapi.h"
-#include "vgeint.h"
+#include "vge.h"
 #include "vgsdec.h"
 
 /* Macro */
@@ -642,7 +641,7 @@ int vge_tick() {
 
     /* Draw play pannel */
     vge_boxfSP(0, 0, 240, 130, 3);
-    put_font_S(24, 2, "VIDEO GAME SYSTEM  ORIGINAL UI EMULATOR");
+    put_font_S(24, 3, "VIDEO GAME SYSTEM  ORIGINAL UI EMULATOR");
     if (ci.s && touch_off == 0 && HIT_CHECK(0, 0, 24, 12, ci.cx - 4, ci.cy - 4, 8, 8)) {
         if (0 == PRF.localeId) {
             vge_putSP(0, 88, 176, 16, 8, 4, 3);

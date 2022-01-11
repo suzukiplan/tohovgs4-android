@@ -10,7 +10,6 @@ add_library(
         src/main/cpp/android_fopen.c
         src/main/cpp/compat/game.c
         src/main/cpp/compat/vgeapi.c
-        src/main/cpp/compat/vgs.c
 )
 
 include_directories(

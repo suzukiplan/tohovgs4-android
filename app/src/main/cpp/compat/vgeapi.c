@@ -1,20 +1,10 @@
-/* Copyright 2012, Suzuki Plan.
- *----------------------------------------------------------------------------
- * [呼称] VGE(Vide Game Engine) Version 1.00
- * [概要] Windows/Androidのクロス開発を実現するためのエンジン. (QVGA専用)
- * [備考] カーネル種別に依存しない処理を実装する(Windows/Android共用)
- *        ただし、C標準関数は全てのカーネルで使えるものとする.
- *----------------------------------------------------------------------------
+/*
+ * Copyright 2012, Suzuki Plan.
  */
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "vge.h"
-#include "vgeint.h"
 #include "vgsdec.h"
 #include "vgsmml.h"
 #include "android_fopen.h"
@@ -23,9 +13,8 @@
 struct _VRAM _vram;
 struct _SLOT _slot[MAXSLOT];
 struct _TOUCH _touch;
-unsigned char _mute;
-unsigned char _pause;
 void *_psg;
+static int fs_bstop;
 
 /* 内部関数 */
 static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy);
@@ -65,13 +54,6 @@ int vge_gload(unsigned char n, const unsigned char *bin) {
     return 0;
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_putSP: スロットデータをスプライト領域へ転送する
- * 引数: vge_putBGと同じ
- * 解説: スプライトは、一度表示したら消える妖精のような存在
- *----------------------------------------------------------------------------
- */
 void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy) {
     int i, j;
     int posT;
@@ -95,13 +77,6 @@ void vge_putSP(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy) 
     }
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_putSPM: スロットデータ(mask)をスプライト領域へ転送する
- * 引数: vge_putBGと同じ + maskカラー(c)
- * 解説: スプライトは、一度表示したら消える妖精のような存在
- *----------------------------------------------------------------------------
- */
 void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy, unsigned char c) {
     int i, j;
     int posT;
@@ -125,11 +100,6 @@ void vge_putSPM(unsigned char n, int sx, int sy, int xs, int ys, int dx, int dy,
     }
 }
 
-/*
- *----------------------------------------------------------------------------
- * vge_putBG/vge_putSP共通のクリッピング処理
- *----------------------------------------------------------------------------
- */
 static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy) {
     /* モロにはみだしてないか？ */
     if ((*sx) < 0 || _slot[n].xs < (*sx) + (*xs) || (*sy) < 0 || _slot[n].ys < (*sy) + (*ys) ||
@@ -160,52 +130,20 @@ static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, i
     return 0;
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_pixelSP: スプライト面にピクセルを描画する
- *----------------------------------------------------------------------------
- * 引数:
- * - x [I] X座標
- * - y [I] Y座標
- * - c [I] パレット番号
- *----------------------------------------------------------------------------
- */
 void vge_pixelSP(int x, int y, unsigned char c) {
     pixel(_vram.sp, x, y, c);
 }
 
-/*
- *----------------------------------------------------------------------------
- * vge_pixelBG, vge_pixelSPの内部処理
- *----------------------------------------------------------------------------
- */
 static inline void pixel(unsigned char *p, int x, int y, unsigned char c) {
     if (0 <= x && x < XSIZE && 0 <= y && y < YSIZE) {
         p[y * XSIZE + x] = c;
     }
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_lineBG: BG面にラインを描画する
- *----------------------------------------------------------------------------
- * 引数:
- * - fx [I] X座標(基点)
- * - fy [I] Y座標(基点)
- * - tx [I] X座標(終点)
- * - ty [I] Y座標(終点)
- * - c [I] パレット番号
- *----------------------------------------------------------------------------
- */
 void vge_lineSP(int fx, int fy, int tx, int ty, unsigned char c) {
     line(_vram.sp, fx, fy, tx, ty, c);
 }
 
-/*
- *----------------------------------------------------------------------------
- * vge_lineBGとvge_lineSPの共通処理
- *----------------------------------------------------------------------------
- */
 static inline void line(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c) {
     int idx, idy;
     int w;
@@ -238,18 +176,6 @@ static inline void line(unsigned char *p, int fx, int fy, int tx, int ty, unsign
     }
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_boxBG: スプライト面にボックスを描画する
- *----------------------------------------------------------------------------
- * 引数:
- * - fx [I] X座標(基点)
- * - fy [I] Y座標(基点)
- * - tx [I] X座標(終点)
- * - ty [I] Y座標(終点)
- * - c [I] パレット番号
- *----------------------------------------------------------------------------
- */
 void vge_boxSP(int fx, int fy, int tx, int ty, unsigned char c) {
     vge_lineSP(fx, fy, tx, fy, c);
     vge_lineSP(fx, ty, tx, ty, c);
@@ -257,27 +183,10 @@ void vge_boxSP(int fx, int fy, int tx, int ty, unsigned char c) {
     vge_lineSP(tx, fy, tx, ty, c);
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_boxfSP: スプライト面に塗りつぶしボックスを描画する
- *----------------------------------------------------------------------------
- * 引数:
- * - fx [I] X座標(基点)
- * - fy [I] Y座標(基点)
- * - tx [I] X座標(終点)
- * - ty [I] Y座標(終点)
- * - c [I] パレット番号
- *----------------------------------------------------------------------------
- */
 void vge_boxfSP(int fx, int fy, int tx, int ty, unsigned char c) {
     boxf(_vram.sp, fx, fy, tx, ty, c);
 }
 
-/*
- *----------------------------------------------------------------------------
- * vge_lineBGとvge_lineSPの共通処理
- *----------------------------------------------------------------------------
- */
 static inline void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsigned char c) {
     int w;
     /* form -> to変換 */
@@ -317,18 +226,6 @@ static inline void boxf(unsigned char *p, int fx, int fy, int tx, int ty, unsign
     }
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] タッチパネルの状態を取得
- *----------------------------------------------------------------------------
- * 引数:
- * - s [O] タッチパネルを押した状態か否か（非タッチ0, タッチ中: フレーム数）
- * - cx [O] 現在のX座標（非タッチ中は不定）
- * - cy [O] 現在のY座標（非タッチ中は不定）
- * - dx [O] X方向の移動距離（非タッチ中は不定）
- * - dy [O] Y方向の移動距離（非タッチ中は不定）
- *----------------------------------------------------------------------------
- */
 void vge_touch(int *s, int *cx, int *cy, int *dx, int *dy) {
     *s = _touch.s;
     *cx = _touch.cx;
@@ -341,25 +238,6 @@ void vge_touch(int *s, int *cx, int *cy, int *dx, int *dy) {
     _touch.dy = 0;
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_getmute: 音を消す / 鳴らすの設定を取得
- *----------------------------------------------------------------------------
- * 戻り値: 非0=ミュート、0=発音
- *----------------------------------------------------------------------------
- */
-unsigned char vge_getmute() {
-    return _mute;
-}
-
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_bplay: BGMを演奏する
- *----------------------------------------------------------------------------
- * 引数:
- * - n [I] スロット番号
- *----------------------------------------------------------------------------
- */
 void vge_bplay(const char *mmlPath) {
     struct VgsMmlErrorInfo err;
     struct VgsBgmData *data;
@@ -381,27 +259,23 @@ void vge_bplay(const char *mmlPath) {
     vgsdec_set_value(_psg, VGSDEC_REG_RESET, 1);
     vgsdec_set_value(_psg, VGSDEC_REG_SYNTHESIS_BUFFER, 1);
     vgsdec_set_value(_psg, VGSDEC_REG_TIME, 0);
-    _bstop = 0;
+    fs_bstop = 0;
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_bstop: BGMの演奏を中断する
- *----------------------------------------------------------------------------
- */
 void vge_bstop() {
-    _bstop = 1;
+    fs_bstop = 1;
 }
 
-/*
- *----------------------------------------------------------------------------
- * [VGE-API] vge_bresume: BGMの演奏を中断したところから再開する
- *----------------------------------------------------------------------------
- */
 void vge_bresume() {
-    _bstop = 0;
+    fs_bstop = 0;
 }
 
 void vge_restartCurrentSong() {
     vgsdec_set_value(_psg, VGSDEC_REG_TIME, 0);
+}
+
+void vgsbuf(char *buf, size_t size) {
+    memset(buf, 0, size);
+    if (fs_bstop) return;
+    vgsdec_execute(_psg, buf, size);
 }

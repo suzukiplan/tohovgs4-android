@@ -10,7 +10,6 @@
 #include "vgsdec.h"
 #include "vgsmml.h"
 #include "vge.h"
-#include "vgeint.h"
 #include "android_fopen.h"
 #include "audio.hpp"
 
