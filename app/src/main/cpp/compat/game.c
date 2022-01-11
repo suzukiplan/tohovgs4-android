@@ -525,15 +525,18 @@ int vge_tick() {
             dp = 40 + (ii++) * 20 + 130 + (int) base;
             if (i < fs_SongNum && 114 < dp && dp < 320) {
                 if (fs_musicCursor == i) {
-                    vge_boxfSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 75);
-                    vge_boxSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 111);
                     if (ci.s && touch_off == 0 && 2 == touching &&
                         HIT_CHECK(ci.cx - 4, ci.cy - 4, 8, 8, bx, 130, 240, 190) &&
                         HIT_CHECK(4 + bx, dp, 216 + 16, 16, ci.cx - 4, ci.cy - 4, 8,
                                   8)) {
+                        vge_boxfSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 60);
+                        vge_boxSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 111);
                         if (push) {
                             vge_restartCurrentSong();
                         }
+                    } else {
+                        vge_boxfSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 75);
+                        vge_boxSP(4 + bx, dp, 220 + 16 + bx, dp + 16, 111);
                     }
                 } else {
                     if (ci.s && touch_off == 0 && 2 == touching &&
