@@ -1,3 +1,7 @@
+/**
+ * ©2022, SUZUKI PLAN
+ * License: https://github.com/suzukiplan/tohovgs4-android/blob/master/LICENSE.txt
+ */
 #ifndef INCLUDE_AUDIO_HPP
 #define INCLUDE_AUDIO_HPP
 

@@ -1,5 +1,6 @@
 /*
  * Copyright 2012, Suzuki Plan.
+ * License: https://github.com/suzukiplan/tohovgs4-android/blob/master/LICENSE.txt
  */
 #include <stdio.h>
 #include <stdlib.h>

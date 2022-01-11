@@ -1,6 +1,8 @@
 /* Main Program of the Touhou BGM on VGS */
 /* (C)2013, SUZUKI PLAN */
 /* Author: Y.Suzuki Apr-2013 */
+/* License: https://github.com/suzukiplan/tohovgs4-android/blob/master/LICENSE.txt */
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
