@@ -1,3 +1,7 @@
+/**
+ * ©2022, SUZUKI PLAN
+ * License: https://github.com/suzukiplan/tohovgs4-android/blob/master/LICENSE.txt
+ */
 package com.suzukiplan.tohovgs
 
 import android.annotation.SuppressLint
@@ -196,7 +200,8 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                     song.loop,
                     album.compatColor,
                     "mml/${song.mml}.mml".toByteArray(Charsets.UTF_8),
-                    convertToSJIS(song.name)
+                    convertToSJIS(song.name),
+                    convertToSJIS(song.nameE)
                 )
             }
             titleIndex++
@@ -210,7 +215,8 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             settings.compatLoop,
             settings.compatBase,
             settings.compatInfinity,
-            settings.compatKobushi
+            settings.compatKobushi,
+            settings.compatLocaleId
         )
         while (alive) {
             start = System.currentTimeMillis()
@@ -233,6 +239,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         settings.compatBase = JNI.compatGetBase()
         settings.compatInfinity = JNI.compatGetInfinity()
         settings.compatKobushi = JNI.compatGetKobushi()
+        settings.compatLocaleId = JNI.compatGetLocaleId()
         JNI.compatCleanUp()
     }
 

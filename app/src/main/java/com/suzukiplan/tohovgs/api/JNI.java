@@ -38,7 +38,7 @@ public class JNI {
 
     public static native void compatAddTitle(int index, int id, int songNum, byte[] title, byte[] copyright);
 
-    public static native void compatAddSong(int index, int id, int no, int loop, int col, byte[] mmlPath, byte[] title);
+    public static native void compatAddSong(int index, int id, int no, int loop, int col, byte[] mmlPath, byte[] titleJ, byte[] titleE);
 
     public static native void compatTick(Bitmap bitmap);
 
@@ -52,7 +52,8 @@ public class JNI {
                                                   int loop,
                                                   int base,
                                                   int infinity,
-                                                  int kobushi);
+                                                  int kobushi,
+                                                  int localeId);
 
     public static native int compatGetCurrentTitleId();
 
@@ -63,4 +64,6 @@ public class JNI {
     public static native int compatGetInfinity();
 
     public static native int compatGetKobushi();
+
+    public static native int compatGetLocaleId();
 }

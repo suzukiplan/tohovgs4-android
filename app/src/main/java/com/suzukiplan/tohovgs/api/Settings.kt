@@ -53,6 +53,10 @@ class Settings(context: Context?) {
         }
     }
 
+    var pageName: String?
+        get() = preferences?.getString("page_name", null)
+        set(value) = save { editor -> editor.putString("page_name", value) }
+
     var compatCurrentTitleId: Int
         get() = preferences?.getInt("compat_current_title_id", 0x0010) ?: 0x0010
         set(value) = save { editor -> editor.putInt("compat_current_title_id", value) }
@@ -72,4 +76,8 @@ class Settings(context: Context?) {
     var compatKobushi: Int
         get() = preferences?.getInt("compat_kobushi", 0) ?: 0
         set(value) = save { editor -> editor.putInt("compat_kobushi", value) }
+
+    var compatLocaleId: Int
+        get() = preferences?.getInt("compat_locale_id", 0) ?: 0
+        set(value) = save { editor -> editor.putInt("compat_locale_id", value) }
 }

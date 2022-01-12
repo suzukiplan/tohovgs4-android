@@ -6,6 +6,7 @@ package com.suzukiplan.tohovgs
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +65,13 @@ class SongListFragment : Fragment() {
     var listener: Listener? = null
     private var isSequentialMode = false
     private var showSongIndex = false
+    private var language = Language.Default
+
+    enum class Language {
+        Japanese,
+        French,
+        Default
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,6 +80,11 @@ class SongListFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         settings = Settings(context)
+        language = when (Locale.getDefault().language) {
+            "ja" -> Language.Japanese
+            "fr" -> Language.French
+            else -> Language.Default
+        }
         mainActivity = activity as MainActivity
         items.clear()
         random = Random(System.currentTimeMillis())
@@ -206,6 +219,7 @@ class SongListFragment : Fragment() {
         private val lock: View = itemView.findViewById(R.id.lock)
         private val play: View = itemView.findViewById(R.id.play)
         private val songTitle: TextView = itemView.findViewById(R.id.song_title)
+        private val englishTitle: TextView = itemView.findViewById(R.id.english_title)
         private val songIndex: TextView = itemView.findViewById(R.id.song_index)
 
         @SuppressLint("SetTextI18n")
@@ -245,7 +259,31 @@ class SongListFragment : Fragment() {
                     true
                 }
             }
-            songTitle.text = song.name
+            when (language) {
+                Language.Japanese -> {
+                    songTitle.text = song.name
+                    englishTitle.visibility = View.GONE
+                }
+                Language.French -> {
+                    songTitle.text = song.name
+                    englishTitle.text = song.french
+                    englishTitle.visibility = View.VISIBLE
+                    songTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                    englishTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                }
+                Language.Default -> {
+                    songTitle.text = song.name
+                    if (null != song.english) {
+                        englishTitle.text = song.english
+                        englishTitle.visibility = View.VISIBLE
+                        songTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                        englishTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                    } else {
+                        songTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                        englishTitle.visibility = View.GONE
+                    }
+                }
+            }
             songIndex.visibility = if (showSongIndex) {
                 songIndex.text = "#${items.indexOf(song) + 1}"
                 View.VISIBLE

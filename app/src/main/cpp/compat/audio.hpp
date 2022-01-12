@@ -1,3 +1,7 @@
+/**
+ * ©2022, SUZUKI PLAN
+ * License: https://github.com/suzukiplan/tohovgs4-android/blob/master/LICENSE.txt
+ */
 #ifndef INCLUDE_AUDIO_HPP
 #define INCLUDE_AUDIO_HPP
 
@@ -8,9 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
-#include "vgeint.h"
+#include "vge.h"
 
-#define SOUND_BUFFER_SIZE 735
+#define SOUND_BUFFER_SIZE 800
 
 class VgsAudioSystem {
 private:
@@ -79,7 +83,6 @@ public:
 
     static void callback(SLAndroidSimpleBufferQueueItf bq, void *c) {
         VgsAudioSystem *context = (VgsAudioSystem *) c;
-        struct timespec ts = {0, 0};
         context->lock();
         if (!context->isEnded()) {
             (*bq)->Enqueue(bq, context->buffer[context->bufferLatch], SOUND_BUFFER_SIZE);

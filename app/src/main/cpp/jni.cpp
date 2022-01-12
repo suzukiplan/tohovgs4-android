@@ -10,7 +10,6 @@
 #include "vgsdec.h"
 #include "vgsmml.h"
 #include "vge.h"
-#include "vgeint.h"
 #include "android_fopen.h"
 #include "audio.hpp"
 
@@ -172,15 +171,29 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAddSong(JNIEnv *env, jclass,
                                                   jint loop,
                                                   jint col,
                                                   jbyteArray mmlPath_,
-                                                  jbyteArray title_) {
+                                                  jbyteArray titleJ_,
+                                                  jbyteArray titleE_) {
     //__android_log_print(ANDROID_LOG_DEBUG, "TOHOVGS", "addSong:%04X-%d", id, no);
-    jbyte *title = env->GetByteArrayElements(title_, nullptr);
-    size_t titleSize = (uint32_t) env->GetArrayLength(title_);
+    jbyte *titleJ = env->GetByteArrayElements(titleJ_, nullptr);
+    size_t titleSizeJ = (uint32_t) env->GetArrayLength(titleJ_);
+    jbyte *titleE = env->GetByteArrayElements(titleE_, nullptr);
+    size_t titleSizeE = (uint32_t) env->GetArrayLength(titleE_);
     jbyte *mmlPath = env->GetByteArrayElements(mmlPath_, nullptr);
     size_t mmlPathSize = (uint32_t) env->GetArrayLength(mmlPath_);
-    tohovgs_setSong(index, id, no, loop, col, mmlPath, mmlPathSize, title, titleSize);
+    tohovgs_setSong(index,
+                    id,
+                    no,
+                    loop,
+                    col,
+                    mmlPath,
+                    mmlPathSize,
+                    titleJ,
+                    titleSizeJ,
+                    titleE,
+                    titleSizeE);
     env->ReleaseByteArrayElements(mmlPath_, mmlPath, 0);
-    env->ReleaseByteArrayElements(title_, title, 0);
+    env->ReleaseByteArrayElements(titleJ_, titleJ, 0);
+    env->ReleaseByteArrayElements(titleE_, titleE, 0);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -230,8 +243,9 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatSetPreference(JNIEnv *, jclass,
                                                         jint loop,
                                                         jint base,
                                                         jint infinity,
-                                                        jint kobushi) {
-    tohovgs_setPreference(currentTitleId, loop, base, infinity, kobushi);
+                                                        jint kobushi,
+                                                        jint localeId) {
+    tohovgs_setPreference(currentTitleId, loop, base, infinity, kobushi, localeId);
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -257,4 +271,9 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatGetInfinity(JNIEnv *, jclass) {
 extern "C" JNIEXPORT jint JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatGetKobushi(JNIEnv *, jclass) {
     return tohovgs_getPreference()->kobushi;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetLocaleId(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->localeId;
 }
