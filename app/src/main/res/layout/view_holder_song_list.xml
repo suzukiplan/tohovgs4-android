@@ -45,6 +45,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:lines="1"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
@@ -53,8 +57,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="marquee"
+                android:lines="1"
                 android:textColor="@color/black_alpha50"
-                android:textSize="11sp" />
+                android:textSize="10sp"
+                android:textStyle="italic"
+                tools:ignore="SmallSp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
