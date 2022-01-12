@@ -53,6 +53,10 @@ class Settings(context: Context?) {
         }
     }
 
+    var pageName: String?
+        get() = preferences?.getString("page_name", null)
+        set(value) = save { editor -> editor.putString("page_name", value) }
+
     var compatCurrentTitleId: Int
         get() = preferences?.getInt("compat_current_title_id", 0x0010) ?: 0x0010
         set(value) = save { editor -> editor.putInt("compat_current_title_id", value) }

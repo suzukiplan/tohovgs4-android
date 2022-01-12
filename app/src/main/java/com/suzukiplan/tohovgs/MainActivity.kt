@@ -50,11 +50,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private val executor = Executors.newFixedThreadPool(4)
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
 
-    enum class Page(val value: Int) {
-        PerTitle(1),
-        Sequential(2),
-        Shuffle(3),
-        Retro(4),
+    enum class Page(val value: Pair<Int, String>) {
+        NotSelected(Pair(0, "")),
+        PerTitle(Pair(1, "home")),
+        Sequential(Pair(2, "all")),
+        Shuffle(Pair(3, "shuffle")),
+        Retro(Pair(4, "retro")),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,11 +90,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         resetSeekBar()
         musicManager = MusicManager.getInstance(this)
         musicManager?.initialize()
-        val transaction = supportFragmentManager.beginTransaction()
-        currentFragment = AlbumPagerFragment.create()
-        transaction.replace(fragmentContainer.id, currentFragment!!)
-        transaction.commit()
-        currentPage = Page.PerTitle
         footers.clear()
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
@@ -103,6 +99,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager?.infinity = checked
         }
+        currentPage = Page.NotSelected
+        movePage(settings.pageName)
 
         MobileAds.initialize(this) {
             Logger.d("MobileAds initialized: $it")
@@ -143,8 +141,16 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         seekBarTouching = false
     }
 
+    private fun movePage(name: String?) = movePage(
+        when (name) {
+            Page.Sequential.value.second -> Page.Sequential
+            Page.Retro.value.second -> Page.Retro
+            else -> Page.PerTitle
+        }
+    )
+
     private fun movePage(page: Page) {
-        if (page == currentPage) return
+        if (currentPage != Page.NotSelected && page == currentPage) return
         stopSong()
         seekBarContainer.visibility = if (page == Page.Retro) {
             View.GONE
@@ -152,6 +158,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             View.VISIBLE
         }
         val fragment = when (page) {
+            Page.NotSelected -> return
             Page.PerTitle -> AlbumPagerFragment.create()
             Page.Sequential -> SongListFragment.createAsSequential()
             Page.Shuffle -> SongListFragment.createAsShuffle()
@@ -159,22 +166,36 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         }
         if (fragment is SongListFragment) fragment.listener = this
         val transaction = supportFragmentManager.beginTransaction()
-        if (currentPage.value < page.value) {
-            transaction.setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left)
-        } else {
-            transaction.setCustomAnimations(R.anim.slide_in_from_left, R.anim.slide_out_to_right)
+        if (currentPage != Page.NotSelected) {
+            if (currentPage.value.first < page.value.first) {
+                transaction.setCustomAnimations(
+                    R.anim.slide_in_from_right,
+                    R.anim.slide_out_to_left
+                )
+            } else {
+                transaction.setCustomAnimations(
+                    R.anim.slide_in_from_left,
+                    R.anim.slide_out_to_right
+                )
+            }
         }
         transaction.replace(fragmentContainer.id, fragment)
         currentFragment = fragment
         transaction.commit()
-        footers[currentPage]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
-        executeAsync {
-            Thread.sleep(300L)
-            runOnUiThread {
-                if (page == currentPage) {
-                    footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+        if (currentPage == Page.NotSelected) {
+            footers[Page.PerTitle]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
+            footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+        } else {
+            footers[currentPage]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
+            executeAsync {
+                Thread.sleep(300L)
+                runOnUiThread {
+                    if (page == currentPage) {
+                        footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
+                    }
                 }
             }
+            settings.pageName = page.value.second
         }
         currentPage = page
     }
