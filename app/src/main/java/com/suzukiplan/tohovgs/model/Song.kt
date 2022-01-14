@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName
 data class Song(
     @SerializedName("name") val name: String,
     @SerializedName("english") val english: String?,
-    @SerializedName("french") val french: String,
     @SerializedName("mml") val mml: String,
     @SerializedName("loop") val loop: Int,
     var parentAlbum: Album? = null,

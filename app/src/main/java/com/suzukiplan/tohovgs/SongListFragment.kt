@@ -264,13 +264,7 @@ class SongListFragment : Fragment() {
                     songTitle.text = song.name
                     englishTitle.visibility = View.GONE
                 }
-                Language.French -> {
-                    songTitle.text = song.name
-                    englishTitle.text = song.french
-                    englishTitle.visibility = View.VISIBLE
-                    songTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                    englishTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                }
+                Language.French,
                 Language.Default -> {
                     songTitle.text = song.name
                     if (null != song.english) {
