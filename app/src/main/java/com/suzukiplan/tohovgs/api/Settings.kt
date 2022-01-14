@@ -80,4 +80,8 @@ class Settings(context: Context?) {
     var compatLocaleId: Int
         get() = preferences?.getInt("compat_locale_id", 0) ?: 0
         set(value) = save { editor -> editor.putInt("compat_locale_id", value) }
+
+    var compatListType: Int
+        get() = preferences?.getInt("compat_list_type", 0) ?: 0
+        set(value) = save { editor -> editor.putInt("compat_list_type", value) }
 }

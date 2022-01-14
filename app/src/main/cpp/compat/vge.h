@@ -41,6 +41,7 @@ struct Preferences {
     int loop;
     int kobushi;
     int localeId;
+    int listType;
 };
 
 extern struct _VRAM _vram;
@@ -85,7 +86,8 @@ void tohovgs_setPreference(int currentTitleId,
                            int base,
                            int infinity,
                            int kobushi,
-                           int localeId);
+                           int localeId,
+                           int listType);
 
 struct Preferences *tohovgs_getPreference();
 
