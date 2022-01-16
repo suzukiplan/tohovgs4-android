@@ -200,8 +200,11 @@ class SongListFragment : Fragment() {
     inner class MergeAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private val positions = ArrayList<String>(0)
 
-        fun notifyItemChanged(song: Song) {
+        fun notifyItemChanged(song: Song) =
             notifyItemChanged(positions.indexOf("S#${songs.indexOf(song)}"))
+
+        fun focus(song: Song) = activity?.runOnUiThread {
+            list.smoothScrollToPosition(positions.indexOf("S#${songs.indexOf(song)}"))
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
@@ -260,6 +263,10 @@ class SongListFragment : Fragment() {
             holder.bind(songs[position])
 
         override fun getItemCount() = songs.count()
+
+        fun focus(song: Song) = activity?.runOnUiThread {
+            list.smoothScrollToPosition(songs.indexOf(song))
+        }
     }
 
     private fun onPlayEnded(song: Song) {
@@ -281,12 +288,21 @@ class SongListFragment : Fragment() {
         }
         play(nextSong)
         reload(nextSong)
-        list.scrollToPosition(songs.indexOf(nextSong))
+        moveFocus(nextSong)
     }
 
     private fun play(song: Song) {
         if (isSequentialMode) settings.initialPositionSequential = songs.indexOf(song)
         listener?.onPlay(song.parentAlbum!!, song) { onPlayEnded(song) }
+        moveFocus(song)
+    }
+
+    private fun moveFocus(song: Song) {
+        if (isSequentialMode) {
+            mergeAdapter?.focus(song)
+        } else {
+            songAdapter.focus(song)
+        }
     }
 
     inner class TitleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
