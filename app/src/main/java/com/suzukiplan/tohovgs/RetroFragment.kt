@@ -216,7 +216,8 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             settings.compatBase,
             settings.compatInfinity,
             settings.compatKobushi,
-            settings.compatLocaleId
+            settings.compatLocaleId,
+            settings.compatListType
         )
         while (alive) {
             start = System.currentTimeMillis()
@@ -240,6 +241,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         settings.compatInfinity = JNI.compatGetInfinity()
         settings.compatKobushi = JNI.compatGetKobushi()
         settings.compatLocaleId = JNI.compatGetLocaleId()
+        settings.compatListType = JNI.compatGetListType()
         JNI.compatCleanUp()
     }
 

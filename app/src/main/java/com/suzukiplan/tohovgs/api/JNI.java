@@ -53,7 +53,8 @@ public class JNI {
                                                   int base,
                                                   int infinity,
                                                   int kobushi,
-                                                  int localeId);
+                                                  int localeId,
+                                                  int listType);
 
     public static native int compatGetCurrentTitleId();
 
@@ -66,4 +67,6 @@ public class JNI {
     public static native int compatGetKobushi();
 
     public static native int compatGetLocaleId();
+
+    public static native int compatGetListType();
 }

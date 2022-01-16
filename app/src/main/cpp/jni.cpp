@@ -244,8 +244,9 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatSetPreference(JNIEnv *, jclass,
                                                         jint base,
                                                         jint infinity,
                                                         jint kobushi,
-                                                        jint localeId) {
-    tohovgs_setPreference(currentTitleId, loop, base, infinity, kobushi, localeId);
+                                                        jint localeId,
+                                                        jint listType) {
+    tohovgs_setPreference(currentTitleId, loop, base, infinity, kobushi, localeId, listType);
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -276,4 +277,9 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatGetKobushi(JNIEnv *, jclass) {
 extern "C" JNIEXPORT jint JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatGetLocaleId(JNIEnv *, jclass) {
     return tohovgs_getPreference()->localeId;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatGetListType(JNIEnv *, jclass) {
+    return tohovgs_getPreference()->listType;
 }
