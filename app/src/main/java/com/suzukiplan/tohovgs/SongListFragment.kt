@@ -54,11 +54,15 @@ class SongListFragment : Fragment() {
         fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit)
     }
 
-    private var items = ArrayList<Song>(0)
+    private lateinit var inflater: LayoutInflater
+    private var albums = ArrayList<Album>(0)
+    private var songs = ArrayList<Song>(0)
     private lateinit var settings: Settings
     private lateinit var mainActivity: MainActivity
     private lateinit var list: RecyclerView
-    private lateinit var adapter: Adapter
+    private lateinit var songAdapter: SongAdapter
+    private var titleAdapter: TitleAdapter? = null
+    private var mergeAdapter: MergeAdapter? = null
     private lateinit var random: Random
     private lateinit var progress: View
     private lateinit var allLocked: View
@@ -79,6 +83,7 @@ class SongListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        this.inflater = inflater
         settings = Settings(context)
         language = when (Locale.getDefault().language) {
             "ja" -> Language.Japanese
@@ -86,7 +91,8 @@ class SongListFragment : Fragment() {
             else -> Language.Default
         }
         mainActivity = activity as MainActivity
-        items.clear()
+        albums.clear()
+        songs.clear()
         random = Random(System.currentTimeMillis())
         val view = inflater.inflate(R.layout.fragment_song_list, container, false)
         progress = view.findViewById(R.id.progress)
@@ -96,12 +102,18 @@ class SongListFragment : Fragment() {
                 val albumId = requireArguments().getString("album_id")
                 val album =
                     MusicManager.getInstance(mainActivity)?.albums?.find { it.id == albumId }!!
-                album.songs.forEach { items.add(it) }
+                album.songs.forEach { songs.add(it) }
             }
             "sequential" -> {
-                addAvailableSongs(items)
-                if (items.count() < 1) {
+                addAvailableSongs(songs)
+                if (songs.count() < 1) {
                     allLocked.visibility = View.VISIBLE
+                } else {
+                    songs.forEach { song ->
+                        if (null == albums.find { it.id == song.parentAlbum?.id }) {
+                            albums.add(song.parentAlbum!!)
+                        }
+                    }
                 }
                 isSequentialMode = true
                 showSongIndex = true
@@ -116,8 +128,14 @@ class SongListFragment : Fragment() {
             }
         }
         list = view.findViewById(R.id.list)
-        adapter = Adapter()
-        list.adapter = adapter
+        songAdapter = SongAdapter()
+        if (isSequentialMode) {
+            titleAdapter = TitleAdapter()
+            mergeAdapter = MergeAdapter()
+            list.adapter = mergeAdapter
+        } else {
+            list.adapter = songAdapter
+        }
         list.itemAnimator = null
         list.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -135,15 +153,15 @@ class SongListFragment : Fragment() {
                 Thread.sleep(1500)
                 val tmpItems = ArrayList<Song>()
                 addAvailableSongs(tmpItems)
-                items.clear()
+                songs.clear()
                 while (tmpItems.isNotEmpty()) {
-                    items.add(tmpItems.removeAt(abs(random.nextInt()) % tmpItems.count()))
+                    songs.add(tmpItems.removeAt(abs(random.nextInt()) % tmpItems.count()))
                 }
                 mainActivity.runOnUiThread {
-                    adapter.notifyDataSetChanged()
+                    list.adapter?.notifyDataSetChanged()
                     list.scrollToPosition(0)
                     progress.visibility = View.GONE
-                    allLocked.visibility = if (items.count() < 1) View.VISIBLE else View.GONE
+                    allLocked.visibility = if (songs.count() < 1) View.VISIBLE else View.GONE
                 }
             }
         }
@@ -164,32 +182,89 @@ class SongListFragment : Fragment() {
         super.onResume()
     }
 
-    private fun reloadIfNeeded() = items.forEach { if (it.needReload) reload(it) }
+    private fun reloadIfNeeded() = songs.forEach { if (it.needReload) reload(it) }
 
     private fun reload(song: Song?) {
         song ?: return
-        val index = items.indexOf(song)
+        val index = songs.indexOf(song)
         if (0 <= index) {
-            adapter.notifyItemChanged(index)
+            if (isSequentialMode) {
+                mergeAdapter?.notifyItemChanged(song)
+            } else {
+                songAdapter.notifyItemChanged(index)
+            }
             song.needReload = false
         }
     }
 
-    inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
-        private val inflater = LayoutInflater.from(requireContext())
+    inner class MergeAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+        private val positions = ArrayList<String>(0)
 
+        fun notifyItemChanged(song: Song) {
+            notifyItemChanged(positions.indexOf("S#${songs.indexOf(song)}"))
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
+            0 -> titleAdapter!!.onCreateViewHolder(parent, 0)
+            1 -> songAdapter.onCreateViewHolder(parent, 0)
+            else -> throw RuntimeException("unknown viewType: $viewType")
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            if (positions.size < 1) {
+                var albumIndex = 0
+                var songIndex = 0
+                albums.forEach { album ->
+                    positions.add("A#${albumIndex++}")
+                    songs.forEach { song ->
+                        if (song.parentAlbum?.id == album.id) {
+                            positions.add("S#${songIndex++}")
+                        }
+                    }
+                }
+            }
+            return when {
+                positions[position].startsWith("A#") -> 0
+                positions[position].startsWith("S#") -> 1
+                else -> throw RuntimeException("!? positions[$position]=${positions[position]}")
+            }
+        }
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            val index = positions[position].substring(2).toInt()
+            when (holder) {
+                is TitleViewHolder -> holder.bind(albums[index])
+                is SongViewHolder -> holder.bind(songs[index])
+            }
+        }
+
+        override fun getItemCount() = songs.count() + albums.count()
+    }
+
+    inner class TitleAdapter : RecyclerView.Adapter<TitleViewHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TitleViewHolder =
+            TitleViewHolder(inflater.inflate(R.layout.view_holder_title_list, parent, false))
+
+        override fun onBindViewHolder(holder: TitleViewHolder, position: Int) {
+            holder.bind(albums[position])
+        }
+
+        override fun getItemCount() = albums.count()
+    }
+
+    inner class SongAdapter : RecyclerView.Adapter<SongViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            ViewHolder(inflater.inflate(R.layout.view_holder_song_list, parent, false))
+            SongViewHolder(inflater.inflate(R.layout.view_holder_song_list, parent, false))
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) =
-            holder.bind(items[position])
+        override fun onBindViewHolder(holder: SongViewHolder, position: Int) =
+            holder.bind(songs[position])
 
-        override fun getItemCount() = items.count()
+        override fun getItemCount() = songs.count()
     }
 
     private fun onPlayEnded(song: Song) {
         reload(song)
-        var nextIndex = items.indexOf(song)
+        var nextIndex = songs.indexOf(song)
         val previousIndex = nextIndex
         var nextSong: Song
         if (true == MusicManager.getInstance(mainActivity)?.infinity) {
@@ -197,8 +272,8 @@ class SongListFragment : Fragment() {
         } else {
             do {
                 nextIndex++
-                nextIndex %= items.count()
-                nextSong = items[nextIndex]
+                nextIndex %= songs.count()
+                nextSong = songs[nextIndex]
                 if (previousIndex == nextIndex && settings.isLocked(nextSong)) {
                     return // all songs are unlocked
                 }
@@ -206,15 +281,24 @@ class SongListFragment : Fragment() {
         }
         play(nextSong)
         reload(nextSong)
-        list.scrollToPosition(items.indexOf(nextSong))
+        list.scrollToPosition(songs.indexOf(nextSong))
     }
 
     private fun play(song: Song) {
-        if (isSequentialMode) settings.initialPositionSequential = items.indexOf(song)
+        if (isSequentialMode) settings.initialPositionSequential = songs.indexOf(song)
         listener?.onPlay(song.parentAlbum!!, song) { onPlayEnded(song) }
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class TitleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val title: TextView = itemView.findViewById(R.id.title)
+        private val copyright: TextView = itemView.findViewById(R.id.copyright)
+        fun bind(album: Album) {
+            title.text = album.formalName
+            copyright.text = album.copyright
+        }
+    }
+
+    inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val root: View = itemView.findViewById(R.id.root)
         private val lock: View = itemView.findViewById(R.id.lock)
         private val play: View = itemView.findViewById(R.id.play)
@@ -279,7 +363,7 @@ class SongListFragment : Fragment() {
                 }
             }
             songIndex.visibility = if (showSongIndex) {
-                songIndex.text = "#${items.indexOf(song) + 1}"
+                songIndex.text = "#${songs.indexOf(song) + 1}"
                 View.VISIBLE
             } else {
                 View.GONE
