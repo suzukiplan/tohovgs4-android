@@ -1,5 +1,7 @@
 package com.suzukiplan.tohovgs
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +20,22 @@ class SettingsFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        view.findViewById<View>(R.id.twitter).setOnClickListener {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://twitter.com/suzukiplan")
+                )
+            )
+        }
+        view.findViewById<View>(R.id.github).setOnClickListener {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://suzukiplan.github.io/tohovgs4-android")
+                )
+            )
+        }
         return view
     }
 }
