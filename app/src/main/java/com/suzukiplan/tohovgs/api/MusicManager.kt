@@ -4,7 +4,6 @@
  */
 package com.suzukiplan.tohovgs.api
 
-import android.annotation.SuppressLint
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
@@ -17,20 +16,7 @@ import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Albums
 import com.suzukiplan.tohovgs.model.Song
 
-class MusicManager {
-    companion object {
-        @SuppressLint("StaticFieldLeak")
-        private var instance: MusicManager? = null
-
-        fun getInstance(mainActivity: MainActivity): MusicManager? {
-            if (null == instance) {
-                instance = MusicManager()
-                instance?.load(mainActivity)
-            }
-            return instance
-        }
-    }
-
+class MusicManager(private val mainActivity: MainActivity) {
     val albums: List<Album>? get() = albumsRawData?.albums
     private var locker = Object()
     private var albumsRawData: Albums? = null
@@ -65,7 +51,7 @@ class MusicManager {
         }
     }
 
-    private fun load(mainActivity: MainActivity) {
+    fun load(): MusicManager {
         val songListInput = mainActivity.assets.open("songlist.json")
         val songListJson = String(songListInput.readBytes(), Charsets.UTF_8)
         changeMasterVolume(Settings(mainActivity).masterVolume)
@@ -75,6 +61,7 @@ class MusicManager {
                 song.parentAlbum = album
             }
         }
+        return this
     }
 
     fun changeMasterVolume(masterVolume: Int) {

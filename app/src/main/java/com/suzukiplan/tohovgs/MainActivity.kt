@@ -23,16 +23,12 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
-import com.suzukiplan.tohovgs.api.Constants
-import com.suzukiplan.tohovgs.api.Logger
-import com.suzukiplan.tohovgs.api.MusicManager
-import com.suzukiplan.tohovgs.api.Settings
+import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
-    internal var musicManager: MusicManager? = null
     private lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup
@@ -46,7 +42,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private var currentFragment: Fragment? = null
     private var currentLength = 0
     private var seekBarTouching = false
+    lateinit var musicManager: MusicManager
     lateinit var gson: Gson
+    lateinit var api: WebAPI
     private val executor = Executors.newFixedThreadPool(4)
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
 
@@ -64,6 +62,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         setContentView(R.layout.activity_main)
         settings = Settings(this)
         gson = Gson()
+        musicManager = MusicManager(this).load()
+        api = WebAPI(this)
         progress = findViewById(R.id.progress)
         adContainer = findViewById(R.id.ad_container)
         fragmentContainer = findViewById(R.id.fragment_container)
@@ -85,12 +85,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 seekBarTouching = false
-                musicManager?.seek(seekBar?.progress)
+                musicManager.seek(seekBar?.progress)
             }
         })
         resetSeekBar()
-        musicManager = MusicManager.getInstance(this)
-        musicManager?.initialize()
+        musicManager.initialize()
         footers.clear()
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         footers[Page.Settings] = findViewById(R.id.footer_settings)
         footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
-            musicManager?.infinity = checked
+            musicManager.infinity = checked
         }
         currentPage = Page.NotSelected
         movePage(settings.pageName)
@@ -216,8 +215,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onBackPressed() = finish()
 
     override fun finish() {
-        musicManager?.stop()
-        musicManager?.terminate()
+        musicManager.stop()
+        musicManager.terminate()
         super.finish()
     }
 
@@ -225,9 +224,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         AskDialog.start(this, getString(R.string.ask_lock, song.name), object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (isYes) {
-                    val previousStatus = musicManager?.isExistLockedSong(settings)
+                    val previousStatus = musicManager.isExistLockedSong(settings)
                     settings.lock(song)
-                    if (false == previousStatus) {
+                    if (!previousStatus) {
                         refreshAlbumPagerFragment()
                     }
                     done()
@@ -294,11 +293,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 ad.show(this@MainActivity) { rewardItem ->
                     Logger.d("RewardItem: type=${rewardItem.type}, amount=${rewardItem.amount}")
                     if (null == album) {
-                        musicManager?.albums?.forEach { settings.unlock(it) }
+                        musicManager.albums?.forEach { settings.unlock(it) }
                         refreshAlbumPagerFragment()
                     } else {
                         settings.unlock(album)
-                        if (false == musicManager?.isExistLockedSong(settings)) {
+                        if (!musicManager.isExistLockedSong(settings)) {
                             refreshAlbumPagerFragment()
                         }
                     }
@@ -317,12 +316,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         params.putString(FirebaseAnalytics.Param.ITEM_ID, song.mml)
         params.putString(FirebaseAnalytics.Param.ITEM_NAME, song.name)
         FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, params)
-        if (true == musicManager?.isPlaying(album, song)) {
+        if (musicManager.isPlaying(album, song)) {
             Logger.d("stop ${song.name}")
             stopSong()
         } else {
             Logger.d("play ${song.name}")
-            musicManager?.play(this, album, song, { length, time ->
+            musicManager.play(this, album, song, { length, time ->
                 if (!seekBarTouching) {
                     runOnUiThread {
                         val left = length - time
@@ -341,15 +340,15 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     override fun onPause() {
-        musicManager?.isBackground = true
-        musicManager?.startJob(this)
+        musicManager.isBackground = true
+        musicManager.startJob(this)
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        musicManager?.stopJob(this)
-        musicManager?.isBackground = false
+        musicManager.stopJob(this)
+        musicManager.isBackground = false
     }
 
     private fun startProgress() {
@@ -365,7 +364,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun stopSong() {
-        musicManager?.stop()
+        musicManager.stop()
         resetSeekBar()
     }
 

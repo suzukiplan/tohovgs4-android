@@ -50,6 +50,8 @@ android {
         buildConfigField("String", "ADS_ID_REWARD", "\"${ADS_ID_REWARD}\"")
         def ADS_ID_INTERSTITIAL = properties.getProperty("ads_id_interstitial")
         buildConfigField("String", "ADS_ID_INTERSTITIAL", "\"${ADS_ID_INTERSTITIAL}\"")
+        def API_SERVER_BASE_URI = properties.getProperty("api_server_base_uri")
+        buildConfigField("String", "API_SERVER_BASE_URI", "\"${API_SERVER_BASE_URI}\"")
     }
 
     buildTypes {
@@ -74,13 +76,14 @@ android {
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.google.android.gms:play-services-ads:20.5.0'
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-perf-ktx'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 }

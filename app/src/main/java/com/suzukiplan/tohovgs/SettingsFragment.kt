@@ -13,13 +13,17 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.suzukiplan.tohovgs.api.MusicManager
 import com.suzukiplan.tohovgs.api.Settings
+import com.suzukiplan.tohovgs.api.WebAPI
 
 class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     companion object {
         fun create() = SettingsFragment()
     }
 
+    private lateinit var musicManager: MusicManager
+    private lateinit var api: WebAPI
     private lateinit var settings: Settings
     private lateinit var masterVolumeText: TextView
 
@@ -29,8 +33,12 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        val mainActivity = activity as MainActivity
+        musicManager = mainActivity.musicManager!!
+        api = mainActivity.api
         settings = Settings(context)
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        view.findViewById<View>(R.id.download).setOnClickListener { updateSongList() }
         masterVolumeText = view.findViewById(R.id.master_volume_text)
         val masterVolume = settings.masterVolume
         masterVolumeText.text = getString(R.string.master_volume, masterVolume)
@@ -58,17 +66,20 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         masterVolumeText.text = getString(R.string.master_volume, progress)
-        (activity as? MainActivity)?.musicManager?.changeMasterVolume(progress)
+        musicManager.changeMasterVolume(progress)
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        val album = (activity as? MainActivity)?.musicManager?.albums?.get(0) ?: return
+        val album = musicManager.albums?.get(0) ?: return
         val song = album.songs[0]
-        (activity as? MainActivity)?.musicManager?.play(context, album, song)
+        musicManager.play(context, album, song)
     }
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        (activity as? MainActivity)?.musicManager?.stop()
+        musicManager.stop()
         settings.masterVolume = seekBar?.progress ?: return
+    }
+
+    private fun updateSongList() {
     }
 }

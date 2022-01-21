@@ -14,7 +14,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.suzukiplan.tohovgs.api.MusicManager
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
@@ -100,8 +99,7 @@ class SongListFragment : Fragment() {
         when (requireArguments().getString("mode")) {
             "album" -> {
                 val albumId = requireArguments().getString("album_id")
-                val album =
-                    MusicManager.getInstance(mainActivity)?.albums?.find { it.id == albumId }!!
+                val album = mainActivity.musicManager.albums?.find { it.id == albumId }!!
                 album.songs.forEach { songs.add(it) }
             }
             "sequential" -> {
@@ -168,7 +166,7 @@ class SongListFragment : Fragment() {
     }
 
     private fun addAvailableSongs(list: ArrayList<Song>) {
-        MusicManager.getInstance(mainActivity)?.albums?.forEach { album ->
+        mainActivity.musicManager.albums?.forEach { album ->
             album.songs.forEach { song ->
                 if (!settings.isLocked(song)) {
                     list.add(song)
@@ -274,7 +272,7 @@ class SongListFragment : Fragment() {
         var nextIndex = songs.indexOf(song)
         val previousIndex = nextIndex
         var nextSong: Song
-        if (true == MusicManager.getInstance(mainActivity)?.infinity) {
+        if (mainActivity.musicManager.infinity) {
             nextSong = song
         } else {
             do {
