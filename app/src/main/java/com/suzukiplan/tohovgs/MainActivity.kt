@@ -32,7 +32,7 @@ import com.suzukiplan.tohovgs.model.Song
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
-    private var musicManager: MusicManager? = null
+    internal var musicManager: MusicManager? = null
     private lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup

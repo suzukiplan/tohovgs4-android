@@ -51,6 +51,7 @@ class MusicManager {
     var infinity = false
     var isBackground = false
     private var startedContext: Context? = null
+    private var masterVolume = 100
 
     fun isExistLockedSong(settings: Settings): Boolean {
         return null != albums?.find { album ->
@@ -67,12 +68,18 @@ class MusicManager {
     private fun load(mainActivity: MainActivity) {
         val songListInput = mainActivity.assets.open("songlist.json")
         val songListJson = String(songListInput.readBytes(), Charsets.UTF_8)
+        changeMasterVolume(Settings(mainActivity).masterVolume)
         albumsRawData = mainActivity.gson.fromJson(songListJson, Albums::class.java)
         albumsRawData?.albums?.forEach { album ->
             album.songs.forEach { song ->
                 song.parentAlbum = album
             }
         }
+    }
+
+    fun changeMasterVolume(masterVolume: Int) {
+        this.masterVolume = masterVolume
+        audioTrack?.setVolume(masterVolume / 100.0f)
     }
 
     fun initialize() {
@@ -113,12 +120,14 @@ class MusicManager {
         return playingAlbum == album && playingSong == song
     }
 
+    fun play(context: Context?, album: Album?, song: Song?) = play(context, album, song, null, null)
+
     fun play(
         context: Context?,
         album: Album?,
         song: Song?,
-        onSeek: (length: Int, time: Int) -> Unit,
-        onPlayEnded: () -> Unit
+        onSeek: ((length: Int, time: Int) -> Unit)?,
+        onPlayEnded: (() -> Unit)?
     ) {
         album ?: return
         song ?: return
@@ -142,8 +151,8 @@ class MusicManager {
     }
 
     private fun createAudioTrack(
-        onSeek: (length: Int, time: Int) -> Unit,
-        onPlayEnded: () -> Unit
+        onSeek: ((length: Int, time: Int) -> Unit)?,
+        onPlayEnded: (() -> Unit)?
     ) {
         audioTrack?.release()
         val attributes = AudioAttributes.Builder()
@@ -162,6 +171,7 @@ class MusicManager {
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
         audioTrack?.positionNotificationPeriod = basicBufferSize / 2
+        audioTrack?.setVolume(masterVolume / 100f)
         audioTrack?.setPlaybackPositionUpdateListener(object :
             AudioTrack.OnPlaybackPositionUpdateListener {
             override fun onMarkerReached(audioTrack: AudioTrack?) {
@@ -179,7 +189,7 @@ class MusicManager {
                     timeLength = JNI.getTimeLength(vgsContext) / 22050
                     time = JNI.getTime(vgsContext) / 22050
                 }
-                onSeek.invoke(timeLength, time)
+                onSeek?.invoke(timeLength, time)
                 val loop = playingSong?.loop ?: 0
                 if (!infinity && !fadeoutExecuted && 0 < loop) {
                     val loopCount: Int
@@ -198,7 +208,7 @@ class MusicManager {
                     decode(decodeAudioBuffers[decodeAudioBufferLatch])
                 } else {
                     stop()
-                    onPlayEnded.invoke()
+                    onPlayEnded?.invoke()
                 }
             }
         })
