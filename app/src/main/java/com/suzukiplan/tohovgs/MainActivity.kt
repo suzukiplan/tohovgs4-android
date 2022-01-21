@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         Sequential(Pair(2, "all")),
         Shuffle(Pair(3, "shuffle")),
         Retro(Pair(4, "retro")),
+        Settings(Pair(5, "settings")),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
         footers[Page.Shuffle] = findViewById(R.id.footer_shuffle)
         footers[Page.Retro] = findViewById(R.id.footer_retro_ui)
+        footers[Page.Settings] = findViewById(R.id.footer_settings)
         footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager?.infinity = checked
@@ -152,7 +154,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun movePage(page: Page) {
         if (currentPage != Page.NotSelected && page == currentPage) return
         stopSong()
-        seekBarContainer.visibility = if (page == Page.Retro) {
+        seekBarContainer.visibility = if (page == Page.Retro || page == Page.Settings) {
             View.GONE
         } else {
             View.VISIBLE
@@ -163,6 +165,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             Page.Sequential -> SongListFragment.createAsSequential()
             Page.Shuffle -> SongListFragment.createAsShuffle()
             Page.Retro -> RetroFragment.create()
+            Page.Settings -> SettingsFragment.create()
         }
         if (fragment is SongListFragment) fragment.listener = this
         val transaction = supportFragmentManager.beginTransaction()

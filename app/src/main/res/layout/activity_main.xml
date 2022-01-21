@@ -45,7 +45,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="8dp"
                 android:text="00:00"
-                android:textColor="?attr/colorControlNormal"
+                android:textColor="@color/black"
                 android:textSize="12sp"
                 tools:ignore="HardcodedText" />
 
@@ -67,7 +67,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="8dp"
                 android:text="00:00"
-                android:textColor="?attr/colorControlNormal"
+                android:textColor="@color/black"
                 android:textSize="12sp"
                 tools:ignore="HardcodedText" />
 
@@ -88,7 +88,7 @@
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:background="@color/grey"
             android:orientation="horizontal">
 
