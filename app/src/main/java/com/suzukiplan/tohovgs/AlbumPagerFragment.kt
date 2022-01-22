@@ -49,7 +49,7 @@ class AlbumPagerFragment : Fragment() {
         hideUnlockAll = view.findViewById(R.id.unlock_all_hide)
         tabLayout = view.findViewById(R.id.tab)
         pager = view.findViewById(R.id.pager)
-        items = mainActivity.musicManager.albums!!
+        items = mainActivity.musicManager.albums
         pager.adapter = Adapter(mainActivity)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {

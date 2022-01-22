@@ -13,16 +13,16 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.suzukiplan.tohovgs.api.MusicManager
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.api.WebAPI
+import com.suzukiplan.tohovgs.model.Song
 
 class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     companion object {
         fun create() = SettingsFragment()
     }
 
-    private lateinit var musicManager: MusicManager
+    private lateinit var mainActivity: MainActivity
     private lateinit var api: WebAPI
     private lateinit var settings: Settings
     private lateinit var masterVolumeText: TextView
@@ -33,8 +33,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        val mainActivity = activity as MainActivity
-        musicManager = mainActivity.musicManager!!
+        mainActivity = activity as MainActivity
         api = mainActivity.api
         settings = Settings(context)
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -66,20 +65,74 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         masterVolumeText.text = getString(R.string.master_volume, progress)
-        musicManager.changeMasterVolume(progress)
+        mainActivity.musicManager.changeMasterVolume(progress)
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        val album = musicManager.albums?.get(0) ?: return
+        val album = mainActivity.musicManager.albums[0]
         val song = album.songs[0]
-        musicManager.play(context, album, song)
+        mainActivity.musicManager.play(context, album, song)
     }
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        musicManager.stop()
+        mainActivity.musicManager.stop()
         settings.masterVolume = seekBar?.progress ?: return
     }
 
     private fun updateSongList() {
+        mainActivity.startProgress()
+        mainActivity.api.check(mainActivity.musicManager.version) { updatable ->
+            Thread.sleep(1000L)
+            if (null == updatable) {
+                msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
+                return@check
+            }
+            if (!updatable) {
+                msg(getString(R.string.up_to_date))
+                return@check
+            }
+            mainActivity.api.downloadSongList { songList ->
+                if (null == songList) {
+                    msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
+                    return@downloadSongList
+                }
+                val downloadSongs = ArrayList<Song>()
+                songList.albums.forEach { album ->
+                    album.songs.forEach { song ->
+                        if (!song.checkExistMML(context)) {
+                            downloadSongs.add(song)
+                        }
+                    }
+                }
+                var error = false
+                downloadSongs.forEach { song ->
+                    val mml = mainActivity.api.downloadMML(song)
+                    if (null == mml) {
+                        error = true
+                    } else {
+                        song.getDownloadFile(context).writeText(mml, Charsets.UTF_8)
+                    }
+                }
+                if (error) {
+                    msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
+                } else {
+                    mainActivity.musicManager.updateSongList(songList)
+                    if (downloadSongs.size < 1) {
+                        msg(getString(R.string.update_list_only))
+                    } else {
+                        mainActivity.runOnUiThread {
+                            mainActivity.showAddedSongs(downloadSongs)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun msg(message: String) {
+        mainActivity.runOnUiThread {
+            mainActivity.endProgress()
+            MessageDialog.start(mainActivity, message)
+        }
     }
 }

@@ -99,7 +99,7 @@ class SongListFragment : Fragment() {
         when (requireArguments().getString("mode")) {
             "album" -> {
                 val albumId = requireArguments().getString("album_id")
-                val album = mainActivity.musicManager.albums?.find { it.id == albumId }!!
+                val album = mainActivity.musicManager.albums.find { it.id == albumId }!!
                 album.songs.forEach { songs.add(it) }
             }
             "sequential" -> {
@@ -166,7 +166,7 @@ class SongListFragment : Fragment() {
     }
 
     private fun addAvailableSongs(list: ArrayList<Song>) {
-        mainActivity.musicManager.albums?.forEach { album ->
+        mainActivity.musicManager.albums.forEach { album ->
             album.songs.forEach { song ->
                 if (!settings.isLocked(song)) {
                     list.add(song)

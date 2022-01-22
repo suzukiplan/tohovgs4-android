@@ -184,6 +184,11 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+    <FrameLayout
+        android:id="@+id/modal_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <RelativeLayout
         android:id="@+id/progress"
         android:layout_width="match_parent"

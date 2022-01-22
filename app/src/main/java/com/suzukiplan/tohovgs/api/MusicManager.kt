@@ -13,13 +13,15 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import com.suzukiplan.tohovgs.MainActivity
 import com.suzukiplan.tohovgs.model.Album
-import com.suzukiplan.tohovgs.model.Albums
 import com.suzukiplan.tohovgs.model.Song
+import com.suzukiplan.tohovgs.model.SongList
+import java.io.File
 
 class MusicManager(private val mainActivity: MainActivity) {
-    val albums: List<Album>? get() = albumsRawData?.albums
+    val version: String get() = songList.version
+    val albums: List<Album> get() = songList.albums
     private var locker = Object()
-    private var albumsRawData: Albums? = null
+    private lateinit var songList: SongList
     private var vgsContext = 0L
     private var playingAlbum: Album? = null
     private var playingSong: Song? = null
@@ -38,25 +40,54 @@ class MusicManager(private val mainActivity: MainActivity) {
     var isBackground = false
     private var startedContext: Context? = null
     private var masterVolume = 100
+    private val downloadSongListFile: File get() = File("${mainActivity.filesDir}/songlist.json")
 
     fun isExistLockedSong(settings: Settings): Boolean {
-        return null != albums?.find { album ->
+        return null != albums.find { album ->
             null != album.songs.find { settings.isLocked(it) }
         }
     }
 
     fun isExistUnlockedSong(settings: Settings): Boolean {
-        return null != albums?.find { album ->
+        return null != albums.find { album ->
             null != album.songs.find { !settings.isLocked(it) }
         }
     }
 
+    fun updateSongList(songList: SongList) {
+        val json = mainActivity.gson.toJson(songList)
+        downloadSongListFile.writeText(json, Charsets.UTF_8)
+        mainActivity.musicManager = load()
+    }
+
     fun load(): MusicManager {
-        val songListInput = mainActivity.assets.open("songlist.json")
-        val songListJson = String(songListInput.readBytes(), Charsets.UTF_8)
         changeMasterVolume(Settings(mainActivity).masterVolume)
-        albumsRawData = mainActivity.gson.fromJson(songListJson, Albums::class.java)
-        albumsRawData?.albums?.forEach { album ->
+        val assetSongListInput = mainActivity.assets.open("songlist.json")
+        val assetSongListJson = String(assetSongListInput.readBytes(), Charsets.UTF_8)
+        val assetSongList = mainActivity.gson.fromJson(assetSongListJson, SongList::class.java)
+        val downloadSongListJson = if (downloadSongListFile.exists()) {
+            downloadSongListFile.readText(Charsets.UTF_8)
+        } else null
+        val downloadSongList = if (null != downloadSongListJson) {
+            mainActivity.gson.fromJson(downloadSongListJson, SongList::class.java)
+        } else {
+            null
+        }
+        songList = when {
+            null == downloadSongList -> {
+                Logger.d("use preset songlist.json ${assetSongList.version} (not downloaded)")
+                assetSongList
+            }
+            assetSongList.version < downloadSongList.version -> {
+                Logger.d("use downloaded songlist.json ${downloadSongList.version}")
+                downloadSongList
+            }
+            else -> {
+                Logger.d("use preset songlist.json ${assetSongList.version} (newer than downloaded)")
+                assetSongList
+            }
+        }
+        songList.albums.forEach { album ->
             album.songs.forEach { song ->
                 song.parentAlbum = album
             }
@@ -86,7 +117,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     private fun find(album: Album?, song: Song?): Song? {
         album ?: return null
         song ?: return null
-        albumsRawData?.albums?.find { it.id == album.id } ?: return null
+        songList.albums.find { it.id == album.id } ?: return null
         return album.songs.find { it.mml == song.mml }
     }
 
@@ -212,7 +243,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     private fun jobIdOfSong(song: Song?): Int {
-        val albumIndex = albums?.indexOf(song?.parentAlbum) ?: 0
+        val albumIndex = albums.indexOf(song?.parentAlbum)
         val songIndex = song?.parentAlbum?.songs?.indexOf(song) ?: 0
         return (albumIndex + 1) * 1000 + songIndex + 1
     }

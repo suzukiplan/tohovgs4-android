@@ -26,7 +26,9 @@ import com.google.gson.Gson
 import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
+import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var settings: Settings
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     lateinit var musicManager: MusicManager
     lateinit var gson: Gson
     lateinit var api: WebAPI
-    private val executor = Executors.newFixedThreadPool(4)
+    private val executor = Executors.newFixedThreadPool(8)
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
 
     enum class Page(val value: Pair<Int, String>) {
@@ -102,7 +104,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         }
         currentPage = Page.NotSelected
         movePage(settings.pageName)
-
+        val adConfig = RequestConfiguration.Builder()
+            .setTestDeviceIds(listOf(BuildConfig.TEST_DEVICE_ID))
+            .build()
+        MobileAds.setRequestConfiguration(adConfig)
         MobileAds.initialize(this) {
             Logger.d("MobileAds initialized: $it")
             adContainer.removeAllViews()
@@ -293,7 +298,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 ad.show(this@MainActivity) { rewardItem ->
                     Logger.d("RewardItem: type=${rewardItem.type}, amount=${rewardItem.amount}")
                     if (null == album) {
-                        musicManager.albums?.forEach { settings.unlock(it) }
+                        musicManager.albums.forEach { settings.unlock(it) }
                         refreshAlbumPagerFragment()
                     } else {
                         settings.unlock(album)
@@ -351,13 +356,13 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         musicManager.isBackground = false
     }
 
-    private fun startProgress() {
+    fun startProgress() {
         runOnUiThread {
             progress.visibility = View.VISIBLE
         }
     }
 
-    private fun endProgress() {
+    fun endProgress() {
         runOnUiThread {
             progress.visibility = View.GONE
         }
@@ -384,5 +389,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     interstitialAd.show(this@MainActivity)
                 }
             })
+    }
+
+    fun showAddedSongs(songs: List<Song>) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.modal_fragment_container, AddedSongsFragment.create(this, songs))
+            .commit()
     }
 }

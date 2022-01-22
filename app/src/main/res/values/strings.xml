@@ -26,4 +26,9 @@
     <string name="support">Support</string>
     <string name="support_twitter">Twitter: @suzukiplan</string>
     <string name="support_github">Web: suzukiplan.github.io</string>
+    <string name="communication_error">Communication with the server has failed. (status code: %d)</string>
+    <string name="up_to_date">All songs are up to date.\nThe first update information for new songs will be posted on my Twitter, so please follow me if you like.</string>
+    <string name="update_list_only">Only the song list has been updated. No new songs have been added.</string>
+    <string name="added_songs">Added Following Songs</string>
+    <string name="close">Close</string>
 </resources>

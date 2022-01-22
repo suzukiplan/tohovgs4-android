@@ -165,7 +165,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         paint.isAntiAlias = false
 
         JNI.compatCleanUp()
-        val albums = (activity as MainActivity).musicManager.albums ?: return
+        val albums = (activity as MainActivity).musicManager.albums
         val unlockedSongs = HashMap<String, List<Song>>(albums.size)
         var unlockedSongsCount = 0
         albums.forEach { album ->
