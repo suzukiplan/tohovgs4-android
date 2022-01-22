@@ -8,6 +8,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var leftTime: TextView
     private lateinit var seekBar: AppCompatSeekBar
     private lateinit var seekBarContainer: View
+    private lateinit var badge: ImageView
     private var footers = HashMap<Page, View>()
     private var currentFragment: Fragment? = null
     private var currentLength = 0
@@ -73,6 +75,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         leftTime = findViewById(R.id.left_time)
         seekBar = findViewById(R.id.seek_bar)
         seekBarContainer = findViewById(R.id.seek_bar_container)
+        badge = findViewById(R.id.badge)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -134,6 +137,18 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             adContainer.addView(adView)
             val request = AdRequest.Builder().build()
             adView.loadAd(request)
+        }
+        if (!settings.badge) {
+            api.check(musicManager.version) { updatable ->
+                runOnUiThread {
+                    badge.visibility = if (true == updatable) {
+                        settings.badge = true
+                        View.VISIBLE
+                    } else View.GONE
+                }
+            }
+        } else {
+            badge.visibility = View.VISIBLE
         }
     }
 
@@ -397,5 +412,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         supportFragmentManager.beginTransaction()
             .replace(R.id.modal_fragment_container, AddedSongsFragment.create(this, songs))
             .commit()
+    }
+
+    fun hideBadge() {
+        badge.visibility = View.GONE
+        settings.badge = false
     }
 }

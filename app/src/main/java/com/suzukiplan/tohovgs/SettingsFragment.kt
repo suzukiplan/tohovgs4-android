@@ -27,6 +27,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     private lateinit var api: WebAPI
     private lateinit var settings: Settings
     private lateinit var masterVolumeText: TextView
+    private var checked = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,6 +82,10 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     }
 
     private fun updateSongList() {
+        if (checked) {
+            msg(getString(R.string.up_to_date))
+            return
+        }
         mainActivity.startProgress()
         mainActivity.api.check(mainActivity.musicManager.version) { updatable ->
             Thread.sleep(1000L)
@@ -90,6 +95,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             }
             if (!updatable) {
                 msg(getString(R.string.up_to_date))
+                checked = true
                 return@check
             }
             mainActivity.api.downloadSongList { songList ->
@@ -130,6 +136,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                             )
                         } else {
                             mainActivity.runOnUiThread {
+                                mainActivity.hideBadge()
                                 mainActivity.musicManager.updateSongList(songList)
                                 if (downloadSongs.size < 1) {
                                     msg(getString(R.string.update_list_only))

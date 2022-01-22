@@ -61,6 +61,10 @@ class Settings(context: Context?) {
         get() = preferences?.getInt("master_volume", 100) ?: 100
         set(value) = save { editor -> editor.putInt("master_volume", value) }
 
+    var badge: Boolean
+        get() = preferences?.getBoolean("badge", false) ?: false
+        set(value) = save { editor -> editor.putBoolean("badge", value) }
+
     var compatCurrentTitleId: Int
         get() = preferences?.getInt("compat_current_title_id", 0x0010) ?: 0x0010
         set(value) = save { editor -> editor.putInt("compat_current_title_id", value) }
