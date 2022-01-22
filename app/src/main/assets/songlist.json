@@ -1,5 +1,5 @@
 {
-  "version": "2022.01.08",
+  "version": "2022.01.09",
   "albums": [
     {
       "albumId": "th04",
@@ -809,6 +809,44 @@
           "name": "プレイヤーズスコア",
           "english": "Player's Score",
           "french": "Score du joueur"
+        }
+      ]
+    },
+    {
+      "albumId": "th11",
+      "name": "東方地霊殿",
+      "formalName": "東方地霊殿　〜 Subterranean Animism.",
+      "copyright": "(c)2008 上海アリス幻樂団",
+      "compatColor": 196,
+      "defaultLocked": true,
+      "songs": [
+        {
+          "mml": "TH11-02",
+          "loop": 1,
+          "name": "暗闇の風穴",
+          "english": "The Wind Tunnel of Darkness",
+          "french": "La soufflerie des ténèbres"
+        },
+        {
+          "mml": "TH11-05",
+          "loop": 1,
+          "name": "緑眼のジェラシー",
+          "english": "Green-Eyed Jealousy",
+          "french": "Jalousie aux yeux verts"
+        },
+        {
+          "mml": "TH11-09",
+          "loop": 1,
+          "name": "少女さとり　〜 3rd eye",
+          "english": "Satori Maiden　〜 3rd eye",
+          "french": "Satori Maiden　〜 3ème oeil"
+        },
+        {
+          "mml": "TH11-11",
+          "loop": 1,
+          "name": "死体旅行　〜 Be of good cheer!",
+          "english": "Corpse Voyage　〜 Be of good cheer!",
+          "french": "Voyage du cadavre　〜 Soyez de bonne humeur !"
         }
       ]
     }
