@@ -15,9 +15,15 @@ data class Song(
     @SerializedName("loop") val loop: Int,
     @SerializedName("parentAlbumId") var parentAlbumId: String?,
     var parentAlbum: Album? = null,
-    var playing: Boolean = false,
+    var status: Status? = null,
     var needReload: Boolean = false,
 ) {
+    enum class Status {
+        Stop,
+        Play,
+        Pause,
+    }
+
     val nameE: String get() = english ?: name
 
     fun getDownloadFile(context: Context?) = File("${context?.filesDir?.path}/$mml.mml")

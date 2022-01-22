@@ -127,9 +127,26 @@ class MusicManager(private val mainActivity: MainActivity) {
         }
         audioTrack?.release()
         playingSong?.needReload = true
-        find(playingAlbum, playingSong)?.playing = false
+        find(playingAlbum, playingSong)?.status = Song.Status.Stop
         playingAlbum = null
         playingSong = null
+    }
+
+    fun pause(
+        progress: Int,
+        onSeek: ((length: Int, time: Int) -> Unit)?,
+        onPlayEnded: (() -> Unit)?
+    ) {
+        val song = playingSong ?: return
+        val album = playingAlbum ?: return
+        if (song.status == Song.Status.Play) {
+            song.status = Song.Status.Pause
+            song.needReload = true
+            audioTrack?.release()
+            audioTrack = null
+        } else {
+            play(startedContext, album, song, onSeek, onPlayEnded, progress)
+        }
     }
 
     fun isPlaying(album: Album?, song: Song?): Boolean {
@@ -138,27 +155,31 @@ class MusicManager(private val mainActivity: MainActivity) {
         return playingAlbum == album && playingSong == song
     }
 
-    fun play(context: Context?, album: Album?, song: Song?) = play(context, album, song, null, null)
+    fun play(context: Context?, album: Album?, song: Song?) =
+        play(context, album, song, null, null, 0)
 
     fun play(
         context: Context?,
         album: Album?,
         song: Song?,
         onSeek: ((length: Int, time: Int) -> Unit)?,
-        onPlayEnded: (() -> Unit)?
+        onPlayEnded: (() -> Unit)?,
+        seek: Int
     ) {
         album ?: return
         song ?: return
         stop()
-        find(album, song)?.playing = true
+        find(album, song)?.status = Song.Status.Play
         playingAlbum = album
         playingSong = song
         playingSong?.needReload = true
         decodeFirst = true
         fadeoutExecuted = false
         decodeSize = 0
-        synchronized(locker) { JNI.load(vgsContext, song.readMML(context)) }
-        createAudioTrack(onSeek, onPlayEnded)
+        synchronized(locker) {
+            JNI.load(vgsContext, song.readMML(context))
+        }
+        createAudioTrack(seek, onSeek, onPlayEnded)
         if (isBackground) startJob(context)
         startedContext = context
     }
@@ -169,6 +190,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     private fun createAudioTrack(
+        seek: Int,
         onSeek: ((length: Int, time: Int) -> Unit)?,
         onPlayEnded: (() -> Unit)?
     ) {
@@ -230,6 +252,7 @@ class MusicManager(private val mainActivity: MainActivity) {
                 }
             }
         })
+        JNI.seek(vgsContext, seek * 22050)
         decode(decodeAudioBufferFirst)
         audioTrack?.write(decodeAudioBufferFirst, 0, decodeAudioBufferFirst.size)
         audioTrack?.play()

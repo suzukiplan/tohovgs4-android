@@ -10,7 +10,9 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -315,7 +317,7 @@ class SongListFragment : Fragment() {
     inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val root: View = itemView.findViewById(R.id.root)
         private val lock: View = itemView.findViewById(R.id.lock)
-        private val play: View = itemView.findViewById(R.id.play)
+        private val play: ImageView = itemView.findViewById(R.id.play)
         private val songTitle: TextView = itemView.findViewById(R.id.song_title)
         private val englishTitle: TextView = itemView.findViewById(R.id.english_title)
         private val songIndex: TextView = itemView.findViewById(R.id.song_index)
@@ -342,10 +344,18 @@ class SongListFragment : Fragment() {
                 }
             } else {
                 lock.visibility = View.GONE
-                play.visibility = if (song.playing) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
+                play.visibility = when (song.status) {
+                    Song.Status.Play -> {
+                        play.setImageResource(R.drawable.ic_baseline_play_circle_filled_24)
+                        View.VISIBLE
+                    }
+                    Song.Status.Pause -> {
+                        play.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                        View.VISIBLE
+                    }
+                    null, Song.Status.Stop -> {
+                        View.GONE
+                    }
                 }
                 root.setBackgroundResource(R.drawable.card)
                 root.setOnClickListener {

@@ -22,7 +22,6 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
@@ -333,31 +332,32 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     private fun duration(sec: Int) = String.format("%02d:%02d", sec / 60, sec % 60)
 
+    private fun seek(length: Int, time: Int) {
+        if (!seekBarTouching) {
+            runOnUiThread {
+                val left = length - time
+                seekBar.max = length
+                seekBar.progress = time
+                playTime.text = duration(time)
+                leftTime.text = duration(left)
+                currentLength = length
+            }
+        }
+    }
+
     override fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit) {
-        val params = Bundle()
-        params.putString(FirebaseAnalytics.Param.ITEM_ID, song.mml)
-        params.putString(FirebaseAnalytics.Param.ITEM_NAME, song.name)
-        FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, params)
         if (musicManager.isPlaying(album, song)) {
-            Logger.d("stop ${song.name}")
-            stopSong()
-        } else {
-            Logger.d("play ${song.name}")
-            musicManager.play(this, album, song, { length, time ->
-                if (!seekBarTouching) {
-                    runOnUiThread {
-                        val left = length - time
-                        seekBar.max = length
-                        seekBar.progress = time
-                        playTime.text = duration(time)
-                        leftTime.text = duration(left)
-                        currentLength = length
-                    }
-                }
-            }, {
+            Logger.d("pause/resume ${song.name}")
+            musicManager.pause(seekBar.progress, { length, time -> seek(length, time) }) {
                 resetSeekBar()
                 onPlayEnded.invoke()
-            })
+            }
+        } else {
+            Logger.d("play ${song.name}")
+            musicManager.play(this, album, song, { length, time -> seek(length, time) }, {
+                resetSeekBar()
+                onPlayEnded.invoke()
+            }, 0)
         }
     }
 
