@@ -275,6 +275,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 Logger.e("Rewarded Ad load failed: $error")
                 endProgress()
                 MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
+                musicManager.albums.forEach { settings.unlock(it) }
+                refreshAlbumPagerFragment()
                 done?.invoke(false)
             }
 

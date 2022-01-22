@@ -246,7 +246,12 @@ void vge_bplay(const char *mmlPath) {
     int mmlSize = 0;
     int readSize;
     memset(mmlDataBuffer, 0, sizeof(mmlDataBuffer));
-    FILE *fp = android_fopen(mmlPath, "rb");
+    FILE *fp = NULL;
+    if (0 == strncmp(mmlPath, "mml/", 4)) {
+        fp = android_fopen(mmlPath, "rb");
+    } else {
+        fp = fopen(mmlPath, "rb");
+    }
     if (!fp) return;
     do {
         readSize = fread(&mmlDataBuffer[mmlSize], 1, 1024, fp);

@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.api.WebAPI
 import com.suzukiplan.tohovgs.model.Song
@@ -96,32 +97,47 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                     msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
                     return@downloadSongList
                 }
+                Logger.d("check need download mml files...")
                 val downloadSongs = ArrayList<Song>()
-                songList.albums.forEach { album ->
-                    album.songs.forEach { song ->
-                        if (!song.checkExistMML(context)) {
-                            downloadSongs.add(song)
+                mainActivity.runOnUiThread {
+                    songList.albums.forEach { album ->
+                        album.songs.forEach { song ->
+                            Logger.d("check ${song.mml}.mml")
+                            if (!song.checkExistMML(requireContext())) {
+                                Logger.d("need download: ${song.name}")
+                                song.parentAlbumId = album.id
+                                downloadSongs.add(song)
+                            }
                         }
                     }
-                }
-                var error = false
-                downloadSongs.forEach { song ->
-                    val mml = mainActivity.api.downloadMML(song)
-                    if (null == mml) {
-                        error = true
-                    } else {
-                        song.getDownloadFile(context).writeText(mml, Charsets.UTF_8)
-                    }
-                }
-                if (error) {
-                    msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
-                } else {
-                    mainActivity.musicManager.updateSongList(songList)
-                    if (downloadSongs.size < 1) {
-                        msg(getString(R.string.update_list_only))
-                    } else {
-                        mainActivity.runOnUiThread {
-                            mainActivity.showAddedSongs(downloadSongs)
+                    mainActivity.executeAsync {
+                        Logger.d("need download files: ${downloadSongs.size}")
+                        var error = false
+                        downloadSongs.forEach { song ->
+                            val mml = mainActivity.api.downloadMML(song)
+                            if (null == mml) {
+                                error = true
+                            } else {
+                                song.getDownloadFile(context).writeText(mml, Charsets.UTF_8)
+                            }
+                        }
+                        if (error) {
+                            msg(
+                                getString(
+                                    R.string.communication_error,
+                                    mainActivity.api.lastStatusCode
+                                )
+                            )
+                        } else {
+                            mainActivity.runOnUiThread {
+                                mainActivity.musicManager.updateSongList(songList)
+                                if (downloadSongs.size < 1) {
+                                    msg(getString(R.string.update_list_only))
+                                } else {
+                                    mainActivity.endProgress()
+                                    mainActivity.showAddedSongs(downloadSongs)
+                                }
+                            }
                         }
                     }
                 }

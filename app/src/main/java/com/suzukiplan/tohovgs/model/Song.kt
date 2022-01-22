@@ -13,6 +13,7 @@ data class Song(
     @SerializedName("english") val english: String?,
     @SerializedName("mml") val mml: String,
     @SerializedName("loop") val loop: Int,
+    @SerializedName("parentAlbumId") var parentAlbumId: String?,
     var parentAlbum: Album? = null,
     var playing: Boolean = false,
     var needReload: Boolean = false,
@@ -22,19 +23,38 @@ data class Song(
     fun getDownloadFile(context: Context?) = File("${context?.filesDir?.path}/$mml.mml")
 
     fun checkExistMML(context: Context?): Boolean {
-        val assetInputStream = context?.assets?.open("mml/${mml}.mml")
-        if (null != assetInputStream) {
-            assetInputStream.close()
-            return true
+        try {
+            val assetInputStream = context?.assets?.open("mml/${mml}.mml")
+            if (null != assetInputStream) {
+                assetInputStream.close()
+                return true
+            }
+        } catch (e: Exception) {
         }
-        val file = getDownloadFile(context)
-        return file.exists() && file.isFile && 0L < file.length()
+        return getDownloadFile(context).exists()
     }
 
     fun readMML(context: Context?): ByteArray? {
-        val inputStream = context?.assets?.open("mml/${mml}.mml") ?: return null
-        val result = inputStream.readBytes()
-        inputStream.close()
-        return result
+        try {
+            val inputStream = context?.assets?.open("mml/${mml}.mml") ?: return null
+            val result = inputStream.readBytes()
+            inputStream.close()
+            return result
+        } catch (e: java.lang.Exception) {
+        }
+        val file = getDownloadFile(context) ?: return null
+        return file.readBytes()
+    }
+
+    fun pathMML(context: Context?): String {
+        try {
+            val inputStream = context?.assets?.open("mml/${mml}.mml")
+            if (null != inputStream) {
+                inputStream.close()
+                return "mml/$mml.mml"
+            }
+        } catch (e: java.lang.Exception) {
+        }
+        return getDownloadFile(context).path
     }
 }

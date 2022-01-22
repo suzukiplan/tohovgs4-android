@@ -33,12 +33,16 @@ class AddedSongsFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         this.inflater = inflater
-        val view = inflater.inflate(R.layout.fragment_album_pager, container, false)
+        val view = inflater.inflate(R.layout.fragment_added_songs, container, false)
         val listType: Type = object : TypeToken<List<Song>>() {}.type
         songs = (activity as MainActivity).gson.fromJson(
             requireArguments().getString("songs"),
             listType
         )
+        val albums = (activity as MainActivity).musicManager.albums
+        songs.forEach { song ->
+            song.parentAlbum = albums.find { it.id == song.parentAlbumId }
+        }
         val list = view.findViewById<RecyclerView>(R.id.list)
         list.layoutManager = LinearLayoutManager(
             requireContext(), LinearLayoutManager.VERTICAL, false

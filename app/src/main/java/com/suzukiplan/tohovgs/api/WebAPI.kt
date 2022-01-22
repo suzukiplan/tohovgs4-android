@@ -25,7 +25,10 @@ class WebAPI(private val mainActivity: MainActivity) {
 
     fun downloadSongList(done: (songList: SongList?) -> Unit) = getAsync("/songlist.json") {
         if (null != it) {
-            done(mainActivity.gson.fromJson(it, SongList::class.java))
+            Logger.d("parse songlist.json...")
+            val songList = mainActivity.gson.fromJson(it, SongList::class.java)
+            Logger.d("parsed songlist.json: ${songList.version}")
+            done(songList)
         } else done(null)
     }
 

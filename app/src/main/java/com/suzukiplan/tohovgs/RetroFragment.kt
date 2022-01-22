@@ -196,7 +196,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                     songNo,
                     song.loop,
                     album.compatColor,
-                    "mml/${song.mml}.mml".toByteArray(Charsets.UTF_8),
+                    song.pathMML(context).toByteArray(Charsets.UTF_8),
                     convertToSJIS(song.name),
                     convertToSJIS(song.nameE)
                 )
