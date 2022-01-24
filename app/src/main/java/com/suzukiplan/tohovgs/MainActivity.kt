@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup
+    private lateinit var adBgImage: View
+    private lateinit var adBgText: View
     private lateinit var fragmentContainer: ViewGroup
     private lateinit var currentPage: Page
     private lateinit var playTime: TextView
@@ -69,6 +71,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         api = WebAPI(this)
         progress = findViewById(R.id.progress)
         adContainer = findViewById(R.id.ad_container)
+        adBgImage = findViewById(R.id.ad_bg_image)
+        adBgText = findViewById(R.id.ad_bg_text)
         fragmentContainer = findViewById(R.id.fragment_container)
         playTime = findViewById(R.id.play_time)
         leftTime = findViewById(R.id.left_time)
@@ -112,7 +116,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         MobileAds.setRequestConfiguration(adConfig)
         MobileAds.initialize(this) {
             Logger.d("MobileAds initialized: $it")
-            adContainer.removeAllViews()
             val adView = AdView(this)
             adView.adSize = AdSize.BANNER
             adView.adUnitId = Constants.bannerAdsId
@@ -131,6 +134,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 override fun onAdLoaded() {
                     super.onAdLoaded()
                     Logger.d("Ad loaded")
+                    adBgImage.visibility = View.GONE
+                    adBgText.visibility = View.GONE
                 }
             }
             adContainer.addView(adView)
