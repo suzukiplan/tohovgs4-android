@@ -288,10 +288,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 super.onAdFailedToLoad(error)
                 Logger.e("Rewarded Ad load failed: $error")
                 endProgress()
-                MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
-                musicManager.albums.forEach { settings.unlock(it) }
-                refreshAlbumPagerFragment()
-                done?.invoke(false)
+                if (3 == error.code) {
+                    MessageDialog.start(this@MainActivity, getString(R.string.error_ads_no_config))
+                    if (null == album) {
+                        musicManager.albums.forEach { settings.unlock(it) }
+                        refreshAlbumPagerFragment()
+                    } else {
+                        settings.unlock(album)
+                        if (!musicManager.isExistLockedSong(settings)) {
+                            refreshAlbumPagerFragment()
+                        }
+                    }
+                    done?.invoke(true)
+                } else {
+                    MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
+                    done?.invoke(false)
+                }
             }
 
             override fun onAdLoaded(ad: RewardedAd) {
