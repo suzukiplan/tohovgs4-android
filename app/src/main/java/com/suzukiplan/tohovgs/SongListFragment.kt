@@ -10,11 +10,12 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.suzukiplan.tohovgs.api.MusicManager
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
@@ -100,8 +101,7 @@ class SongListFragment : Fragment() {
         when (requireArguments().getString("mode")) {
             "album" -> {
                 val albumId = requireArguments().getString("album_id")
-                val album =
-                    MusicManager.getInstance(mainActivity)?.albums?.find { it.id == albumId }!!
+                val album = mainActivity.musicManager.albums.find { it.id == albumId }!!
                 album.songs.forEach { songs.add(it) }
             }
             "sequential" -> {
@@ -168,7 +168,7 @@ class SongListFragment : Fragment() {
     }
 
     private fun addAvailableSongs(list: ArrayList<Song>) {
-        MusicManager.getInstance(mainActivity)?.albums?.forEach { album ->
+        mainActivity.musicManager.albums.forEach { album ->
             album.songs.forEach { song ->
                 if (!settings.isLocked(song)) {
                     list.add(song)
@@ -200,8 +200,11 @@ class SongListFragment : Fragment() {
     inner class MergeAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private val positions = ArrayList<String>(0)
 
-        fun notifyItemChanged(song: Song) {
+        fun notifyItemChanged(song: Song) =
             notifyItemChanged(positions.indexOf("S#${songs.indexOf(song)}"))
+
+        fun focus(song: Song) = activity?.runOnUiThread {
+            list.smoothScrollToPosition(positions.indexOf("S#${songs.indexOf(song)}"))
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
@@ -260,6 +263,10 @@ class SongListFragment : Fragment() {
             holder.bind(songs[position])
 
         override fun getItemCount() = songs.count()
+
+        fun focus(song: Song) = activity?.runOnUiThread {
+            list.smoothScrollToPosition(songs.indexOf(song))
+        }
     }
 
     private fun onPlayEnded(song: Song) {
@@ -267,7 +274,7 @@ class SongListFragment : Fragment() {
         var nextIndex = songs.indexOf(song)
         val previousIndex = nextIndex
         var nextSong: Song
-        if (true == MusicManager.getInstance(mainActivity)?.infinity) {
+        if (mainActivity.musicManager.infinity) {
             nextSong = song
         } else {
             do {
@@ -281,12 +288,21 @@ class SongListFragment : Fragment() {
         }
         play(nextSong)
         reload(nextSong)
-        list.scrollToPosition(songs.indexOf(nextSong))
+        moveFocus(nextSong)
     }
 
     private fun play(song: Song) {
         if (isSequentialMode) settings.initialPositionSequential = songs.indexOf(song)
         listener?.onPlay(song.parentAlbum!!, song) { onPlayEnded(song) }
+        moveFocus(song)
+    }
+
+    private fun moveFocus(song: Song) {
+        if (isSequentialMode) {
+            mergeAdapter?.focus(song)
+        } else {
+            songAdapter.focus(song)
+        }
     }
 
     inner class TitleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -301,7 +317,7 @@ class SongListFragment : Fragment() {
     inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val root: View = itemView.findViewById(R.id.root)
         private val lock: View = itemView.findViewById(R.id.lock)
-        private val play: View = itemView.findViewById(R.id.play)
+        private val play: ImageView = itemView.findViewById(R.id.play)
         private val songTitle: TextView = itemView.findViewById(R.id.song_title)
         private val englishTitle: TextView = itemView.findViewById(R.id.english_title)
         private val songIndex: TextView = itemView.findViewById(R.id.song_index)
@@ -328,10 +344,18 @@ class SongListFragment : Fragment() {
                 }
             } else {
                 lock.visibility = View.GONE
-                play.visibility = if (song.playing) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
+                play.visibility = when (song.status) {
+                    Song.Status.Play -> {
+                        play.setImageResource(R.drawable.ic_baseline_play_circle_filled_24)
+                        View.VISIBLE
+                    }
+                    Song.Status.Pause -> {
+                        play.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                        View.VISIBLE
+                    }
+                    null, Song.Status.Stop -> {
+                        View.GONE
+                    }
                 }
                 root.setBackgroundResource(R.drawable.card)
                 root.setOnClickListener {

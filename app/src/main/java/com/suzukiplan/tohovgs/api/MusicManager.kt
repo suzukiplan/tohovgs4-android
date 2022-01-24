@@ -4,7 +4,6 @@
  */
 package com.suzukiplan.tohovgs.api
 
-import android.annotation.SuppressLint
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
@@ -14,26 +13,15 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import com.suzukiplan.tohovgs.MainActivity
 import com.suzukiplan.tohovgs.model.Album
-import com.suzukiplan.tohovgs.model.Albums
 import com.suzukiplan.tohovgs.model.Song
+import com.suzukiplan.tohovgs.model.SongList
+import java.io.File
 
-class MusicManager {
-    companion object {
-        @SuppressLint("StaticFieldLeak")
-        private var instance: MusicManager? = null
-
-        fun getInstance(mainActivity: MainActivity): MusicManager? {
-            if (null == instance) {
-                instance = MusicManager()
-                instance?.load(mainActivity)
-            }
-            return instance
-        }
-    }
-
-    val albums: List<Album>? get() = albumsRawData?.albums
+class MusicManager(private val mainActivity: MainActivity) {
+    val version: String get() = songList.version
+    val albums: List<Album> get() = songList.albums
     private var locker = Object()
-    private var albumsRawData: Albums? = null
+    private lateinit var songList: SongList
     private var vgsContext = 0L
     private var playingAlbum: Album? = null
     private var playingSong: Song? = null
@@ -51,28 +39,65 @@ class MusicManager {
     var infinity = false
     var isBackground = false
     private var startedContext: Context? = null
+    private var masterVolume = 100
+    private val downloadSongListFile: File get() = File("${mainActivity.filesDir}/songlist.json")
 
     fun isExistLockedSong(settings: Settings): Boolean {
-        return null != albums?.find { album ->
+        return null != albums.find { album ->
             null != album.songs.find { settings.isLocked(it) }
         }
     }
 
     fun isExistUnlockedSong(settings: Settings): Boolean {
-        return null != albums?.find { album ->
+        return null != albums.find { album ->
             null != album.songs.find { !settings.isLocked(it) }
         }
     }
 
-    private fun load(mainActivity: MainActivity) {
-        val songListInput = mainActivity.assets.open("songlist.json")
-        val songListJson = String(songListInput.readBytes(), Charsets.UTF_8)
-        albumsRawData = mainActivity.gson.fromJson(songListJson, Albums::class.java)
-        albumsRawData?.albums?.forEach { album ->
+    fun updateSongList(songList: SongList) {
+        val json = mainActivity.gson.toJson(songList)
+        downloadSongListFile.writeText(json, Charsets.UTF_8)
+        mainActivity.musicManager = load()
+    }
+
+    fun load(): MusicManager {
+        changeMasterVolume(Settings(mainActivity).masterVolume)
+        val assetSongListInput = mainActivity.assets.open("songlist.json")
+        val assetSongListJson = String(assetSongListInput.readBytes(), Charsets.UTF_8)
+        val assetSongList = mainActivity.gson.fromJson(assetSongListJson, SongList::class.java)
+        val downloadSongListJson = if (downloadSongListFile.exists()) {
+            downloadSongListFile.readText(Charsets.UTF_8)
+        } else null
+        val downloadSongList = if (null != downloadSongListJson) {
+            mainActivity.gson.fromJson(downloadSongListJson, SongList::class.java)
+        } else {
+            null
+        }
+        songList = when {
+            null == downloadSongList -> {
+                Logger.d("use preset songlist.json ${assetSongList.version} (not downloaded)")
+                assetSongList
+            }
+            assetSongList.version < downloadSongList.version -> {
+                Logger.d("use downloaded songlist.json ${downloadSongList.version}")
+                downloadSongList
+            }
+            else -> {
+                Logger.d("use preset songlist.json ${assetSongList.version} (newer than downloaded)")
+                assetSongList
+            }
+        }
+        songList.albums.forEach { album ->
             album.songs.forEach { song ->
                 song.parentAlbum = album
             }
         }
+        return this
+    }
+
+    fun changeMasterVolume(masterVolume: Int) {
+        this.masterVolume = masterVolume
+        audioTrack?.setVolume(masterVolume / 100.0f)
     }
 
     fun initialize() {
@@ -92,7 +117,7 @@ class MusicManager {
     private fun find(album: Album?, song: Song?): Song? {
         album ?: return null
         song ?: return null
-        albumsRawData?.albums?.find { it.id == album.id } ?: return null
+        songList.albums.find { it.id == album.id } ?: return null
         return album.songs.find { it.mml == song.mml }
     }
 
@@ -102,9 +127,26 @@ class MusicManager {
         }
         audioTrack?.release()
         playingSong?.needReload = true
-        find(playingAlbum, playingSong)?.playing = false
+        find(playingAlbum, playingSong)?.status = Song.Status.Stop
         playingAlbum = null
         playingSong = null
+    }
+
+    fun pause(
+        progress: Int,
+        onSeek: ((length: Int, time: Int) -> Unit)?,
+        onPlayEnded: (() -> Unit)?
+    ) {
+        val song = playingSong ?: return
+        val album = playingAlbum ?: return
+        if (song.status == Song.Status.Play) {
+            song.status = Song.Status.Pause
+            song.needReload = true
+            audioTrack?.release()
+            audioTrack = null
+        } else {
+            play(startedContext, album, song, onSeek, onPlayEnded, progress)
+        }
     }
 
     fun isPlaying(album: Album?, song: Song?): Boolean {
@@ -113,25 +155,31 @@ class MusicManager {
         return playingAlbum == album && playingSong == song
     }
 
+    fun play(context: Context?, album: Album?, song: Song?) =
+        play(context, album, song, null, null, 0)
+
     fun play(
         context: Context?,
         album: Album?,
         song: Song?,
-        onSeek: (length: Int, time: Int) -> Unit,
-        onPlayEnded: () -> Unit
+        onSeek: ((length: Int, time: Int) -> Unit)?,
+        onPlayEnded: (() -> Unit)?,
+        seek: Int
     ) {
         album ?: return
         song ?: return
         stop()
-        find(album, song)?.playing = true
+        find(album, song)?.status = Song.Status.Play
         playingAlbum = album
         playingSong = song
         playingSong?.needReload = true
         decodeFirst = true
         fadeoutExecuted = false
         decodeSize = 0
-        synchronized(locker) { JNI.load(vgsContext, song.readMML(context)) }
-        createAudioTrack(onSeek, onPlayEnded)
+        synchronized(locker) {
+            JNI.load(vgsContext, song.readMML(context))
+        }
+        createAudioTrack(seek, onSeek, onPlayEnded)
         if (isBackground) startJob(context)
         startedContext = context
     }
@@ -142,8 +190,9 @@ class MusicManager {
     }
 
     private fun createAudioTrack(
-        onSeek: (length: Int, time: Int) -> Unit,
-        onPlayEnded: () -> Unit
+        seek: Int,
+        onSeek: ((length: Int, time: Int) -> Unit)?,
+        onPlayEnded: (() -> Unit)?
     ) {
         audioTrack?.release()
         val attributes = AudioAttributes.Builder()
@@ -162,6 +211,7 @@ class MusicManager {
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
         audioTrack?.positionNotificationPeriod = basicBufferSize / 2
+        audioTrack?.setVolume(masterVolume / 100f)
         audioTrack?.setPlaybackPositionUpdateListener(object :
             AudioTrack.OnPlaybackPositionUpdateListener {
             override fun onMarkerReached(audioTrack: AudioTrack?) {
@@ -179,7 +229,7 @@ class MusicManager {
                     timeLength = JNI.getTimeLength(vgsContext) / 22050
                     time = JNI.getTime(vgsContext) / 22050
                 }
-                onSeek.invoke(timeLength, time)
+                onSeek?.invoke(timeLength, time)
                 val loop = playingSong?.loop ?: 0
                 if (!infinity && !fadeoutExecuted && 0 < loop) {
                     val loopCount: Int
@@ -198,10 +248,11 @@ class MusicManager {
                     decode(decodeAudioBuffers[decodeAudioBufferLatch])
                 } else {
                     stop()
-                    onPlayEnded.invoke()
+                    onPlayEnded?.invoke()
                 }
             }
         })
+        JNI.seek(vgsContext, seek * 22050)
         decode(decodeAudioBufferFirst)
         audioTrack?.write(decodeAudioBufferFirst, 0, decodeAudioBufferFirst.size)
         audioTrack?.play()
@@ -215,7 +266,7 @@ class MusicManager {
     }
 
     private fun jobIdOfSong(song: Song?): Int {
-        val albumIndex = albums?.indexOf(song?.parentAlbum) ?: 0
+        val albumIndex = albums.indexOf(song?.parentAlbum)
         val songIndex = song?.parentAlbum?.songs?.indexOf(song) ?: 0
         return (albumIndex + 1) * 1000 + songIndex + 1
     }

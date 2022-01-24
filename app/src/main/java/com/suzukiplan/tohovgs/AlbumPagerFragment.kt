@@ -16,7 +16,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.suzukiplan.tohovgs.api.MusicManager
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Album
 
@@ -34,7 +33,6 @@ class AlbumPagerFragment : Fragment() {
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
     private lateinit var settings: Settings
-    private var musicManager: MusicManager? = null
     private lateinit var items: List<Album>
 
     override fun onCreateView(
@@ -45,14 +43,13 @@ class AlbumPagerFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         mainActivity = activity as MainActivity
         settings = Settings(context)
-        musicManager = MusicManager.getInstance(mainActivity)
         val view = inflater.inflate(R.layout.fragment_album_pager, container, false)
         unlockAllContainer = view.findViewById(R.id.unlock_all_container)
         unlockAll = view.findViewById(R.id.unlock_all)
         hideUnlockAll = view.findViewById(R.id.unlock_all_hide)
         tabLayout = view.findViewById(R.id.tab)
         pager = view.findViewById(R.id.pager)
-        items = musicManager?.albums!!
+        items = mainActivity.musicManager.albums
         pager.adapter = Adapter(mainActivity)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -68,19 +65,18 @@ class AlbumPagerFragment : Fragment() {
         TabLayoutMediator(tabLayout, pager) { tab, position ->
             tab.text = items[position].name
         }.attach()
-        val allUnlocked = MusicManager.getInstance(mainActivity)?.isExistLockedSong(settings)
-        unlockAllContainer.visibility =
-            if (true == allUnlocked) {
-                unlockAll.setOnClickListener {
-                    mainActivity.onRequestUnlockAll()
-                }
-                hideUnlockAll.setOnClickListener {
-                    unlockAllContainer.visibility = View.GONE
-                }
-                View.VISIBLE
-            } else {
-                View.GONE
+        val allUnlocked = mainActivity.musicManager.isExistLockedSong(settings)
+        unlockAllContainer.visibility = if (allUnlocked) {
+            unlockAll.setOnClickListener {
+                mainActivity.onRequestUnlockAll()
             }
+            hideUnlockAll.setOnClickListener {
+                unlockAllContainer.visibility = View.GONE
+            }
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
         return view
     }
 

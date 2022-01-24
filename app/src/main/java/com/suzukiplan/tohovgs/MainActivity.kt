@@ -8,6 +8,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -21,33 +22,35 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
-import com.suzukiplan.tohovgs.api.Constants
-import com.suzukiplan.tohovgs.api.Logger
-import com.suzukiplan.tohovgs.api.MusicManager
-import com.suzukiplan.tohovgs.api.Settings
+import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
+import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
-    private var musicManager: MusicManager? = null
     private lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup
+    private lateinit var adBgImage: View
+    private lateinit var adBgText: View
     private lateinit var fragmentContainer: ViewGroup
     private lateinit var currentPage: Page
     private lateinit var playTime: TextView
     private lateinit var leftTime: TextView
     private lateinit var seekBar: AppCompatSeekBar
     private lateinit var seekBarContainer: View
+    private lateinit var badge: ImageView
     private var footers = HashMap<Page, View>()
     private var currentFragment: Fragment? = null
     private var currentLength = 0
     private var seekBarTouching = false
+    lateinit var musicManager: MusicManager
     lateinit var gson: Gson
-    private val executor = Executors.newFixedThreadPool(4)
+    lateinit var api: WebAPI
+    private val executor = Executors.newFixedThreadPool(8)
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
 
     enum class Page(val value: Pair<Int, String>) {
@@ -56,6 +59,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         Sequential(Pair(2, "all")),
         Shuffle(Pair(3, "shuffle")),
         Retro(Pair(4, "retro")),
+        Settings(Pair(5, "settings")),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,13 +67,18 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         setContentView(R.layout.activity_main)
         settings = Settings(this)
         gson = Gson()
+        musicManager = MusicManager(this).load()
+        api = WebAPI(this)
         progress = findViewById(R.id.progress)
         adContainer = findViewById(R.id.ad_container)
+        adBgImage = findViewById(R.id.ad_bg_image)
+        adBgText = findViewById(R.id.ad_bg_text)
         fragmentContainer = findViewById(R.id.fragment_container)
         playTime = findViewById(R.id.play_time)
         leftTime = findViewById(R.id.left_time)
         seekBar = findViewById(R.id.seek_bar)
         seekBarContainer = findViewById(R.id.seek_bar_container)
+        badge = findViewById(R.id.badge)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -84,27 +93,29 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 seekBarTouching = false
-                musicManager?.seek(seekBar?.progress)
+                musicManager.seek(seekBar?.progress)
             }
         })
         resetSeekBar()
-        musicManager = MusicManager.getInstance(this)
-        musicManager?.initialize()
+        musicManager.initialize()
         footers.clear()
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
         footers[Page.Shuffle] = findViewById(R.id.footer_shuffle)
         footers[Page.Retro] = findViewById(R.id.footer_retro_ui)
+        footers[Page.Settings] = findViewById(R.id.footer_settings)
         footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
-            musicManager?.infinity = checked
+            musicManager.infinity = checked
         }
         currentPage = Page.NotSelected
         movePage(settings.pageName)
-
+        val adConfig = RequestConfiguration.Builder()
+            .setTestDeviceIds(listOf(BuildConfig.TEST_DEVICE_ID))
+            .build()
+        MobileAds.setRequestConfiguration(adConfig)
         MobileAds.initialize(this) {
             Logger.d("MobileAds initialized: $it")
-            adContainer.removeAllViews()
             val adView = AdView(this)
             adView.adSize = AdSize.BANNER
             adView.adUnitId = Constants.bannerAdsId
@@ -123,11 +134,25 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 override fun onAdLoaded() {
                     super.onAdLoaded()
                     Logger.d("Ad loaded")
+                    adBgImage.visibility = View.GONE
+                    adBgText.visibility = View.GONE
                 }
             }
             adContainer.addView(adView)
             val request = AdRequest.Builder().build()
             adView.loadAd(request)
+        }
+        if (!settings.badge) {
+            api.check(musicManager.version) { updatable ->
+                runOnUiThread {
+                    badge.visibility = if (true == updatable) {
+                        settings.badge = true
+                        View.VISIBLE
+                    } else View.GONE
+                }
+            }
+        } else {
+            badge.visibility = View.VISIBLE
         }
     }
 
@@ -152,7 +177,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun movePage(page: Page) {
         if (currentPage != Page.NotSelected && page == currentPage) return
         stopSong()
-        seekBarContainer.visibility = if (page == Page.Retro) {
+        seekBarContainer.visibility = if (page == Page.Retro || page == Page.Settings) {
             View.GONE
         } else {
             View.VISIBLE
@@ -163,6 +188,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             Page.Sequential -> SongListFragment.createAsSequential()
             Page.Shuffle -> SongListFragment.createAsShuffle()
             Page.Retro -> RetroFragment.create()
+            Page.Settings -> SettingsFragment.create()
         }
         if (fragment is SongListFragment) fragment.listener = this
         val transaction = supportFragmentManager.beginTransaction()
@@ -213,8 +239,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onBackPressed() = finish()
 
     override fun finish() {
-        musicManager?.stop()
-        musicManager?.terminate()
+        musicManager.stop()
+        musicManager.terminate()
         super.finish()
     }
 
@@ -222,9 +248,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         AskDialog.start(this, getString(R.string.ask_lock, song.name), object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (isYes) {
-                    val previousStatus = musicManager?.isExistLockedSong(settings)
+                    val previousStatus = musicManager.isExistLockedSong(settings)
                     settings.lock(song)
-                    if (false == previousStatus) {
+                    if (!previousStatus) {
                         refreshAlbumPagerFragment()
                     }
                     done()
@@ -267,8 +293,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 super.onAdFailedToLoad(error)
                 Logger.e("Rewarded Ad load failed: $error")
                 endProgress()
-                MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
-                done?.invoke(false)
+                if (3 == error.code) {
+                    MessageDialog.start(this@MainActivity, getString(R.string.error_ads_no_config))
+                    if (null == album) {
+                        musicManager.albums.forEach { settings.unlock(it) }
+                        refreshAlbumPagerFragment()
+                    } else {
+                        settings.unlock(album)
+                        if (!musicManager.isExistLockedSong(settings)) {
+                            refreshAlbumPagerFragment()
+                        }
+                    }
+                    done?.invoke(true)
+                } else {
+                    MessageDialog.start(this@MainActivity, getString(R.string.error_ads))
+                    done?.invoke(false)
+                }
             }
 
             override fun onAdLoaded(ad: RewardedAd) {
@@ -291,11 +331,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 ad.show(this@MainActivity) { rewardItem ->
                     Logger.d("RewardItem: type=${rewardItem.type}, amount=${rewardItem.amount}")
                     if (null == album) {
-                        musicManager?.albums?.forEach { settings.unlock(it) }
+                        musicManager.albums.forEach { settings.unlock(it) }
                         refreshAlbumPagerFragment()
                     } else {
                         settings.unlock(album)
-                        if (false == musicManager?.isExistLockedSong(settings)) {
+                        if (!musicManager.isExistLockedSong(settings)) {
                             refreshAlbumPagerFragment()
                         }
                     }
@@ -309,60 +349,61 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     private fun duration(sec: Int) = String.format("%02d:%02d", sec / 60, sec % 60)
 
+    private fun seek(length: Int, time: Int) {
+        if (!seekBarTouching) {
+            runOnUiThread {
+                val left = length - time
+                seekBar.max = length
+                seekBar.progress = time
+                playTime.text = duration(time)
+                leftTime.text = duration(left)
+                currentLength = length
+            }
+        }
+    }
+
     override fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit) {
-        val params = Bundle()
-        params.putString(FirebaseAnalytics.Param.ITEM_ID, song.mml)
-        params.putString(FirebaseAnalytics.Param.ITEM_NAME, song.name)
-        FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, params)
-        if (true == musicManager?.isPlaying(album, song)) {
-            Logger.d("stop ${song.name}")
-            stopSong()
-        } else {
-            Logger.d("play ${song.name}")
-            musicManager?.play(this, album, song, { length, time ->
-                if (!seekBarTouching) {
-                    runOnUiThread {
-                        val left = length - time
-                        seekBar.max = length
-                        seekBar.progress = time
-                        playTime.text = duration(time)
-                        leftTime.text = duration(left)
-                        currentLength = length
-                    }
-                }
-            }, {
+        if (musicManager.isPlaying(album, song)) {
+            Logger.d("pause/resume ${song.name}")
+            musicManager.pause(seekBar.progress, { length, time -> seek(length, time) }) {
                 resetSeekBar()
                 onPlayEnded.invoke()
-            })
+            }
+        } else {
+            Logger.d("play ${song.name}")
+            musicManager.play(this, album, song, { length, time -> seek(length, time) }, {
+                resetSeekBar()
+                onPlayEnded.invoke()
+            }, 0)
         }
     }
 
     override fun onPause() {
-        musicManager?.isBackground = true
-        musicManager?.startJob(this)
+        musicManager.isBackground = true
+        musicManager.startJob(this)
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        musicManager?.stopJob(this)
-        musicManager?.isBackground = false
+        musicManager.stopJob(this)
+        musicManager.isBackground = false
     }
 
-    private fun startProgress() {
+    fun startProgress() {
         runOnUiThread {
             progress.visibility = View.VISIBLE
         }
     }
 
-    private fun endProgress() {
+    fun endProgress() {
         runOnUiThread {
             progress.visibility = View.GONE
         }
     }
 
     fun stopSong() {
-        musicManager?.stop()
+        musicManager.stop()
         resetSeekBar()
     }
 
@@ -382,5 +423,16 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     interstitialAd.show(this@MainActivity)
                 }
             })
+    }
+
+    fun showAddedSongs(songs: List<Song>) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.modal_fragment_container, AddedSongsFragment.create(this, songs))
+            .commit()
+    }
+
+    fun hideBadge() {
+        badge.visibility = View.GONE
+        settings.badge = false
     }
 }

@@ -6,4 +6,7 @@ package com.suzukiplan.tohovgs.model
 
 import com.google.gson.annotations.SerializedName
 
-data class Albums(@SerializedName("albums") val albums: List<Album>)
+data class SongList(
+    @SerializedName("version") val version: String,
+    @SerializedName("albums") val albums: List<Album>,
+)
