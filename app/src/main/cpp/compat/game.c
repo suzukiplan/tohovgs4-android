@@ -466,7 +466,7 @@ int vge_tick() {
 
     /* Auto focus */
     if (focus) {
-        if (0 == PRF.listType && fs_list[fs_musicCursor].id != fs_title[fs_currentTitle].id) {
+        if (0 == PRF.listType && 0 <= fs_musicCursor && fs_list[fs_musicCursor].id != fs_title[fs_currentTitle].id) {
             playingTitle = fs_list[fs_musicCursor].id;
             if (playingTitle != fs_title[fs_currentTitle].id) {
                 /* check pop count of right */
@@ -787,7 +787,7 @@ int vge_tick() {
     if (0 == infinity) {
         int ss;
         int sm;
-        if (fs_list[fs_musicCursor].loop) {
+        if (0 <= fs_musicCursor && fs_list[fs_musicCursor].loop) {
             int introLen = vgsdec_get_value(_psg, VGSDEC_REG_LOOP_TIME);
             int loopLen = vgsdec_get_value(_psg, VGSDEC_REG_TIME_LENGTH) - introLen;
             ss = introLen + loopLen * loop;
