@@ -176,12 +176,14 @@ class MusicManager(private val mainActivity: MainActivity) {
         decodeFirst = true
         fadeoutExecuted = false
         decodeSize = 0
-        synchronized(locker) {
-            JNI.load(vgsContext, song.readMML(context))
+        song.readMML(mainActivity) {
+            synchronized(locker) {
+                JNI.load(vgsContext, it)
+                createAudioTrack(seek, onSeek, onPlayEnded)
+                if (isBackground) startJob(context)
+                startedContext = context
+            }
         }
-        createAudioTrack(seek, onSeek, onPlayEnded)
-        if (isBackground) startJob(context)
-        startedContext = context
     }
 
     fun seek(progress: Int?) {
@@ -248,7 +250,7 @@ class MusicManager(private val mainActivity: MainActivity) {
                     decode(decodeAudioBuffers[decodeAudioBufferLatch])
                 } else {
                     stop()
-                    onPlayEnded?.invoke()
+                    mainActivity.runOnUiThread { onPlayEnded?.invoke() }
                 }
             }
         })
