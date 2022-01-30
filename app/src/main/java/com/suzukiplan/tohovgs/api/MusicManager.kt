@@ -250,7 +250,7 @@ class MusicManager(private val mainActivity: MainActivity) {
                     decode(decodeAudioBuffers[decodeAudioBufferLatch])
                 } else {
                     stop()
-                    onPlayEnded?.invoke()
+                    mainActivity.runOnUiThread { onPlayEnded?.invoke() }
                 }
             }
         })
