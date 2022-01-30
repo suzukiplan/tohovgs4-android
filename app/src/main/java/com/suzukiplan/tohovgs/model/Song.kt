@@ -6,7 +6,9 @@ package com.suzukiplan.tohovgs.model
 
 import android.content.Context
 import com.google.gson.annotations.SerializedName
+import com.suzukiplan.tohovgs.MainActivity
 import java.io.File
+import java.io.FileNotFoundException
 
 data class Song(
     @SerializedName("name") val name: String,
@@ -40,16 +42,21 @@ data class Song(
         return getDownloadFile(context).exists()
     }
 
-    fun readMML(context: Context?): ByteArray? {
-        try {
-            val inputStream = context?.assets?.open("mml/${mml}.mml") ?: return null
-            val result = inputStream.readBytes()
-            inputStream.close()
-            return result
-        } catch (e: java.lang.Exception) {
+    fun readMML(mainActivity: MainActivity?, done: (mml: ByteArray?) -> Unit) {
+        mainActivity?.executeAsync {
+            try {
+                val inputStream = mainActivity.assets?.open("mml/${mml}.mml")
+                if (null == inputStream) {
+                    done.invoke(getDownloadFile(mainActivity).readBytes())
+                } else {
+                    val result = inputStream.readBytes()
+                    inputStream.close()
+                    done.invoke(result)
+                }
+            } catch (e: FileNotFoundException) {
+                done.invoke(getDownloadFile(mainActivity).readBytes())
+            }
         }
-        val file = getDownloadFile(context) ?: return null
-        return file.readBytes()
     }
 
     fun pathMML(context: Context?): String {
