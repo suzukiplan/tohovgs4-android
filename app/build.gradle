@@ -52,8 +52,10 @@ android {
         buildConfigField("String", "ADS_ID_INTERSTITIAL", "\"${ADS_ID_INTERSTITIAL}\"")
         def API_SERVER_BASE_URI = properties.getProperty("api_server_base_uri")
         buildConfigField("String", "API_SERVER_BASE_URI", "\"${API_SERVER_BASE_URI}\"")
-        def TEST_DEVICE_ID = properties.getProperty("test_device_id")
-        buildConfigField("String", "TEST_DEVICE_ID", "\"${TEST_DEVICE_ID}\"")
+        def TEST_DEVICE_ID_1 = properties.getProperty("test_device_id_1")
+        buildConfigField("String", "TEST_DEVICE_ID_1", "\"${TEST_DEVICE_ID_1}\"")
+        def TEST_DEVICE_ID_2 = properties.getProperty("test_device_id_2")
+        buildConfigField("String", "TEST_DEVICE_ID_2", "\"${TEST_DEVICE_ID_2}\"")
     }
 
     buildTypes {

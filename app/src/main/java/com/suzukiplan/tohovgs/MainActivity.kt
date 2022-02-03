@@ -28,7 +28,6 @@ import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import java.util.*
 import java.util.concurrent.Executors
-import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var settings: Settings
@@ -111,7 +110,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         currentPage = Page.NotSelected
         movePage(settings.pageName)
         val adConfig = RequestConfiguration.Builder()
-            .setTestDeviceIds(listOf(BuildConfig.TEST_DEVICE_ID))
+            .setTestDeviceIds(
+                listOf(
+                    BuildConfig.TEST_DEVICE_ID_1,
+                    BuildConfig.TEST_DEVICE_ID_2
+                )
+            )
             .build()
         MobileAds.setRequestConfiguration(adConfig)
         MobileAds.initialize(this) {
