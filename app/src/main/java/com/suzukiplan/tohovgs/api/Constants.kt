@@ -8,20 +8,8 @@ import com.suzukiplan.tohovgs.BuildConfig
 
 class Constants {
     companion object {
-        val bannerAdsId = if (BuildConfig.DEBUG) {
-            "ca-app-pub-3940256099942544/6300978111"
-        } else {
-            BuildConfig.ADS_ID_BANNER
-        }
-        val rewardAdsId = if (BuildConfig.DEBUG) {
-            "ca-app-pub-3940256099942544/5224354917"
-        } else {
-            BuildConfig.ADS_ID_REWARD
-        }
-        val interstitialAdsId = if (BuildConfig.DEBUG) {
-            "ca-app-pub-3940256099942544/1033173712"
-        } else {
-            BuildConfig.ADS_ID_INTERSTITIAL
-        }
+        const val bannerAdsId = BuildConfig.ADS_ID_BANNER
+        const val rewardAdsId = BuildConfig.ADS_ID_REWARD
+        const val interstitialAdsId = BuildConfig.ADS_ID_INTERSTITIAL
     }
 }
