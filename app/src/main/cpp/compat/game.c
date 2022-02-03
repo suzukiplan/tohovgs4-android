@@ -268,7 +268,9 @@ int vge_tick() {
         focus = 0;
         pflag = 1;
         if (0 == touching) {
-            if (HIT_CHECK(ci.cx - 4, ci.cy - 4, 8, 8, 0, 300, 240, 20)) {
+            if (PRF.listType && HIT_CHECK(ci.cx - 4, ci.cy - 4, 8, 8, 224, 130, 16, 190)) {
+                touching = 1;
+            } else if (HIT_CHECK(ci.cx - 4, ci.cy - 4, 8, 8, 0, 300, 240, 20)) {
                 touching = 3;
             } else {
                 touching = 2;
