@@ -26,7 +26,6 @@ import com.google.gson.Gson
 import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
-import java.util.*
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
@@ -64,10 +63,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        settings = Settings(this)
-        gson = Gson()
-        musicManager = MusicManager(this).load()
-        api = WebAPI(this)
         progress = findViewById(R.id.progress)
         adContainer = findViewById(R.id.ad_container)
         adBgImage = findViewById(R.id.ad_bg_image)
@@ -95,8 +90,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 musicManager.seek(seekBar?.progress)
             }
         })
-        resetSeekBar()
-        musicManager.initialize()
         footers.clear()
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
@@ -108,6 +101,16 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             musicManager.infinity = checked
         }
         currentPage = Page.NotSelected
+        initialize()
+    }
+
+    private fun initialize() {
+        settings = Settings(this)
+        gson = Gson()
+        api = WebAPI(this)
+        musicManager = MusicManager(this).load()
+        musicManager.initialize()
+        resetSeekBar()
         movePage(settings.pageName)
         val adConfig = RequestConfiguration.Builder()
             .setTestDeviceIds(
