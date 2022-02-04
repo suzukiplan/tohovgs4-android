@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +19,6 @@ import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 class SongListFragment : Fragment() {
@@ -58,8 +56,8 @@ class SongListFragment : Fragment() {
     private lateinit var inflater: LayoutInflater
     private var albums = ArrayList<Album>(0)
     private var songs = ArrayList<Song>(0)
-    private lateinit var settings: Settings
     private lateinit var mainActivity: MainActivity
+    private val settings: Settings get() = mainActivity.settings
     private lateinit var list: RecyclerView
     private lateinit var songAdapter: SongAdapter
     private var titleAdapter: TitleAdapter? = null
@@ -85,7 +83,6 @@ class SongListFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         this.inflater = inflater
-        settings = Settings(context)
         language = when (Locale.getDefault().language) {
             "ja" -> Language.Japanese
             "fr" -> Language.French

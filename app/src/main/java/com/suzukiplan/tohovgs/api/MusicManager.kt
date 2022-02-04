@@ -64,7 +64,9 @@ class MusicManager(private val mainActivity: MainActivity) {
         changeMasterVolume(Settings(mainActivity).masterVolume)
         val assetSongListInput = mainActivity.assets.open("songlist.json")
         val assetSongListJson = String(assetSongListInput.readBytes(), Charsets.UTF_8)
+        assetSongListInput.close()
         val assetSongList = mainActivity.gson.fromJson(assetSongListJson, SongList::class.java)
+        val downloadSongListFile = this.downloadSongListFile
         val downloadSongListJson = if (downloadSongListFile.exists()) {
             downloadSongListFile.readText(Charsets.UTF_8)
         } else null

@@ -48,13 +48,15 @@ class WebAPI(private val mainActivity: MainActivity) {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    internalLastStatusCode = response.code
-                    if (response.code != 200) {
-                        Logger.e("Server error: ${response.code}")
+                    val statusCode = response.code
+                    internalLastStatusCode = statusCode
+                    val body = response.body?.string()
+                    response.close()
+                    if (statusCode != 200) {
+                        Logger.e("Server error: $statusCode")
                         done(null)
                     } else {
-                        val body = response.body?.string()
-                        Logger.e("GET $path succeed (${body?.length} bytes)")
+                        Logger.d("GET $path succeed (${body?.length} bytes)")
                         done(body)
                     }
                 }
@@ -65,10 +67,12 @@ class WebAPI(private val mainActivity: MainActivity) {
     private fun getSync(path: String): String? {
         Logger.d("GET $path")
         val response = client.newCall(makeRequest(path)).execute()
+        val statusCode = response.code
+        internalLastStatusCode = statusCode
         val body = response.body?.string()
-        internalLastStatusCode = response.code
-        return if (response.code != 200 || null == body) {
-            Logger.e("GET $path failed (${response.code})")
+        response.close()
+        return if (statusCode != 200 || null == body) {
+            Logger.e("GET $path failed (${statusCode})")
             null
         } else {
             Logger.e("GET $path succeed (${body.length} bytes)")

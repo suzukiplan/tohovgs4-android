@@ -26,8 +26,6 @@ class TOHOVGS : Application() {
             )
             StrictMode.setVmPolicy(
                 VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
                     .penaltyLog()
                     .penaltyDeath()
                     .build()

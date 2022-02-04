@@ -23,7 +23,8 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         fun create(): RetroFragment = RetroFragment()
     }
 
-    private lateinit var settings: Settings
+    private lateinit var mainActivity: MainActivity
+    private val settings: Settings get() = mainActivity.settings
     private lateinit var surfaceView: SurfaceView
     private lateinit var holder: SurfaceHolder
     private lateinit var vram: Bitmap
@@ -43,11 +44,11 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         savedInstanceState: Bundle?
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        settings = Settings(context)
+        mainActivity = activity as MainActivity
         vram = Bitmap.createBitmap(vramRect.width(), vramRect.height(), Bitmap.Config.RGB_565)
         val view = inflater.inflate(R.layout.fragment_retro, container, false)
         surfaceView = view.findViewById(R.id.surface_view)
-        if ((activity as MainActivity).musicManager.isExistUnlockedSong(settings)) {
+        if (mainActivity.musicManager.isExistUnlockedSong(settings)) {
             surfaceView.setZOrderOnTop(true)
             holder = surfaceView.holder
             holder.addCallback(this)
@@ -165,7 +166,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         paint.isAntiAlias = false
 
         JNI.compatCleanUp()
-        val albums = (activity as MainActivity).musicManager.albums
+        val albums = mainActivity.musicManager.albums
         val unlockedSongs = HashMap<String, List<Song>>(albums.size)
         var unlockedSongsCount = 0
         albums.forEach { album ->

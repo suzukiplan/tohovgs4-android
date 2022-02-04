@@ -26,12 +26,10 @@ import com.google.gson.Gson
 import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
-import java.util.*
 import java.util.concurrent.Executors
-import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
-    private lateinit var settings: Settings
+    lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup
     private lateinit var adBgImage: View
@@ -51,6 +49,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     lateinit var gson: Gson
     lateinit var api: WebAPI
     private val executor = Executors.newFixedThreadPool(8)
+    private var initialized = false
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
 
     enum class Page(val value: Pair<Int, String>) {
@@ -65,10 +64,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        settings = Settings(this)
-        gson = Gson()
-        musicManager = MusicManager(this).load()
-        api = WebAPI(this)
         progress = findViewById(R.id.progress)
         adContainer = findViewById(R.id.ad_container)
         adBgImage = findViewById(R.id.ad_bg_image)
@@ -96,8 +91,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 musicManager.seek(seekBar?.progress)
             }
         })
-        resetSeekBar()
-        musicManager.initialize()
         footers.clear()
         footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
         footers[Page.Sequential] = findViewById(R.id.footer_sequential)
@@ -108,10 +101,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager.infinity = checked
         }
-        currentPage = Page.NotSelected
-        movePage(settings.pageName)
+
         val adConfig = RequestConfiguration.Builder()
-            .setTestDeviceIds(listOf(BuildConfig.TEST_DEVICE_ID))
+            .setTestDeviceIds(
+                listOf(
+                    BuildConfig.TEST_DEVICE_ID_1,
+                    BuildConfig.TEST_DEVICE_ID_2
+                )
+            )
             .build()
         MobileAds.setRequestConfiguration(adConfig)
         MobileAds.initialize(this) {
@@ -138,10 +135,28 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     adBgText.visibility = View.GONE
                 }
             }
-            adContainer.addView(adView)
+            runOnUiThread { adContainer.addView(adView) }
             val request = AdRequest.Builder().build()
             adView.loadAd(request)
         }
+
+        currentPage = Page.NotSelected
+        executeAsync {
+            initialize {
+                runOnUiThread {
+                    resetSeekBar()
+                    movePage(settings.pageName)
+                }
+            }
+        }
+    }
+
+    private fun initialize(done: () -> Unit) {
+        settings = Settings(this)
+        gson = Gson()
+        api = WebAPI(this)
+        musicManager = MusicManager(this).load()
+        musicManager.initialize()
         if (!settings.badge) {
             api.check(musicManager.version) { updatable ->
                 runOnUiThread {
@@ -152,8 +167,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 }
             }
         } else {
-            badge.visibility = View.VISIBLE
+            runOnUiThread {
+                badge.visibility = View.VISIBLE
+            }
         }
+        initialized = true
+        done.invoke()
     }
 
     @SuppressLint("SetTextI18n")
@@ -379,15 +398,19 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     override fun onPause() {
-        musicManager.isBackground = true
-        musicManager.startJob(this)
+        if (initialized) {
+            musicManager.isBackground = true
+            musicManager.startJob(this)
+        }
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        musicManager.stopJob(this)
-        musicManager.isBackground = false
+        if (initialized) {
+            musicManager.stopJob(this)
+            musicManager.isBackground = false
+        }
     }
 
     fun startProgress() {
