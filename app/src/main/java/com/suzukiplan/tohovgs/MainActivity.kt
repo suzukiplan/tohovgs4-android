@@ -30,7 +30,7 @@ import java.util.*
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
-    private lateinit var settings: Settings
+    lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup
     private lateinit var adBgImage: View

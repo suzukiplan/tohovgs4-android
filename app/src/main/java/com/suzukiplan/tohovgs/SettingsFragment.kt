@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.Settings
-import com.suzukiplan.tohovgs.api.WebAPI
 import com.suzukiplan.tohovgs.model.Song
 
 class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
@@ -24,8 +23,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     }
 
     private lateinit var mainActivity: MainActivity
-    private lateinit var api: WebAPI
-    private lateinit var settings: Settings
+    private val settings: Settings get() = mainActivity.settings
     private lateinit var masterVolumeText: TextView
     private var checked = false
 
@@ -36,8 +34,6 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         mainActivity = activity as MainActivity
-        api = mainActivity.api
-        settings = Settings(context)
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         view.findViewById<View>(R.id.download).setOnClickListener { updateSongList() }
         masterVolumeText = view.findViewById(R.id.master_volume_text)

@@ -32,7 +32,7 @@ class AlbumPagerFragment : Fragment() {
     private lateinit var hideUnlockAll: ImageButton
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
-    private lateinit var settings: Settings
+    private val settings: Settings get() = mainActivity.settings
     private lateinit var items: List<Album>
 
     override fun onCreateView(
@@ -42,7 +42,6 @@ class AlbumPagerFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         mainActivity = activity as MainActivity
-        settings = Settings(context)
         val view = inflater.inflate(R.layout.fragment_album_pager, container, false)
         unlockAllContainer = view.findViewById(R.id.unlock_all_container)
         unlockAll = view.findViewById(R.id.unlock_all)
