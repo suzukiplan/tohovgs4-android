@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:elevation="4dp"
         android:orientation="horizontal"
-        app:tabGravity="start" />
+        app:tabGravity="center" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
