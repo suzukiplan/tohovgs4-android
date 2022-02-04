@@ -27,6 +27,7 @@ import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import java.util.concurrent.Executors
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     lateinit var settings: Settings
@@ -258,7 +259,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun finish() {
         musicManager.stop()
         musicManager.terminate()
-        super.finish()
+        executeAsync {
+            settings.commit()
+            super.finish()
+            exitProcess(0)
+        }
     }
 
     override fun onRequestLock(song: Song, done: () -> Unit) {

@@ -4,6 +4,7 @@
  */
 package com.suzukiplan.tohovgs.api
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import com.suzukiplan.tohovgs.model.Album
@@ -24,6 +25,11 @@ class Settings(context: Context?) {
         val editor = preferences?.edit()
         if (null != editor) saveProcedure.invoke(editor)
         editor?.apply()
+    }
+
+    @SuppressLint("ApplySharedPref")
+    fun commit() {
+        preferences?.edit()?.commit()
     }
 
     fun isLocked(song: Song): Boolean {
