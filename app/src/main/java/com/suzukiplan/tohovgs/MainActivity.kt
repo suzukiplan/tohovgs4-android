@@ -102,23 +102,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager.infinity = checked
         }
-        currentPage = Page.NotSelected
-        executeAsync {
-            initialize {
-                runOnUiThread {
-                    resetSeekBar()
-                    movePage(settings.pageName)
-                }
-            }
-        }
-    }
 
-    private fun initialize(done: () -> Unit) {
-        settings = Settings(this)
-        gson = Gson()
-        api = WebAPI(this)
-        musicManager = MusicManager(this).load()
-        musicManager.initialize()
         val adConfig = RequestConfiguration.Builder()
             .setTestDeviceIds(
                 listOf(
@@ -156,6 +140,24 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             val request = AdRequest.Builder().build()
             adView.loadAd(request)
         }
+
+        currentPage = Page.NotSelected
+        executeAsync {
+            initialize {
+                runOnUiThread {
+                    resetSeekBar()
+                    movePage(settings.pageName)
+                }
+            }
+        }
+    }
+
+    private fun initialize(done: () -> Unit) {
+        settings = Settings(this)
+        gson = Gson()
+        api = WebAPI(this)
+        musicManager = MusicManager(this).load()
+        musicManager.initialize()
         if (!settings.badge) {
             api.check(musicManager.version) { updatable ->
                 runOnUiThread {
@@ -259,11 +261,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun finish() {
         musicManager.stop()
         musicManager.terminate()
-        executeAsync {
-            settings.commit()
-            super.finish()
-            exitProcess(0)
-        }
+        super.finish()
     }
 
     override fun onRequestLock(song: Song, done: () -> Unit) {
