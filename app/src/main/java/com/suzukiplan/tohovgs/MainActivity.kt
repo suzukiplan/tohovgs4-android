@@ -27,7 +27,6 @@ import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import java.util.concurrent.Executors
-import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     lateinit var settings: Settings
