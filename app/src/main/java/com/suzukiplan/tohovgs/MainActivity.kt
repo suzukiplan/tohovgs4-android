@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     lateinit var gson: Gson
     lateinit var api: WebAPI
     private val executor = Executors.newFixedThreadPool(8)
+    private var initialized = false
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
 
     enum class Page(val value: Pair<Int, String>) {
@@ -101,17 +102,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             musicManager.infinity = checked
         }
         currentPage = Page.NotSelected
-        initialize()
+        executeAsync {
+            initialize {
+                runOnUiThread {
+                    resetSeekBar()
+                    movePage(settings.pageName)
+                }
+            }
+        }
     }
 
-    private fun initialize() {
+    private fun initialize(done: () -> Unit) {
         settings = Settings(this)
         gson = Gson()
         api = WebAPI(this)
         musicManager = MusicManager(this).load()
         musicManager.initialize()
-        resetSeekBar()
-        movePage(settings.pageName)
         val adConfig = RequestConfiguration.Builder()
             .setTestDeviceIds(
                 listOf(
@@ -145,7 +151,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     adBgText.visibility = View.GONE
                 }
             }
-            adContainer.addView(adView)
+            runOnUiThread { adContainer.addView(adView) }
             val request = AdRequest.Builder().build()
             adView.loadAd(request)
         }
@@ -159,8 +165,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 }
             }
         } else {
-            badge.visibility = View.VISIBLE
+            runOnUiThread {
+                badge.visibility = View.VISIBLE
+            }
         }
+        initialized = true
+        done.invoke()
     }
 
     @SuppressLint("SetTextI18n")
@@ -386,15 +396,19 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     override fun onPause() {
-        musicManager.isBackground = true
-        musicManager.startJob(this)
+        if (initialized) {
+            musicManager.isBackground = true
+            musicManager.startJob(this)
+        }
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        musicManager.stopJob(this)
-        musicManager.isBackground = false
+        if (initialized) {
+            musicManager.stopJob(this)
+            musicManager.isBackground = false
+        }
     }
 
     fun startProgress() {
