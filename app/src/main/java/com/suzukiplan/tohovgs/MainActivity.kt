@@ -260,6 +260,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun finish() {
         musicManager.stop()
         musicManager.terminate()
+        val currentFragment = this.currentFragment
+        if (null != currentFragment) {
+            val transaction = supportFragmentManager?.beginTransaction()
+            transaction?.remove(currentFragment)
+            transaction?.commit()
+        }
         super.finish()
     }
 
