@@ -32,4 +32,5 @@ google-services.json
 
 .DS_Store
 app/release
+app/debug
 

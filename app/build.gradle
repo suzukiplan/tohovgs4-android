@@ -13,8 +13,8 @@ android {
         applicationId "com.suzukiplan.TOHOVGS"
         minSdk 26
         targetSdk 31
-        versionCode 413
-        versionName "4.13"
+        versionCode 414
+        versionName "4.14"
         ndk {
             moduleName "native-lib"
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
