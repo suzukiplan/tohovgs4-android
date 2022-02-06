@@ -4,6 +4,7 @@
  */
 package com.suzukiplan.tohovgs
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -27,6 +28,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     private lateinit var masterVolumeText: TextView
     private var checked = false
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,6 +37,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         super.onCreateView(inflater, container, savedInstanceState)
         mainActivity = activity as MainActivity
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        view.findViewById<TextView>(R.id.version).text = "Version ${BuildConfig.VERSION_NAME}"
         view.findViewById<View>(R.id.download).setOnClickListener { updateSongList() }
         masterVolumeText = view.findViewById(R.id.master_volume_text)
         val masterVolume = settings.masterVolume
