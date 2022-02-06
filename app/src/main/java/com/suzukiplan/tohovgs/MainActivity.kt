@@ -275,7 +275,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         if (null != currentFragment) {
             val transaction = supportFragmentManager?.beginTransaction()
             transaction?.remove(currentFragment)
-            transaction?.commit()
+            transaction?.commitAllowingStateLoss()
         }
         musicManager.stop()
         musicManager.terminate()
