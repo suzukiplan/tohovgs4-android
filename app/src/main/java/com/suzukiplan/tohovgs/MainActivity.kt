@@ -51,6 +51,16 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private val executor = Executors.newFixedThreadPool(8)
     private var initialized = false
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
+    private var pausing = true
+    private val procedureQueue = ArrayList<() -> Unit>(0)
+
+    private fun executeWhileResume(procedure: () -> Unit) {
+        if (pausing) {
+            procedureQueue.add(procedure)
+        } else {
+            procedure.invoke()
+        }
+    }
 
     enum class Page(val value: Pair<Int, String>) {
         NotSelected(Pair(0, "")),
@@ -193,7 +203,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         }
     )
 
-    private fun movePage(page: Page) {
+    private fun movePage(page: Page) = executeWhileResume { movePageInternal(page) }
+    private fun movePageInternal(page: Page) {
         if (currentPage != Page.NotSelected && page == currentPage) return
         stopSong()
         seekBarContainer.visibility = if (page == Page.Retro || page == Page.Settings) {
@@ -248,11 +259,13 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun refreshAlbumPagerFragment() {
         if (currentPage != Page.PerTitle) return
         stopSong()
-        val fragment = AlbumPagerFragment.create()
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(fragmentContainer.id, fragment)
-        currentFragment = fragment
-        transaction.commit()
+        executeWhileResume {
+            val fragment = AlbumPagerFragment.create()
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(fragmentContainer.id, fragment)
+            currentFragment = fragment
+            transaction.commit()
+        }
     }
 
     override fun onBackPressed() = finish()
@@ -404,6 +417,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     override fun onPause() {
+        pausing = true
         if (initialized) {
             musicManager.isBackground = true
             musicManager.startJob(this)
@@ -416,6 +430,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         if (initialized) {
             musicManager.stopJob(this)
             musicManager.isBackground = false
+        }
+        pausing = false
+        while (procedureQueue.isNotEmpty()) {
+            procedureQueue.removeAt(0).invoke()
         }
     }
 
@@ -455,9 +473,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun showAddedSongs(songs: List<Song>) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.modal_fragment_container, AddedSongsFragment.create(this, songs))
-            .commit()
+        executeWhileResume {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.modal_fragment_container, AddedSongsFragment.create(this, songs))
+                .commit()
+        }
     }
 
     fun hideBadge() {
