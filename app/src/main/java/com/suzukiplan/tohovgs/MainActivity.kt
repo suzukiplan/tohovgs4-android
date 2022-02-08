@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private var pausing = true
     private val procedureQueue = ArrayList<() -> Unit>(0)
 
-    private fun executeWhileResume(procedure: () -> Unit) {
+    fun executeWhileResume(procedure: () -> Unit) {
         if (pausing) {
             procedureQueue.add(procedure)
         } else {

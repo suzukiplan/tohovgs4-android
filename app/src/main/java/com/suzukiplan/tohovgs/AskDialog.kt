@@ -12,11 +12,13 @@ import androidx.fragment.app.DialogFragment
 class AskDialog : DialogFragment() {
     companion object {
         fun start(from: MainActivity, message: String, listener: Listener) {
-            val dialog = AskDialog()
-            dialog.arguments = Bundle()
-            dialog.arguments?.putString("message", message)
-            dialog.listener = listener
-            dialog.show(from.supportFragmentManager, null)
+            from.executeWhileResume {
+                val dialog = AskDialog()
+                dialog.arguments = Bundle()
+                dialog.arguments?.putString("message", message)
+                dialog.listener = listener
+                dialog.show(from.supportFragmentManager, null)
+            }
         }
     }
 
