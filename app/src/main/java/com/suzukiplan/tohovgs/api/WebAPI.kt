@@ -4,6 +4,7 @@
  */
 package com.suzukiplan.tohovgs.api
 
+import com.suzukiplan.tohovgs.BuildConfig
 import com.suzukiplan.tohovgs.MainActivity
 import com.suzukiplan.tohovgs.model.Song
 import com.suzukiplan.tohovgs.model.SongList
@@ -37,13 +38,8 @@ class WebAPI(private val mainActivity: MainActivity) {
 
     fun downloadMML(song: Song): String? = getSync("/${song.mml}.mml")
 
-    /*
     private fun makeRequest(path: String) =
         Request.Builder().url("${BuildConfig.API_SERVER_BASE_URI}$path").build()
-    */
-    private fun makeRequest(path: String) =
-        Request.Builder().url("https://touhou-vgs4-ios--pr11-support-update-5rxpoboj.web.app/$path")
-            .build()
 
     private fun getAsync(path: String, done: (body: String?) -> Unit) {
         Logger.d("GET $path <async>")
