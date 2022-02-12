@@ -30,6 +30,8 @@
     <string name="communication_error">サーバーとの通信に失敗しました (状態コード: %d)</string>
     <string name="up_to_date">楽曲は全て最新の状態です。\n新曲のアップデート情報は Twitter でお知らせするので、よろしければフォローしてください。</string>
     <string name="update_list_only">楽曲リストの更新のみ行いました。追加された楽曲はありません。</string>
-    <string name="added_songs">以下の楽曲が追加されました</string>
+    <string name="added_songs">最新状態に更新しました</string>
     <string name="close">閉じる</string>
+    <string name="added">追加</string>
+    <string name="updated">更新</string>
 </resources>

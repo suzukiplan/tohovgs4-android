@@ -102,6 +102,11 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                     msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
                     return@downloadSongList
                 }
+                songList.albums.forEach { album ->
+                    album.songs.forEach { song ->
+                        song.primaryUsage = Song.PrimaryUsage.Assets
+                    }
+                }
                 Logger.d("check need download mml files...")
                 val downloadSongs = ArrayList<Song>()
                 mainActivity.runOnUiThread {
@@ -112,6 +117,15 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                                 Logger.d("need download: ${song.name}")
                                 song.parentAlbumId = album.id
                                 downloadSongs.add(song)
+                            } else {
+                                val currentSong =
+                                    mainActivity.musicManager.searchSongOfMML(song.mml)
+                                if (null != currentSong) {
+                                    if (currentSong.ver < song.ver) {
+                                        downloadSongs.add(song)
+                                        song.primaryUsage = Song.PrimaryUsage.Files
+                                    }
+                                }
                             }
                         }
                     }

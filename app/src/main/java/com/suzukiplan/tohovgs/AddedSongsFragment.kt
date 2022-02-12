@@ -68,10 +68,15 @@ class AddedSongsFragment : Fragment() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val title: TextView = itemView.findViewById(R.id.title)
         private val name: TextView = itemView.findViewById(R.id.name)
+        private val kind: TextView = itemView.findViewById(R.id.kind)
 
         fun bind(song: Song) {
             title.text = song.parentAlbum?.name
             name.text = song.name
+            kind.text = when (song.primaryUsage) {
+                Song.PrimaryUsage.Assets -> getString(R.string.added)
+                Song.PrimaryUsage.Files -> getString(R.string.updated)
+            }
         }
     }
 }

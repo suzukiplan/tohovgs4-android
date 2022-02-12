@@ -33,4 +33,17 @@
         android:textColor="@color/black"
         android:textSize="14sp"
         tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/kind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:lines="1"
+        android:text="@string/added"
+        android:textColor="@color/black_alpha50"
+        android:textSize="12sp" />
 </androidx.appcompat.widget.LinearLayoutCompat>

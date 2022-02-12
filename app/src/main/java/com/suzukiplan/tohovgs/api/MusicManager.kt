@@ -75,6 +75,36 @@ class MusicManager(private val mainActivity: MainActivity) {
         } else {
             null
         }
+        assetSongList?.albums?.forEach { album ->
+            album.songs.forEach { song ->
+                val downloadAlbum = downloadSongList?.albums?.find { it.id == album.id }
+                val downloadSong = downloadAlbum?.songs?.find { it.mml == song.mml }
+                song.primaryUsage = if (null != downloadSong) {
+                    if (song.ver < downloadSong.ver) {
+                        Song.PrimaryUsage.Files
+                    } else {
+                        Song.PrimaryUsage.Assets
+                    }
+                } else {
+                    Song.PrimaryUsage.Assets
+                }
+            }
+        }
+        downloadSongList?.albums?.forEach { album ->
+            album.songs.forEach { song ->
+                val assetAlbum = assetSongList.albums.find { it.id == album.id }
+                val assetSong = assetAlbum?.songs?.find { it.mml == song.mml }
+                song.primaryUsage = if (null != assetSong) {
+                    if (assetSong.ver < song.ver) {
+                        Song.PrimaryUsage.Files
+                    } else {
+                        Song.PrimaryUsage.Assets
+                    }
+                } else {
+                    Song.PrimaryUsage.Files
+                }
+            }
+        }
         songList = when {
             null == downloadSongList -> {
                 Logger.d("use preset songlist.json ${assetSongList.version} (not downloaded)")
@@ -92,9 +122,21 @@ class MusicManager(private val mainActivity: MainActivity) {
         songList.albums.forEach { album ->
             album.songs.forEach { song ->
                 song.parentAlbum = album
+                Logger.d("PrimaryUsage: ${song.mml} = ${song.primaryUsage}")
             }
         }
         return this
+    }
+
+    fun searchSongOfMML(mml: String): Song? {
+        songList.albums.forEach { album ->
+            album.songs.forEach { song ->
+                if (song.mml == mml) {
+                    return song
+                }
+            }
+        }
+        return null
     }
 
     fun changeMasterVolume(masterVolume: Int) {
