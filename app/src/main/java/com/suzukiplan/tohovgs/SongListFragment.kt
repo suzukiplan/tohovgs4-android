@@ -57,7 +57,7 @@ class SongListFragment : Fragment() {
     private var albums = ArrayList<Album>(0)
     private var songs = ArrayList<Song>(0)
     private lateinit var mainActivity: MainActivity
-    private val settings: Settings get() = mainActivity.settings
+    private val settings: Settings? get() = mainActivity.settings
     private lateinit var list: RecyclerView
     private lateinit var songAdapter: SongAdapter
     private var titleAdapter: TitleAdapter? = null
@@ -98,8 +98,8 @@ class SongListFragment : Fragment() {
         when (requireArguments().getString("mode")) {
             "album" -> {
                 val albumId = requireArguments().getString("album_id")
-                val album = mainActivity.musicManager.albums.find { it.id == albumId }!!
-                album.songs.forEach { songs.add(it) }
+                val album = mainActivity.musicManager?.albums?.find { it.id == albumId }
+                album?.songs?.forEach { songs.add(it) }
             }
             "sequential" -> {
                 addAvailableSongs(songs)
@@ -137,7 +137,7 @@ class SongListFragment : Fragment() {
         list.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         if (isSequentialMode) {
-            list.scrollToPosition(settings.initialPositionSequential)
+            list.scrollToPosition(settings?.initialPositionSequential ?: 0)
         }
         return view
     }
@@ -165,9 +165,9 @@ class SongListFragment : Fragment() {
     }
 
     private fun addAvailableSongs(list: ArrayList<Song>) {
-        mainActivity.musicManager.albums.forEach { album ->
+        mainActivity.musicManager?.albums?.forEach { album ->
             album.songs.forEach { song ->
-                if (!settings.isLocked(song)) {
+                if (false == settings?.isLocked(song)) {
                     list.add(song)
                 }
             }
@@ -271,17 +271,17 @@ class SongListFragment : Fragment() {
         var nextIndex = songs.indexOf(song)
         val previousIndex = nextIndex
         var nextSong: Song
-        if (mainActivity.musicManager.infinity) {
+        if (true == mainActivity.musicManager?.infinity) {
             nextSong = song
         } else {
             do {
                 nextIndex++
                 nextIndex %= songs.count()
                 nextSong = songs[nextIndex]
-                if (previousIndex == nextIndex && settings.isLocked(nextSong)) {
+                if (previousIndex == nextIndex && true == settings?.isLocked(nextSong)) {
                     return // all songs are unlocked
                 }
-            } while (settings.isLocked(nextSong))
+            } while (true == settings?.isLocked(nextSong))
         }
         play(nextSong)
         reload(nextSong)
@@ -289,7 +289,9 @@ class SongListFragment : Fragment() {
     }
 
     private fun play(song: Song) {
-        if (isSequentialMode) settings.initialPositionSequential = songs.indexOf(song)
+        if (isSequentialMode) {
+            settings?.initialPositionSequential = songs.indexOf(song)
+        }
         listener?.onPlay(song.parentAlbum!!, song) { onPlayEnded(song) }
         moveFocus(song)
     }
@@ -323,8 +325,8 @@ class SongListFragment : Fragment() {
         fun bind(song: Song?) {
             song ?: return
             val album = song.parentAlbum ?: return
-            val locked = settings.isLocked(song)
-            if (locked) {
+            val locked = settings?.isLocked(song)
+            if (true == locked) {
                 lock.visibility = View.VISIBLE
                 play.visibility = View.GONE
                 root.setBackgroundResource(R.drawable.card_locked)

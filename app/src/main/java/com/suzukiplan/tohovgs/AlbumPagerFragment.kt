@@ -32,7 +32,7 @@ class AlbumPagerFragment : Fragment() {
     private lateinit var hideUnlockAll: ImageButton
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
-    private val settings: Settings get() = mainActivity.settings
+    private val settings: Settings? get() = mainActivity.settings
     private lateinit var items: List<Album>
 
     override fun onCreateView(
@@ -48,24 +48,24 @@ class AlbumPagerFragment : Fragment() {
         hideUnlockAll = view.findViewById(R.id.unlock_all_hide)
         tabLayout = view.findViewById(R.id.tab)
         pager = view.findViewById(R.id.pager)
-        items = mainActivity.musicManager.albums
+        items = mainActivity.musicManager?.albums ?: return null
         pager.adapter = Adapter(mainActivity)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 (activity as? MainActivity)?.stopSong()
-                settings.lastSelectedAlbumId = items[position].id
+                settings?.lastSelectedAlbumId = items[position].id
                 super.onPageSelected(position)
             }
         })
-        val targetAlbumId = settings.lastSelectedAlbumId
+        val targetAlbumId = settings?.lastSelectedAlbumId
         val index = items.indexOfFirst { it.id == targetAlbumId }
         pager.setCurrentItem(index, false)
         tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
         TabLayoutMediator(tabLayout, pager) { tab, position ->
             tab.text = items[position].name
         }.attach()
-        val allUnlocked = mainActivity.musicManager.isExistLockedSong(settings)
-        unlockAllContainer.visibility = if (allUnlocked) {
+        val allUnlocked = mainActivity.musicManager?.isExistLockedSong(settings)
+        unlockAllContainer.visibility = if (true == allUnlocked) {
             unlockAll.setOnClickListener {
                 mainActivity.onRequestUnlockAll()
             }

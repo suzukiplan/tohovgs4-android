@@ -18,7 +18,7 @@ class AddedSongsFragment : Fragment() {
         fun create(mainActivity: MainActivity, songs: List<Song>): AddedSongsFragment {
             val result = AddedSongsFragment()
             result.arguments = Bundle()
-            result.arguments?.putString("songs", mainActivity.gson.toJson(songs))
+            result.arguments?.putString("songs", mainActivity.gson?.toJson(songs))
             return result
         }
     }
@@ -35,13 +35,13 @@ class AddedSongsFragment : Fragment() {
         this.inflater = inflater
         val view = inflater.inflate(R.layout.fragment_added_songs, container, false)
         val listType: Type = object : TypeToken<List<Song>>() {}.type
-        songs = (activity as MainActivity).gson.fromJson(
+        songs = (activity as MainActivity).gson?.fromJson(
             requireArguments().getString("songs"),
             listType
-        )
-        val albums = (activity as MainActivity).musicManager.albums
+        )!!
+        val albums = (activity as MainActivity).musicManager?.albums
         songs.forEach { song ->
-            song.parentAlbum = albums.find { it.id == song.parentAlbumId }
+            song.parentAlbum = albums?.find { it.id == song.parentAlbumId }
         }
         val list = view.findViewById<RecyclerView>(R.id.list)
         list.layoutManager = LinearLayoutManager(
@@ -68,10 +68,15 @@ class AddedSongsFragment : Fragment() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val title: TextView = itemView.findViewById(R.id.title)
         private val name: TextView = itemView.findViewById(R.id.name)
+        private val kind: TextView = itemView.findViewById(R.id.kind)
 
         fun bind(song: Song) {
             title.text = song.parentAlbum?.name
             name.text = song.name
+            kind.text = when (song.primaryUsage) {
+                Song.PrimaryUsage.Assets -> getString(R.string.added)
+                Song.PrimaryUsage.Files -> getString(R.string.updated)
+            }
         }
     }
 }

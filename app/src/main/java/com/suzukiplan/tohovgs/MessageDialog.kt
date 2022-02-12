@@ -13,10 +13,12 @@ import com.suzukiplan.tohovgs.api.Logger
 class MessageDialog : DialogFragment() {
     companion object {
         fun start(from: MainActivity, message: String) {
-            val dialog = MessageDialog()
-            dialog.arguments = Bundle()
-            dialog.arguments?.putString("message", message)
-            dialog.show(from.supportFragmentManager, null)
+            from.executeWhileResume {
+                val dialog = MessageDialog()
+                dialog.arguments = Bundle()
+                dialog.arguments?.putString("message", message)
+                dialog.show(from.supportFragmentManager, null)
+            }
         }
     }
 

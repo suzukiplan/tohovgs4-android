@@ -24,7 +24,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     private lateinit var mainActivity: MainActivity
-    private val settings: Settings get() = mainActivity.settings
+    private val settings: Settings? get() = mainActivity.settings
     private lateinit var surfaceView: SurfaceView
     private lateinit var holder: SurfaceHolder
     private lateinit var vram: Bitmap
@@ -48,7 +48,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         vram = Bitmap.createBitmap(vramRect.width(), vramRect.height(), Bitmap.Config.RGB_565)
         val view = inflater.inflate(R.layout.fragment_retro, container, false)
         surfaceView = view.findViewById(R.id.surface_view)
-        if (mainActivity.musicManager.isExistUnlockedSong(settings)) {
+        if (true == mainActivity.musicManager?.isExistUnlockedSong(settings)) {
             surfaceView.setZOrderOnTop(true)
             holder = surfaceView.holder
             holder.addCallback(this)
@@ -129,7 +129,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         renderThread?.start()
     }
 
-    private fun stopRenderThread() {
+    fun stopRenderThread() {
         alive = false
         renderThread?.join()
         renderThread = null
@@ -166,21 +166,21 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         paint.isAntiAlias = false
 
         JNI.compatCleanUp()
-        val albums = mainActivity.musicManager.albums
-        val unlockedSongs = HashMap<String, List<Song>>(albums.size)
+        val albums = mainActivity.musicManager?.albums
+        val unlockedSongs = HashMap<String, List<Song>>(albums?.size ?: 0)
         var unlockedSongsCount = 0
-        albums.forEach { album ->
+        albums?.forEach { album ->
             unlockedSongs[album.id] = album.songs.filter { song ->
-                !settings.isLocked(song)
+                false == settings?.isLocked(song)
             }
             unlockedSongsCount += unlockedSongs[album.id]?.size ?: 0
         }
-        val unlockedAlbums = albums.filter { true == unlockedSongs[it.id]?.isNotEmpty() }
-        JNI.compatAllocate(unlockedAlbums.size, unlockedSongsCount, context?.assets)
+        val unlockedAlbums = albums?.filter { true == unlockedSongs[it.id]?.isNotEmpty() }
+        JNI.compatAllocate(unlockedAlbums?.size ?: 0, unlockedSongsCount, context?.assets)
         var titleIndex = 0
         var songIndex = 0
         var compatId = 0x0010
-        unlockedAlbums.forEach { album ->
+        unlockedAlbums?.forEach { album ->
             val songNum = unlockedSongs[album.id]?.size ?: 0
             JNI.compatAddTitle(
                 titleIndex,
@@ -209,13 +209,13 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         JNI.compatLoadGraphic(0, compatAsset("GSLOT000.CHR"))
         JNI.compatLoadGraphic(1, compatAsset("GSLOT255.CHR"))
         JNI.compatSetPreference(
-            settings.compatCurrentTitleId,
-            settings.compatLoop,
-            settings.compatBase,
-            settings.compatInfinity,
-            settings.compatKobushi,
-            settings.compatLocaleId,
-            settings.compatListType
+            settings?.compatCurrentTitleId ?: 0,
+            settings?.compatLoop ?: 0,
+            settings?.compatBase ?: 0,
+            settings?.compatInfinity ?: 0,
+            settings?.compatKobushi ?: 0,
+            settings?.compatLocaleId ?: 0,
+            settings?.compatListType ?: 0
         )
         while (alive) {
             start = System.currentTimeMillis()
@@ -233,13 +233,13 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             }
         }
         Logger.d("End render thread")
-        settings.compatCurrentTitleId = JNI.compatGetCurrentTitleId()
-        settings.compatLoop = JNI.compatGetLoop()
-        settings.compatBase = JNI.compatGetBase()
-        settings.compatInfinity = JNI.compatGetInfinity()
-        settings.compatKobushi = JNI.compatGetKobushi()
-        settings.compatLocaleId = JNI.compatGetLocaleId()
-        settings.compatListType = JNI.compatGetListType()
+        settings?.compatCurrentTitleId = JNI.compatGetCurrentTitleId()
+        settings?.compatLoop = JNI.compatGetLoop()
+        settings?.compatBase = JNI.compatGetBase()
+        settings?.compatInfinity = JNI.compatGetInfinity()
+        settings?.compatKobushi = JNI.compatGetKobushi()
+        settings?.compatLocaleId = JNI.compatGetLocaleId()
+        settings?.compatListType = JNI.compatGetListType()
         JNI.compatCleanUp()
     }
 
