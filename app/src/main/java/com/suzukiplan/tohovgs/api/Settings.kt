@@ -20,6 +20,10 @@ class Settings(context: Context?) {
         get() = preferences?.getInt("initial_position_sequential", 0) ?: 0
         set(value) = save { editor -> editor.putInt("initial_position_sequential", value) }
 
+    fun commit() {
+        Logger.d("commit shared preferences: ${preferences?.edit()?.commit()}")
+    }
+
     private fun save(saveProcedure: (editor: SharedPreferences.Editor) -> Unit) {
         val editor = preferences?.edit()
         if (null != editor) saveProcedure.invoke(editor)

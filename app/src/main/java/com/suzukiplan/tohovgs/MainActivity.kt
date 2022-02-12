@@ -27,6 +27,7 @@ import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import java.util.concurrent.Executors
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var progress: View
@@ -271,16 +272,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onBackPressed() = finish()
 
     override fun finish() {
-        val currentFragment = this.currentFragment
-        if (null != currentFragment) {
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.remove(currentFragment)
-            transaction.commitAllowingStateLoss()
-        }
         musicManager?.stop()
         musicManager?.terminate()
         musicManager = null
         super.finish()
+        executeAsync {
+            settings?.commit()
+            exitProcess(0)
+        }
     }
 
     override fun onRequestLock(song: Song, done: () -> Unit) {
