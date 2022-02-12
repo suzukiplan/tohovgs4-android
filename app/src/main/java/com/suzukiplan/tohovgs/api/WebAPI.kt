@@ -4,7 +4,6 @@
  */
 package com.suzukiplan.tohovgs.api
 
-import com.suzukiplan.tohovgs.BuildConfig
 import com.suzukiplan.tohovgs.MainActivity
 import com.suzukiplan.tohovgs.model.Song
 import com.suzukiplan.tohovgs.model.SongList
@@ -16,18 +15,22 @@ class WebAPI(private val mainActivity: MainActivity) {
     val lastStatusCode: Int get() = internalLastStatusCode
     private var internalLastStatusCode = 0
 
-    fun check(version: String, done: (updatable: Boolean?) -> Unit) = getAsync("/songlist.ver") {
-        val server = it?.substring(0, 10)
-        val result = if (null != server) version < server else null
-        Logger.d("songlist.json: client=$version, server=$server, updatable=$result")
-        done(result)
+    fun check(version: String?, done: (updatable: Boolean?) -> Unit) = getAsync("/songlist.ver") {
+        if (null == version) {
+            done(false)
+        } else {
+            val server = it?.substring(0, 10)
+            val result = if (null != server) version < server else null
+            Logger.d("songlist.json: client=$version, server=$server, updatable=$result")
+            done(result)
+        }
     }
 
     fun downloadSongList(done: (songList: SongList?) -> Unit) = getAsync("/songlist.json") {
         if (null != it) {
             Logger.d("parse songlist.json...")
-            val songList = mainActivity.gson.fromJson(it, SongList::class.java)
-            Logger.d("parsed songlist.json: ${songList.version}")
+            val songList = mainActivity.gson?.fromJson(it, SongList::class.java)
+            Logger.d("parsed songlist.json: ${songList?.version}")
             done(songList)
         } else done(null)
     }
@@ -39,7 +42,8 @@ class WebAPI(private val mainActivity: MainActivity) {
         Request.Builder().url("${BuildConfig.API_SERVER_BASE_URI}$path").build()
     */
     private fun makeRequest(path: String) =
-        Request.Builder().url("https://touhou-vgs4-ios--pr11-support-update-5rxpoboj.web.app/$path").build()
+        Request.Builder().url("https://touhou-vgs4-ios--pr11-support-update-5rxpoboj.web.app/$path")
+            .build()
 
     private fun getAsync(path: String, done: (body: String?) -> Unit) {
         Logger.d("GET $path <async>")

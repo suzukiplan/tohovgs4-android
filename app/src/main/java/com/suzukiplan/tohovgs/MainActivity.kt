@@ -29,7 +29,6 @@ import com.suzukiplan.tohovgs.model.Song
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), SongListFragment.Listener {
-    lateinit var settings: Settings
     private lateinit var progress: View
     private lateinit var adContainer: ViewGroup
     private lateinit var adBgImage: View
@@ -45,9 +44,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private var currentFragment: Fragment? = null
     private var currentLength = 0
     private var seekBarTouching = false
-    lateinit var musicManager: MusicManager
-    lateinit var gson: Gson
-    lateinit var api: WebAPI
+    var settings: Settings? = null
+    var musicManager: MusicManager? = null
+    var gson: Gson? = null
+    var api: WebAPI? = null
     private val executor = Executors.newFixedThreadPool(8)
     private var initialized = false
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 seekBarTouching = false
-                musicManager.seek(seekBar?.progress)
+                musicManager?.seek(seekBar?.progress)
             }
         })
         footers.clear()
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         footers[Page.Settings] = findViewById(R.id.footer_settings)
         footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
-            musicManager.infinity = checked
+            musicManager?.infinity = checked
         }
 
         val adConfig = RequestConfiguration.Builder()
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             initialize {
                 runOnUiThread {
                     resetSeekBar()
-                    movePage(settings.pageName)
+                    movePage(settings?.pageName)
                 }
             }
         }
@@ -166,12 +166,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         gson = Gson()
         api = WebAPI(this)
         musicManager = MusicManager(this).load()
-        musicManager.initialize()
-        if (!settings.badge) {
-            api.check(musicManager.version) { updatable ->
+        musicManager?.initialize()
+        if (false == settings?.badge) {
+            api?.check(musicManager?.version) { updatable ->
                 runOnUiThread {
                     badge.visibility = if (true == updatable) {
-                        settings.badge = true
+                        settings?.badge = true
                         View.VISIBLE
                     } else View.GONE
                 }
@@ -251,7 +251,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     }
                 }
             }
-            settings.pageName = page.value.second
+            settings?.pageName = page.value.second
         }
         currentPage = page
     }
@@ -277,8 +277,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             transaction.remove(currentFragment)
             transaction.commitAllowingStateLoss()
         }
-        musicManager.stop()
-        musicManager.terminate()
+        musicManager?.stop()
+        musicManager?.terminate()
+        musicManager = null
         super.finish()
     }
 
@@ -286,9 +287,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         AskDialog.start(this, getString(R.string.ask_lock, song.name), object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (isYes) {
-                    val previousStatus = musicManager.isExistLockedSong(settings)
-                    settings.lock(song)
-                    if (!previousStatus) {
+                    val previousStatus = musicManager?.isExistLockedSong(settings)
+                    settings?.lock(song)
+                    if (false == previousStatus) {
                         refreshAlbumPagerFragment()
                     }
                     done()
@@ -334,11 +335,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 if (3 == error.code) {
                     MessageDialog.start(this@MainActivity, getString(R.string.error_ads_no_config))
                     if (null == album) {
-                        musicManager.albums.forEach { settings.unlock(it) }
+                        musicManager?.albums?.forEach { settings?.unlock(it) }
                         refreshAlbumPagerFragment()
                     } else {
-                        settings.unlock(album)
-                        if (!musicManager.isExistLockedSong(settings)) {
+                        settings?.unlock(album)
+                        if (false == musicManager?.isExistLockedSong(settings)) {
                             refreshAlbumPagerFragment()
                         }
                     }
@@ -369,11 +370,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 ad.show(this@MainActivity) { rewardItem ->
                     Logger.d("RewardItem: type=${rewardItem.type}, amount=${rewardItem.amount}")
                     if (null == album) {
-                        musicManager.albums.forEach { settings.unlock(it) }
+                        musicManager?.albums?.forEach { settings?.unlock(it) }
                         refreshAlbumPagerFragment()
                     } else {
-                        settings.unlock(album)
-                        if (!musicManager.isExistLockedSong(settings)) {
+                        settings?.unlock(album)
+                        if (false == musicManager?.isExistLockedSong(settings)) {
                             refreshAlbumPagerFragment()
                         }
                     }
@@ -401,15 +402,15 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     override fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit) {
-        if (musicManager.isPlaying(album, song)) {
+        if (true == musicManager?.isPlaying(album, song)) {
             Logger.d("pause/resume ${song.name}")
-            musicManager.pause(seekBar.progress, { length, time -> seek(length, time) }) {
+            musicManager?.pause(seekBar.progress, { length, time -> seek(length, time) }) {
                 resetSeekBar()
                 onPlayEnded.invoke()
             }
         } else {
             Logger.d("play ${song.name}")
-            musicManager.play(this, album, song, { length, time -> seek(length, time) }, {
+            musicManager?.play(this, album, song, { length, time -> seek(length, time) }, {
                 resetSeekBar()
                 onPlayEnded.invoke()
             }, 0)
@@ -419,8 +420,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onPause() {
         pausing = true
         if (initialized) {
-            musicManager.isBackground = true
-            musicManager.startJob(this)
+            musicManager?.isBackground = true
+            musicManager?.startJob(this)
         }
         super.onPause()
     }
@@ -428,8 +429,8 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onResume() {
         super.onResume()
         if (initialized) {
-            musicManager.stopJob(this)
-            musicManager.isBackground = false
+            musicManager?.stopJob(this)
+            musicManager?.isBackground = false
         }
         pausing = false
         while (procedureQueue.isNotEmpty()) {
@@ -450,7 +451,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun stopSong() {
-        musicManager.stop()
+        musicManager?.stop()
         resetSeekBar()
     }
 
@@ -482,6 +483,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     fun hideBadge() {
         badge.visibility = View.GONE
-        settings.badge = false
+        settings?.badge = false
     }
 }

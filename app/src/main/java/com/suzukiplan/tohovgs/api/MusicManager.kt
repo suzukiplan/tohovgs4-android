@@ -42,20 +42,23 @@ class MusicManager(private val mainActivity: MainActivity) {
     private var masterVolume = 100
     private val downloadSongListFile: File get() = File("${mainActivity.filesDir}/songlist.json")
 
-    fun isExistLockedSong(settings: Settings): Boolean {
+    fun isExistLockedSong(settings: Settings?): Boolean? {
+        if (null == settings) {
+            return null
+        }
         return null != albums.find { album ->
             null != album.songs.find { settings.isLocked(it) }
         }
     }
 
-    fun isExistUnlockedSong(settings: Settings): Boolean {
+    fun isExistUnlockedSong(settings: Settings?): Boolean {
         return null != albums.find { album ->
-            null != album.songs.find { !settings.isLocked(it) }
+            null != album.songs.find { false == settings?.isLocked(it) }
         }
     }
 
     fun updateSongList(songList: SongList) {
-        val json = mainActivity.gson.toJson(songList)
+        val json = mainActivity.gson?.toJson(songList) ?: return
         downloadSongListFile.writeText(json, Charsets.UTF_8)
         mainActivity.musicManager = load()
     }
@@ -65,13 +68,13 @@ class MusicManager(private val mainActivity: MainActivity) {
         val assetSongListInput = mainActivity.assets.open("songlist.json")
         val assetSongListJson = String(assetSongListInput.readBytes(), Charsets.UTF_8)
         assetSongListInput.close()
-        val assetSongList = mainActivity.gson.fromJson(assetSongListJson, SongList::class.java)
+        val assetSongList = mainActivity.gson?.fromJson(assetSongListJson, SongList::class.java)
         val downloadSongListFile = this.downloadSongListFile
         val downloadSongListJson = if (downloadSongListFile.exists()) {
             downloadSongListFile.readText(Charsets.UTF_8)
         } else null
         val downloadSongList = if (null != downloadSongListJson) {
-            mainActivity.gson.fromJson(downloadSongListJson, SongList::class.java)
+            mainActivity.gson?.fromJson(downloadSongListJson, SongList::class.java)
         } else {
             null
         }
@@ -92,7 +95,7 @@ class MusicManager(private val mainActivity: MainActivity) {
         }
         downloadSongList?.albums?.forEach { album ->
             album.songs.forEach { song ->
-                val assetAlbum = assetSongList.albums.find { it.id == album.id }
+                val assetAlbum = assetSongList?.albums?.find { it.id == album.id }
                 val assetSong = assetAlbum?.songs?.find { it.mml == song.mml }
                 song.primaryUsage = if (null != assetSong) {
                     if (assetSong.ver < song.ver) {
@@ -107,15 +110,15 @@ class MusicManager(private val mainActivity: MainActivity) {
         }
         songList = when {
             null == downloadSongList -> {
-                Logger.d("use preset songlist.json ${assetSongList.version} (not downloaded)")
+                Logger.d("use preset songlist.json ${assetSongList!!.version} (not downloaded)")
                 assetSongList
             }
-            assetSongList.version < downloadSongList.version -> {
+            null != assetSongList && assetSongList.version < downloadSongList.version -> {
                 Logger.d("use downloaded songlist.json ${downloadSongList.version}")
                 downloadSongList
             }
             else -> {
-                Logger.d("use preset songlist.json ${assetSongList.version} (newer than downloaded)")
+                Logger.d("use preset songlist.json ${assetSongList!!.version} (newer than downloaded)")
                 assetSongList
             }
         }

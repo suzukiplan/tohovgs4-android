@@ -24,7 +24,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     }
 
     private lateinit var mainActivity: MainActivity
-    private val settings: Settings get() = mainActivity.settings
+    private val settings: Settings? get() = mainActivity.settings
     private lateinit var masterVolumeText: TextView
     private var checked = false
 
@@ -40,7 +40,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         view.findViewById<TextView>(R.id.version).text = "Version ${BuildConfig.VERSION_NAME}"
         view.findViewById<View>(R.id.download).setOnClickListener { updateSongList() }
         masterVolumeText = view.findViewById(R.id.master_volume_text)
-        val masterVolume = settings.masterVolume
+        val masterVolume = settings?.masterVolume ?: 100
         masterVolumeText.text = getString(R.string.master_volume, masterVolume)
         val seekBar = view.findViewById<SeekBar>(R.id.master_volume_seek_bar)
         seekBar.progress = masterVolume
@@ -66,18 +66,18 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         masterVolumeText.text = getString(R.string.master_volume, progress)
-        mainActivity.musicManager.changeMasterVolume(progress)
+        mainActivity.musicManager?.changeMasterVolume(progress)
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        val album = mainActivity.musicManager.albums[0]
-        val song = album.songs[0]
-        mainActivity.musicManager.play(context, album, song)
+        val album = mainActivity.musicManager?.albums?.get(0)
+        val song = album?.songs?.get(0)
+        mainActivity.musicManager?.play(context, album, song)
     }
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        mainActivity.musicManager.stop()
-        settings.masterVolume = seekBar?.progress ?: return
+        mainActivity.musicManager?.stop()
+        settings?.masterVolume = seekBar?.progress ?: return
     }
 
     private fun updateSongList() {
@@ -86,10 +86,10 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             return
         }
         mainActivity.startProgress()
-        mainActivity.api.check(mainActivity.musicManager.version) { updatable ->
+        mainActivity.api?.check(mainActivity.musicManager?.version) { updatable ->
             Thread.sleep(1000L)
             if (null == updatable) {
-                msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
+                msg(getString(R.string.communication_error, mainActivity.api?.lastStatusCode))
                 return@check
             }
             if (!updatable) {
@@ -97,9 +97,9 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                 checked = true
                 return@check
             }
-            mainActivity.api.downloadSongList { songList ->
+            mainActivity.api?.downloadSongList { songList ->
                 if (null == songList) {
-                    msg(getString(R.string.communication_error, mainActivity.api.lastStatusCode))
+                    msg(getString(R.string.communication_error, mainActivity.api?.lastStatusCode))
                     return@downloadSongList
                 }
                 songList.albums.forEach { album ->
@@ -119,7 +119,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                                 downloadSongs.add(song)
                             } else {
                                 val currentSong =
-                                    mainActivity.musicManager.searchSongOfMML(song.mml)
+                                    mainActivity.musicManager?.searchSongOfMML(song.mml)
                                 if (null != currentSong) {
                                     if (currentSong.ver < song.ver) {
                                         downloadSongs.add(song)
@@ -133,7 +133,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                         Logger.d("need download files: ${downloadSongs.size}")
                         var error = false
                         downloadSongs.forEach { song ->
-                            val mml = mainActivity.api.downloadMML(song)
+                            val mml = mainActivity.api?.downloadMML(song)
                             if (null == mml) {
                                 error = true
                             } else {
@@ -144,13 +144,13 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                             msg(
                                 getString(
                                     R.string.communication_error,
-                                    mainActivity.api.lastStatusCode
+                                    mainActivity.api?.lastStatusCode
                                 )
                             )
                         } else {
                             mainActivity.runOnUiThread {
                                 mainActivity.hideBadge()
-                                mainActivity.musicManager.updateSongList(songList)
+                                mainActivity.musicManager?.updateSongList(songList)
                                 if (downloadSongs.size < 1) {
                                     msg(getString(R.string.update_list_only))
                                 } else {
