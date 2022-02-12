@@ -129,7 +129,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         renderThread?.start()
     }
 
-    private fun stopRenderThread() {
+    fun stopRenderThread() {
         alive = false
         renderThread?.join()
         renderThread = null

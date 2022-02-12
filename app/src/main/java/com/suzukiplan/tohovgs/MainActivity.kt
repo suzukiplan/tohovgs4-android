@@ -272,11 +272,15 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     override fun onBackPressed() = finish()
 
     override fun finish() {
-        musicManager?.stop()
-        musicManager?.terminate()
-        musicManager = null
         super.finish()
         executeAsync {
+            val currentFragment = this.currentFragment
+            if (null != currentFragment && currentFragment is RetroFragment) {
+                currentFragment.stopRenderThread()
+            }
+            musicManager?.stop()
+            musicManager?.terminate()
+            musicManager = null
             settings?.commit()
             exitProcess(0)
         }
