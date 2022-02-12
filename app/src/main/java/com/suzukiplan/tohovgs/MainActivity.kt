@@ -122,33 +122,35 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             )
             .build()
         MobileAds.setRequestConfiguration(adConfig)
-        MobileAds.initialize(this) {
-            Logger.d("MobileAds initialized: $it")
-            val adView = AdView(this)
-            adView.adSize = AdSize.BANNER
-            adView.adUnitId = Constants.bannerAdsId
-            val layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            )
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 1)
-            adView.layoutParams = layoutParams
-            adView.adListener = object : AdListener() {
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    super.onAdFailedToLoad(error)
-                    Logger.e("Failed to load ad: $error")
-                }
+        executeAsync {
+            MobileAds.initialize(this) {
+                Logger.d("MobileAds initialized: $it")
+                val adView = AdView(this)
+                adView.adSize = AdSize.BANNER
+                adView.adUnitId = Constants.bannerAdsId
+                val layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 1)
+                adView.layoutParams = layoutParams
+                adView.adListener = object : AdListener() {
+                    override fun onAdFailedToLoad(error: LoadAdError) {
+                        super.onAdFailedToLoad(error)
+                        Logger.e("Failed to load ad: $error")
+                    }
 
-                override fun onAdLoaded() {
-                    super.onAdLoaded()
-                    Logger.d("Ad loaded")
-                    adBgImage.visibility = View.GONE
-                    adBgText.visibility = View.GONE
+                    override fun onAdLoaded() {
+                        super.onAdLoaded()
+                        Logger.d("Ad loaded")
+                        adBgImage.visibility = View.GONE
+                        adBgText.visibility = View.GONE
+                    }
                 }
+                runOnUiThread { adContainer.addView(adView) }
+                val request = AdRequest.Builder().build()
+                adView.loadAd(request)
             }
-            runOnUiThread { adContainer.addView(adView) }
-            val request = AdRequest.Builder().build()
-            adView.loadAd(request)
         }
 
         currentPage = Page.NotSelected
