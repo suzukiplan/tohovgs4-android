@@ -469,7 +469,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     fun showAddedSongs(songs: List<Song>) {
         executeWhileResume {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.modal_fragment_container, AddedSongsFragment.create(this, songs))
+                .replace(
+                    R.id.modal_fragment_container,
+                    AddedSongsFragment.create(this, songs, object : AddedSongsFragment.Listener {
+                        override fun onClose() {
+                            onRequestUnlockAll { Logger.d("unlocked: $it") }
+                        }
+                    })
+                )
                 .commit()
         }
     }

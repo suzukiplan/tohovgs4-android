@@ -15,16 +15,26 @@ import java.lang.reflect.Type
 
 class AddedSongsFragment : Fragment() {
     companion object {
-        fun create(mainActivity: MainActivity, songs: List<Song>): AddedSongsFragment {
+        fun create(
+            mainActivity: MainActivity,
+            songs: List<Song>,
+            listener: AddedSongsFragment.Listener
+        ): AddedSongsFragment {
             val result = AddedSongsFragment()
             result.arguments = Bundle()
             result.arguments?.putString("songs", mainActivity.gson?.toJson(songs))
+            result.listener = listener
             return result
         }
     }
 
+    interface Listener {
+        fun onClose()
+    }
+
     private lateinit var inflater: LayoutInflater
     private lateinit var songs: List<Song>
+    private lateinit var listener: Listener
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +59,7 @@ class AddedSongsFragment : Fragment() {
         )
         list.adapter = Adapter()
         view.findViewById<View>(R.id.close).setOnClickListener {
+            listener.onClose()
             parentFragmentManager.beginTransaction().remove(this).commit()
         }
         return view
