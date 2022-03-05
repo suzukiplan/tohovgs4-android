@@ -67,7 +67,7 @@ class AlbumPagerFragment : Fragment() {
         val allUnlocked = mainActivity.musicManager?.isExistLockedSong(settings)
         unlockAllContainer.visibility = if (true == allUnlocked) {
             unlockAll.setOnClickListener {
-                mainActivity.onRequestUnlockAll()
+                mainActivity.onRequestUnlockAll(null)
             }
             hideUnlockAll.setOnClickListener {
                 unlockAllContainer.visibility = View.GONE

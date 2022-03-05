@@ -47,8 +47,7 @@ class SongListFragment : Fragment() {
     }
 
     interface Listener {
-        fun onRequestUnlockAll()
-        fun onRequestUnlock(album: Album, done: (unlocked: Boolean) -> Unit)
+        fun onRequestUnlockAll(done: ((unlocked: Boolean) -> Unit)?)
         fun onRequestLock(song: Song, done: () -> Unit)
         fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit)
     }
@@ -331,12 +330,12 @@ class SongListFragment : Fragment() {
                 play.visibility = View.GONE
                 root.setBackgroundResource(R.drawable.card_locked)
                 root.setOnClickListener {
-                    listener?.onRequestUnlock(album) {
+                    listener?.onRequestUnlockAll {
                         reloadIfNeeded()
                     }
                 }
                 root.setOnLongClickListener {
-                    listener?.onRequestUnlock(album) {
+                    listener?.onRequestUnlockAll {
                         reloadIfNeeded()
                     }
                     true
