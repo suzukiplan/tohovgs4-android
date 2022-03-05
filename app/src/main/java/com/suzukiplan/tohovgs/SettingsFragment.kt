@@ -61,6 +61,14 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                 )
             )
         }
+        view.findViewById<View>(R.id.apple_music).setOnClickListener {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://music.apple.com/jp/artist/1190977068")
+                )
+            )
+        }
         return view
     }
 

@@ -34,4 +34,9 @@
     <string name="close">閉じる</string>
     <string name="added">追加</string>
     <string name="updated">更新</string>
+    <string name="ask_download_before_unlock">未ダウンロードの楽曲があります。ダウンロード後に再度アンロックが必要になってしまうため、先にダウンロードしますか？</string>
+    <string name="answer_download">ダウンロード</string>
+    <string name="answer_unlock">アンロック</string>
+    <string name="info">お知らせ</string>
+    <string name="apple_music">Apple Music で原曲をチェック</string>
 </resources>

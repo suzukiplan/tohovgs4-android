@@ -1,5 +1,5 @@
 {
-  "version": "2022.02.10",
+  "version": "2022.03.05",
   "albums": [
     {
       "albumId": "th04",
@@ -871,6 +871,13 @@
           "english": "Petals sake cup Ohe Mountain"
         },
         {
+          "mml": "TH11-08",
+          "ver": 0,
+          "loop": 1,
+          "name": "ハートフェルトファンシー",
+          "english": "Heartfelt Fancy"
+        },
+        {
           "mml": "TH11-09",
           "ver": 0,
           "loop": 1,
@@ -878,11 +885,39 @@
           "english": "Satori Maiden　〜 3rd eye"
         },
         {
+          "mml": "TH11-10",
+          "ver": 0,
+          "loop": 0,
+          "name": "廃獄ララバイ",
+          "english": "Lullabies of an Abandoned Hell"
+        },
+        {
           "mml": "TH11-11",
           "ver": 0,
           "loop": 1,
           "name": "死体旅行　〜 Be of good cheer!",
           "english": "Corpse Voyage　〜 Be of good cheer!"
+        },
+        {
+          "mml": "TH11-12",
+          "ver": 0,
+          "loop": 1,
+          "name": "業火マントル",
+          "english": "Hellfire Mantle"
+        },
+        {
+          "mml": "TH11-13",
+          "ver": 0,
+          "loop": 1,
+          "name": "霊知の太陽信仰　～ Nuclear Fusion",
+          "english": "Heliolithic of Mystic Wisdom　～ Nuclear Fusion"
+        },
+        {
+          "mml": "TH11-14",
+          "ver": 0,
+          "loop": 1,
+          "name": "ラストリモート",
+          "english": "Last Remote"
         }
       ]
     }
