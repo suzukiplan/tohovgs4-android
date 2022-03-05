@@ -7,6 +7,7 @@ package com.suzukiplan.tohovgs
 import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 class TOHOVGS : Application() {
     init {
@@ -31,5 +32,6 @@ class TOHOVGS : Application() {
                     .build()
             )
         }
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)   
     }
 }
