@@ -37,4 +37,6 @@
     <string name="ask_download_before_unlock">未ダウンロードの楽曲があります。ダウンロード後に再度アンロックが必要になってしまうため、先にダウンロードしますか？</string>
     <string name="answer_download">ダウンロード</string>
     <string name="answer_unlock">アンロック</string>
+    <string name="info">お知らせ</string>
+    <string name="apple_music">Apple Music で原曲をチェック</string>
 </resources>

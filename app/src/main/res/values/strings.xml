@@ -37,4 +37,6 @@
     <string name="ask_download_before_unlock">There are songs that have not yet been downloaded. Do you want to download them first because you will need to unlock them again after downloading?</string>
     <string name="answer_download">Download</string>
     <string name="answer_unlock">Unlock</string>
+    <string name="info">Information</string>
+    <string name="apple_music">Check original songs (Apple Music)</string>
 </resources>
