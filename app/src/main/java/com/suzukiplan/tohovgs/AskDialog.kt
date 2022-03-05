@@ -16,6 +16,26 @@ class AskDialog : DialogFragment() {
                 val dialog = AskDialog()
                 dialog.arguments = Bundle()
                 dialog.arguments?.putString("message", message)
+                dialog.arguments?.putString("yes", from.getString(R.string.ok))
+                dialog.arguments?.putString("no", from.getString(R.string.cancel))
+                dialog.listener = listener
+                dialog.show(from.supportFragmentManager, null)
+            }
+        }
+
+        fun start(
+            from: MainActivity,
+            message: String,
+            yes: String,
+            no: String,
+            listener: Listener
+        ) {
+            from.executeWhileResume {
+                val dialog = AskDialog()
+                dialog.arguments = Bundle()
+                dialog.arguments?.putString("message", message)
+                dialog.arguments?.putString("yes", yes)
+                dialog.arguments?.putString("no", no)
                 dialog.listener = listener
                 dialog.show(from.supportFragmentManager, null)
             }
@@ -31,10 +51,13 @@ class AskDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             // Use the Builder class for convenient dialog construction
+            val message = requireArguments().getString("message")
+            val yes = requireArguments().getString("yes")
+            val no = requireArguments().getString("no")
             val builder = AlertDialog.Builder(it)
-            builder.setMessage(requireArguments().getString("message"))
-                .setPositiveButton(R.string.ok) { _, _ -> listener?.onClick(true) }
-                .setNegativeButton(R.string.cancel) { _, _ -> listener?.onClick(false) }
+            builder.setMessage(message)
+                .setPositiveButton(yes) { _, _ -> listener?.onClick(true) }
+                .setNegativeButton(no) { _, _ -> listener?.onClick(false) }
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }

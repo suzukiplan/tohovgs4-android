@@ -308,7 +308,24 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         AskDialog.start(this, message, object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (!isYes) return
-                startRewardForUnlock(done)
+                if (true == settings?.badge) {
+                    AskDialog.start(
+                        this@MainActivity,
+                        getString(R.string.ask_download_before_unlock),
+                        getString(R.string.answer_download),
+                        getString(R.string.answer_unlock),
+                        object : AskDialog.Listener {
+                            override fun onClick(isYes: Boolean) {
+                                if (isYes) {
+                                    movePage(Page.Settings)
+                                } else {
+                                    startRewardForUnlock(done)
+                                }
+                            }
+                        })
+                } else {
+                    startRewardForUnlock(done)
+                }
             }
         })
     }
