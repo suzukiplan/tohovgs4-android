@@ -11,6 +11,7 @@ import java.io.File
 import java.io.FileNotFoundException
 
 data class Song(
+    @SerializedName("appleId") val appleId: String?,
     @SerializedName("name") val name: String,
     @SerializedName("english") val english: String?,
     @SerializedName("mml") val mml: String,
@@ -36,6 +37,13 @@ data class Song(
     val nameE: String get() = english ?: name
 
     val ver: Int get() = verRaw ?: 0
+
+    val appleMusicURL: String?
+        get() = if (null != appleId && null != parentAlbum?.appleId) {
+            "https://music.apple.com/jp/album/${parentAlbum?.appleId}?i=$appleId"
+        } else {
+            null
+        }
 
     fun getDownloadFile(context: Context?) = File("${context?.filesDir?.path}/$mml.mml")
 

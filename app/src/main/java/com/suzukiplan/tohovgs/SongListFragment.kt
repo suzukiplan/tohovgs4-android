@@ -50,6 +50,7 @@ class SongListFragment : Fragment() {
         fun onRequestUnlockAll(done: ((unlocked: Boolean) -> Unit)?)
         fun onRequestLock(song: Song, done: () -> Unit)
         fun onPlay(album: Album, song: Song, onPlayEnded: () -> Unit)
+        fun onLongPressed(song: Song, unlocked: () -> Unit)
     }
 
     private lateinit var inflater: LayoutInflater
@@ -94,6 +95,7 @@ class SongListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_song_list, container, false)
         progress = view.findViewById(R.id.progress)
         allLocked = view.findViewById(R.id.all_locked)
+        var needExecuteShuffle = false
         when (requireArguments().getString("mode")) {
             "album" -> {
                 val albumId = requireArguments().getString("album_id")
@@ -120,7 +122,7 @@ class SongListFragment : Fragment() {
                 shuffleButton.visibility = View.VISIBLE
                 shuffleButton.setOnClickListener { executeShuffle() }
                 mainActivity.showInterstitialAd()
-                executeShuffle()
+                needExecuteShuffle = true
             }
         }
         list = view.findViewById(R.id.list)
@@ -138,28 +140,39 @@ class SongListFragment : Fragment() {
         if (isSequentialMode) {
             list.scrollToPosition(settings?.initialPositionSequential ?: 0)
         }
+        if (needExecuteShuffle) {
+            executeShuffle()
+        }
         return view
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun executeShuffle() {
         mainActivity.runOnUiThread {
+            if (true == settings?.removeBannerAds) {
+                doShuffle()
+                return@runOnUiThread
+            }
             progress.visibility = View.VISIBLE
             mainActivity.executeAsync {
                 Thread.sleep(1500)
-                val tmpItems = ArrayList<Song>()
-                addAvailableSongs(tmpItems)
-                songs.clear()
-                while (tmpItems.isNotEmpty()) {
-                    songs.add(tmpItems.removeAt(abs(random.nextInt()) % tmpItems.count()))
-                }
-                mainActivity.runOnUiThread {
-                    list.adapter?.notifyDataSetChanged()
-                    list.scrollToPosition(0)
-                    progress.visibility = View.GONE
-                    allLocked.visibility = if (songs.count() < 1) View.VISIBLE else View.GONE
-                }
+                doShuffle()
             }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun doShuffle() {
+        val tmpItems = ArrayList<Song>()
+        addAvailableSongs(tmpItems)
+        songs.clear()
+        while (tmpItems.isNotEmpty()) {
+            songs.add(tmpItems.removeAt(abs(random.nextInt()) % tmpItems.count()))
+        }
+        mainActivity.runOnUiThread {
+            list.adapter?.notifyDataSetChanged()
+            list.scrollToPosition(0)
+            progress.visibility = View.GONE
+            allLocked.visibility = if (songs.count() < 1) View.VISIBLE else View.GONE
         }
     }
 
@@ -323,7 +336,6 @@ class SongListFragment : Fragment() {
         @SuppressLint("SetTextI18n")
         fun bind(song: Song?) {
             song ?: return
-            val album = song.parentAlbum ?: return
             val locked = settings?.isLocked(song)
             if (true == locked) {
                 lock.visibility = View.VISIBLE
@@ -361,7 +373,7 @@ class SongListFragment : Fragment() {
                     reloadIfNeeded()
                 }
                 root.setOnLongClickListener {
-                    listener?.onRequestLock(song) { reloadIfNeeded() }
+                    listener?.onLongPressed(song) { reloadIfNeeded() }
                     true
                 }
             }

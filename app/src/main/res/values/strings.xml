@@ -39,4 +39,16 @@
     <string name="answer_unlock">Unlock</string>
     <string name="info">Information</string>
     <string name="apple_music">Check original songs (Apple Music)</string>
+    <string name="remove_ads">Remove Ads</string>
+    <string name="remove_reward_ads">Remove Reward Ads</string>
+    <string name="remove_banner_ads">Remove Banner Ads</string>
+    <string name="remove_reward_ads_with_price">Remove Reward Ads\nPrice: %s</string>
+    <string name="remove_banner_ads_with_price">Remove Banner Ads\nPrice: %s</string>
+    <string name="remove_reward_ads_about">Purchase of this product will allow you to unlock songs without playing reward video ads. Once purchased, this product can be used permanently on your Google Account.</string>
+    <string name="remove_banner_ads_about">Purchase of this product will eliminate the banner ads at the top of the screen and the interstitial ads during shuffle playback. Because these ads are important for us to avoid operating at a loss, they are priced at a high level. Once purchased, this product can be used permanently on your Google Account.</string>
+    <string name="restore_purchase">Restore Purchase</string>
+    <string name="cannot_connect_google_play">Cannot connect to the GooglePlay.</string>
+    <string name="purchase">Purchase</string>
+    <string name="lock_song">Lock this song</string>
+    <string name="apple_music_not_exist">This music is not yet available on AppleMusic.</string>
 </resources>

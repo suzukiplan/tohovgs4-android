@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -68,6 +69,38 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                     Uri.parse("https://music.apple.com/jp/artist/1190977068")
                 )
             )
+        }
+        val removeRewardAdsButton = view.findViewById<Button>(R.id.remove_reward_ads)
+        removeRewardAdsButton.text = getString(
+            R.string.remove_reward_ads_with_price,
+            mainActivity.getPriceOfRemoveRewardAds()
+        )
+        if (true == settings?.removeRewardAds) {
+            removeRewardAdsButton.isEnabled = false
+        } else {
+            removeRewardAdsButton.setOnClickListener {
+                mainActivity.purchaseRemoveRewardAds()
+            }
+        }
+        val removeBannerAdsButton = view.findViewById<Button>(R.id.remove_banner_ads)
+        removeBannerAdsButton.text = getString(
+            R.string.remove_banner_ads_with_price,
+            mainActivity.getPriceOfRemoveBannerAds()
+        )
+        if (true == settings?.removeBannerAds) {
+            removeBannerAdsButton.isEnabled = false
+        } else {
+            removeBannerAdsButton.setOnClickListener {
+                mainActivity.purchaseRemoveBannerAds()
+            }
+        }
+        val restoreButton = view.findViewById<View>(R.id.restore_purchase)
+        if (true == settings?.removeRewardAds && true == settings?.removeBannerAds) {
+            restoreButton.isEnabled = false
+        } else {
+            restoreButton.setOnClickListener {
+                mainActivity.restorePurchase()
+            }
         }
         return view
     }

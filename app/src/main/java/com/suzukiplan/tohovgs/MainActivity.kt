@@ -5,6 +5,8 @@
 package com.suzukiplan.tohovgs
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -12,10 +14,12 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
+import com.android.billingclient.api.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -54,6 +58,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     fun executeAsync(task: () -> Unit) = executor.submit(task)!!
     private var pausing = true
     private val procedureQueue = ArrayList<() -> Unit>(0)
+    private lateinit var billingClient: BillingClient
+    private var billingClientReady = false
+    private var billingProducts = ArrayList<SkuDetails>()
+    private var adView: AdView? = null
+    private val skuRemoveRewardAds = "remove_reward_ads"
+    private val skuRemoveBannerAds = "remove_banner_ads"
 
     fun executeWhileResume(procedure: () -> Unit) {
         if (pausing) {
@@ -112,7 +122,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager?.infinity = checked
         }
-
+        setupBillingClient()
         val adConfig = RequestConfiguration.Builder()
             .setTestDeviceIds(
                 listOf(
@@ -122,43 +132,49 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
             )
             .build()
         MobileAds.setRequestConfiguration(adConfig)
-        executeAsync {
-            MobileAds.initialize(this) {
-                Logger.d("MobileAds initialized: $it")
-                val adView = AdView(this)
-                adView.adSize = AdSize.BANNER
-                adView.adUnitId = Constants.bannerAdsId
-                val layoutParams = RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 1)
-                adView.layoutParams = layoutParams
-                adView.adListener = object : AdListener() {
-                    override fun onAdFailedToLoad(error: LoadAdError) {
-                        super.onAdFailedToLoad(error)
-                        Logger.e("Failed to load ad: $error")
-                    }
-
-                    override fun onAdLoaded() {
-                        super.onAdLoaded()
-                        Logger.d("Ad loaded")
-                        adBgImage.visibility = View.GONE
-                        adBgText.visibility = View.GONE
-                    }
-                }
-                runOnUiThread { adContainer.addView(adView) }
-                val request = AdRequest.Builder().build()
-                adView.loadAd(request)
-            }
-        }
-
         currentPage = Page.NotSelected
         executeAsync {
             initialize {
                 runOnUiThread {
+                    setupBanner()
                     resetSeekBar()
                     movePage(settings?.pageName)
+                }
+            }
+        }
+    }
+
+    private fun setupBanner() {
+        if (settings?.removeBannerAds != true) {
+            executeAsync {
+                MobileAds.initialize(this) {
+                    Logger.d("MobileAds initialized: $it")
+                    val adView = AdView(this)
+                    adView.adSize = AdSize.BANNER
+                    adView.adUnitId = Constants.bannerAdsId
+                    val layoutParams = RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 1)
+                    adView.layoutParams = layoutParams
+                    adView.adListener = object : AdListener() {
+                        override fun onAdFailedToLoad(error: LoadAdError) {
+                            super.onAdFailedToLoad(error)
+                            Logger.e("Failed to load ad: $error")
+                        }
+
+                        override fun onAdLoaded() {
+                            super.onAdLoaded()
+                            Logger.d("Ad loaded")
+                            adBgImage.visibility = View.GONE
+                            adBgText.visibility = View.GONE
+                        }
+                    }
+                    runOnUiThread { adContainer.addView(adView) }
+                    val request = AdRequest.Builder().build()
+                    adView.loadAd(request)
+                    this.adView = adView
                 }
             }
         }
@@ -289,21 +305,64 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     override fun onRequestLock(song: Song, done: () -> Unit) {
+        if (true == settings?.removeRewardAds) {
+            doLock(song, done)
+            return
+        }
         AskDialog.start(this, getString(R.string.ask_lock, song.name), object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
                 if (isYes) {
-                    val previousStatus = musicManager?.isExistLockedSong(settings)
-                    settings?.lock(song)
-                    if (false == previousStatus) {
-                        refreshAlbumPagerFragment()
-                    }
-                    done()
+                    doLock(song, done)
                 }
             }
         })
     }
 
+    private fun doLock(song: Song, done: () -> Unit) {
+        val previousStatus = musicManager?.isExistLockedSong(settings)
+        settings?.lock(song)
+        if (false == previousStatus) {
+            refreshAlbumPagerFragment()
+        }
+        done()
+    }
+
+    override fun onLongPressed(song: Song, unlocked: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle(song.name)
+            .setItems(
+                arrayOf(
+                    getString(R.string.apple_music),
+                    getString(R.string.lock_song)
+                )
+            ) { _, index ->
+                when (index) {
+                    0 -> {
+                        Logger.d("appleId: album=${song.parentAlbum?.appleId} song=${song.appleId}")
+                        if (null != song.appleMusicURL) {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(song.appleMusicURL)
+                                )
+                            )
+                        } else {
+                            MessageDialog.start(this, getString(R.string.apple_music_not_exist))
+                        }
+                    }
+                    1 -> doLock(song, unlocked)
+                }
+            }
+            .show()
+    }
+
     override fun onRequestUnlockAll(done: ((unlocked: Boolean) -> Unit)?) {
+        if (true == settings?.removeRewardAds) {
+            musicManager?.albums?.forEach { settings?.unlock(it) }
+            refreshAlbumPagerFragment()
+            done?.invoke(true)
+            return
+        }
         val message = getString(R.string.ask_unlock_all)
         AskDialog.start(this, message, object : AskDialog.Listener {
             override fun onClick(isYes: Boolean) {
@@ -449,6 +508,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun showInterstitialAd() {
+        if (true == settings?.removeBannerAds) {
+            return
+        }
         val request = AdRequest.Builder().build()
         InterstitialAd.load(
             this,
@@ -484,5 +546,140 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     fun hideBadge() {
         badge.visibility = View.GONE
         settings?.badge = false
+    }
+
+    private fun setupBillingClient() {
+        billingClient = BillingClient.newBuilder(this)
+            .setListener { result, purchases -> proceedPurchases(result, purchases) }
+            .enablePendingPurchases()
+            .build()
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingServiceDisconnected() {
+            }
+
+            override fun onBillingSetupFinished(result: BillingResult) {
+                if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                    val skuList = ArrayList<String>(2)
+                    skuList.add(skuRemoveRewardAds)
+                    skuList.add(skuRemoveBannerAds)
+                    val params = SkuDetailsParams.newBuilder()
+                        .setSkusList(skuList)
+                        .setType(BillingClient.SkuType.INAPP)
+                        .build()
+                    billingClient.querySkuDetailsAsync(params) { result2, skuDetails ->
+                        if (result2.responseCode == BillingClient.BillingResponseCode.OK) {
+                            skuDetails?.forEach { skuDetail ->
+                                Logger.d("sku = ${skuDetail.sku}, title = ${skuDetail.title} price = ${skuDetail.price}")
+                                billingProducts.add(skuDetail)
+                            }
+                            billingClientReady = true
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fun getPriceOfRemoveRewardAds() =
+        billingProducts.find { it.sku == skuRemoveRewardAds }?.price
+
+    fun getPriceOfRemoveBannerAds() =
+        billingProducts.find { it.sku == skuRemoveBannerAds }?.price
+
+    fun purchaseRemoveRewardAds() = purchase(skuRemoveRewardAds)
+
+    fun purchaseRemoveBannerAds() = purchase(skuRemoveBannerAds)
+
+    private fun purchase(sku: String) {
+        startProgress()
+        billingClient.querySkuDetailsAsync(
+            SkuDetailsParams.newBuilder()
+                .setType(BillingClient.SkuType.INAPP)
+                .setSkusList(listOf(sku))
+                .build()
+        ) { skuResult, skuDetails ->
+            endProgress()
+            if (null == skuDetails || skuResult.responseCode != BillingClient.BillingResponseCode.OK) {
+                MessageDialog.start(this, getString(R.string.cannot_connect_google_play))
+                return@querySkuDetailsAsync
+            }
+            val skuDetail = skuDetails[0]
+            val message = when (sku) {
+                skuRemoveRewardAds -> getString(R.string.remove_reward_ads_about)
+                skuRemoveBannerAds -> getString(R.string.remove_banner_ads_about)
+                else -> ""
+            }
+            AskDialog.start(
+                this,
+                message,
+                getString(R.string.purchase),
+                getString(R.string.cancel),
+                object : AskDialog.Listener {
+                    override fun onClick(isYes: Boolean) {
+                        if (isYes) {
+                            startPurchase(skuDetail)
+                        }
+                    }
+                })
+        }
+    }
+
+    private fun startPurchase(skuDetail: SkuDetails) {
+        val params = BillingFlowParams.newBuilder()
+            .setSkuDetails(skuDetail)
+            .build()
+        val responseCode = billingClient.launchBillingFlow(this, params).responseCode
+        Logger.d("ResponseCode: $responseCode")
+    }
+
+    fun restorePurchase() {
+        startProgress()
+        billingClient.queryPurchasesAsync(BillingClient.SkuType.INAPP) { result, purchases ->
+            proceedPurchases(result, purchases)
+            executeAsync {
+                Thread.sleep(1500)
+                runOnUiThread {
+                    endProgress()
+                }
+            }
+        }
+    }
+
+    private fun proceedPurchases(result: BillingResult, purchases: List<Purchase>?) {
+        if (result.responseCode != BillingClient.BillingResponseCode.OK) return
+        purchases?.forEach { purchase ->
+            purchase.skus.forEach { sku ->
+                Logger.d("checking sku: $sku")
+                when (sku) {
+                    skuRemoveRewardAds -> {
+                        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                            settings?.removeRewardAds = true
+                        }
+                    }
+                    skuRemoveBannerAds -> {
+                        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                            settings?.removeBannerAds = true
+                            val adView = this.adView
+                            if (null != adView) {
+                                runOnUiThread {
+                                    adContainer.removeView(adView)
+                                    adBgImage.visibility = View.VISIBLE
+                                    adBgText.visibility = View.VISIBLE
+                                }
+                                this.adView = null
+                            }
+                        }
+                    }
+                }
+            }
+            if (!purchase.isAcknowledged && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+                billingClient.acknowledgePurchase(acknowledgePurchaseParams) { result ->
+                    Logger.d("acknowledgePurchase: $result")
+                }
+            }
+        }
     }
 }
