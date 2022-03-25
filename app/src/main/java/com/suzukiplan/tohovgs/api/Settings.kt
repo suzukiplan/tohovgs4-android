@@ -96,4 +96,12 @@ class Settings(context: Context?) {
     var compatListType: Int
         get() = preferences?.getInt("compat_list_type", 0) ?: 0
         set(value) = save { editor -> editor.putInt("compat_list_type", value) }
+
+    var removeRewardAds: Boolean
+        get() = preferences?.getBoolean("remove_reward_ads", false) ?: false
+        set(value) = save { editor -> editor.putBoolean("remove_reward_ads", value) }
+
+    var removeBannerAds: Boolean
+        get() = preferences?.getBoolean("remove_banner_ads", false) ?: false
+        set(value) = save { editor -> editor.putBoolean("remove_banner_ads", value) }
 }
