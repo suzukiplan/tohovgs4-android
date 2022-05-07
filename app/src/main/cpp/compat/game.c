@@ -141,6 +141,7 @@ void tohovgs_setPreference(int currentTitleId,
     PRF.kobushi = kobushi;
     PRF.localeId = localeId;
     PRF.listType = listType;
+    PRF.isFirst = 1;
 }
 
 struct Preferences *tohovgs_getPreference() {
@@ -165,7 +166,6 @@ static void put_kanji(int x, int y, int col, const char *msg, ...);
  */
 int vge_tick() {
     static const char *tn[4] = {"TRI", "SAW", "SQ", "NOZ"};
-    static int isFirst = 1;
     static double base = 4.0;
     static double baseX = 0.0;
     static double move = 0;
@@ -203,9 +203,9 @@ int vge_tick() {
     int playingTitle;
 
     /* preferences */
-    if (isFirst) {
+    if (PRF.isFirst) {
         /* load preferences and setup */
-        isFirst = 0;
+        PRF.isFirst = 0;
         base = (double) PRF.base;
         for (i = 0; i < fs_TitleNum; i++) {
             if (fs_title[i].id == PRF.currentTitleId) break;
@@ -468,7 +468,8 @@ int vge_tick() {
 
     /* Auto focus */
     if (focus) {
-        if (0 == PRF.listType && 0 <= fs_musicCursor && fs_list[fs_musicCursor].id != fs_title[fs_currentTitle].id) {
+        if (0 == PRF.listType && 0 <= fs_musicCursor &&
+            fs_list[fs_musicCursor].id != fs_title[fs_currentTitle].id) {
             playingTitle = fs_list[fs_musicCursor].id;
             if (playingTitle != fs_title[fs_currentTitle].id) {
                 /* check pop count of right */

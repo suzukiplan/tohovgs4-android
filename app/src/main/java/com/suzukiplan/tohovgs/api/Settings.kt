@@ -86,8 +86,15 @@ class Settings(context: Context?) {
         set(value) = save { editor -> editor.putInt("compat_infinity", value) }
 
     var compatKobushi: Int
-        get() = preferences?.getInt("compat_kobushi", 0) ?: 0
-        set(value) = save { editor -> editor.putInt("compat_kobushi", value) }
+        get() {
+            val result = preferences?.getInt("compat_kobushi", 0) ?: 0
+            Logger.d("Get Kobusi ($result)")
+            return result
+        }
+        set(value) {
+            Logger.d("Set KoBuSi = $value")
+            save { editor -> editor.putInt("compat_kobushi", value) }
+        }
 
     var compatLocaleId: Int
         get() = preferences?.getInt("compat_locale_id", 0) ?: 0

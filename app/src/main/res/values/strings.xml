@@ -51,4 +51,5 @@
     <string name="purchase">Purchase</string>
     <string name="lock_song">Lock this song</string>
     <string name="apple_music_not_exist">This music is not yet available on AppleMusic.</string>
+    <string name="kobusi_mode">KoBuSi mode</string>
 </resources>

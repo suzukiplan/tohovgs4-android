@@ -42,6 +42,7 @@ struct Preferences {
     int kobushi;
     int localeId;
     int listType;
+    int isFirst;
 };
 
 extern struct _VRAM _vram;
