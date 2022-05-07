@@ -106,6 +106,13 @@ Java_com_suzukiplan_tohovgs_api_JNI_seek(JNIEnv *, jclass, jlong context, jint p
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_kobushi(JNIEnv *, jclass, jlong context, jint kobushi) {
+    if (context) {
+        vgsdec_set_value((void *) context, VGSDEC_REG_KOBUSHI, kobushi);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *env, jclass) {
     if (compatAudioSystem) {
         delete compatAudioSystem;

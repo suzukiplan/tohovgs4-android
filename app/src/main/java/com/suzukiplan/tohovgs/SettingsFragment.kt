@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.Settings
@@ -43,6 +44,13 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         masterVolumeText = view.findViewById(R.id.master_volume_text)
         val masterVolume = settings?.masterVolume ?: 100
         masterVolumeText.text = getString(R.string.master_volume, masterVolume)
+        val kobusiToggle = view.findViewById<AppCompatToggleButton>(R.id.kobusi_toggle)
+        kobusiToggle.isChecked = 0 != mainActivity.settings?.compatKobushi
+        kobusiToggle.setOnCheckedChangeListener { _, value ->
+            val before = mainActivity.settings?.compatKobushi
+            mainActivity.settings?.compatKobushi = if (value) 1 else 0
+            Logger.d("KoBuSi: $before -> ${mainActivity.settings?.compatKobushi}")
+        }
         val seekBar = view.findViewById<SeekBar>(R.id.master_volume_seek_bar)
         seekBar.progress = masterVolume
         seekBar.setOnSeekBarChangeListener(this)

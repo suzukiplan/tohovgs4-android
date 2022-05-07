@@ -38,8 +38,11 @@ class WebAPI(private val mainActivity: MainActivity) {
 
     fun downloadMML(song: Song): String? = getSync("/${song.mml}.mml")
 
-    private fun makeRequest(path: String) =
+    private fun makeRequest(path: String) = if (BuildConfig.DEBUG) {
+        Request.Builder().url("${BuildConfig.API_SERVER_BASE_URI_DEV}$path").build()
+    } else {
         Request.Builder().url("${BuildConfig.API_SERVER_BASE_URI}$path").build()
+    }
 
     private fun getAsync(path: String, done: (body: String?) -> Unit) {
         Logger.d("GET $path <async>")

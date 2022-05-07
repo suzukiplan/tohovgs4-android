@@ -231,6 +231,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         } else {
             View.VISIBLE
         }
+        if (currentPage == Page.Retro) {
+            (currentFragment as? RetroFragment)?.stopRenderThread()
+        }
         val fragment = when (page) {
             Page.NotSelected -> return
             Page.PerTitle -> AlbumPagerFragment.create()
