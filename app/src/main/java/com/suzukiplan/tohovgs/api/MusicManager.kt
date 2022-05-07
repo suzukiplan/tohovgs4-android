@@ -40,6 +40,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     var isBackground = false
     private var startedContext: Context? = null
     private var masterVolume = 100
+    private var kobushi = 0
     private val downloadSongListFile: File get() = File("${mainActivity.filesDir}/songlist.json")
 
     fun isExistLockedSong(settings: Settings?): Boolean? {
@@ -225,7 +226,8 @@ class MusicManager(private val mainActivity: MainActivity) {
         decodeSize = 0
         song.readMML(mainActivity) {
             synchronized(locker) {
-                JNI.load(vgsContext, it, mainActivity.settings?.compatKobushi ?: 0)
+                kobushi = mainActivity.settings?.compatKobushi ?: 0
+                JNI.load(vgsContext, it)
                 createAudioTrack(seek, onSeek, onPlayEnded)
                 if (isBackground) startJob(context)
                 startedContext = context
@@ -235,7 +237,10 @@ class MusicManager(private val mainActivity: MainActivity) {
 
     fun seek(progress: Int?) {
         progress ?: return
-        synchronized(locker) { JNI.seek(vgsContext, progress * 22050) }
+        synchronized(locker) {
+            JNI.seek(vgsContext, progress * 22050)
+            JNI.kobushi(vgsContext, kobushi)
+        }
     }
 
     private fun createAudioTrack(
@@ -302,6 +307,7 @@ class MusicManager(private val mainActivity: MainActivity) {
             }
         })
         JNI.seek(vgsContext, seek * 22050)
+        JNI.kobushi(vgsContext, kobushi)
         decode(decodeAudioBufferFirst)
         audioTrack?.write(decodeAudioBufferFirst, 0, decodeAudioBufferFirst.size)
         audioTrack?.play()

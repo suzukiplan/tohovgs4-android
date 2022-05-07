@@ -12,7 +12,7 @@ public class JNI {
 
     public static native void releaseDecoder(long context);
 
-    public static native void load(long context, byte[] mml, int kobushi);
+    public static native void load(long context, byte[] mml);
 
     public static native void decode(long context, byte[] buf);
 
@@ -27,6 +27,8 @@ public class JNI {
     public static native int getTime(long context);
 
     public static native void seek(long context, int progress);
+
+    public static native void kobushi(long context, int kobushi);
 
     public static native void compatCleanUp();
 
