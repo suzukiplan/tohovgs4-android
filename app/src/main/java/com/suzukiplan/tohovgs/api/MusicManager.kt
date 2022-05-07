@@ -64,7 +64,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     fun load(): MusicManager {
-        changeMasterVolume(Settings(mainActivity).masterVolume)
+        changeMasterVolume(mainActivity.settings?.masterVolume ?: 100)
         val assetSongListInput = mainActivity.assets.open("songlist.json")
         val assetSongListJson = String(assetSongListInput.readBytes(), Charsets.UTF_8)
         assetSongListInput.close()
