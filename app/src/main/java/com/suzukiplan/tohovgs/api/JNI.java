@@ -12,7 +12,7 @@ public class JNI {
 
     public static native void releaseDecoder(long context);
 
-    public static native void load(long context, byte[] mml);
+    public static native void load(long context, byte[] mml, int kobushi);
 
     public static native void decode(long context, byte[] buf);
 

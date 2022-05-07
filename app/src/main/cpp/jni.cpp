@@ -29,7 +29,8 @@ Java_com_suzukiplan_tohovgs_api_JNI_releaseDecoder(JNIEnv *, jclass, jlong conte
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_load(JNIEnv *env, jclass, jlong context, jbyteArray mml_) {
+Java_com_suzukiplan_tohovgs_api_JNI_load(JNIEnv *env, jclass, jlong context, jbyteArray mml_,
+                                         jint kobushi) {
     if (context) {
         jbyte *mml = env->GetByteArrayElements(mml_, nullptr);
         size_t size = (uint32_t) env->GetArrayLength(mml_);
@@ -39,6 +40,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_load(JNIEnv *env, jclass, jlong context, jby
             if (data) {
                 vgsdec_load_bgm_from_memory((void *) context, data->data, data->size);
                 vgsmml_free_bgm_data(data);
+                vgsdec_set_value((void *) context, VGSDEC_REG_KOBUSHI, kobushi);
             }
             env->ReleaseByteArrayElements(mml_, mml, 0);
         }

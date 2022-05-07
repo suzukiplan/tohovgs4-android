@@ -225,7 +225,7 @@ class MusicManager(private val mainActivity: MainActivity) {
         decodeSize = 0
         song.readMML(mainActivity) {
             synchronized(locker) {
-                JNI.load(vgsContext, it)
+                JNI.load(vgsContext, it, mainActivity.settings?.compatKobushi ?: 0)
                 createAudioTrack(seek, onSeek, onPlayEnded)
                 if (isBackground) startJob(context)
                 startedContext = context
