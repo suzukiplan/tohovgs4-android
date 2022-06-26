@@ -4,7 +4,7 @@
  */
 package com.suzukiplan.tohovgs.api
 
-import com.suzukiplan.tohovgs.BuildConfig
+import com.suzukiplan.TOHOVGS.BuildConfig
 import com.suzukiplan.tohovgs.MainActivity
 import com.suzukiplan.tohovgs.model.Song
 import com.suzukiplan.tohovgs.model.SongList

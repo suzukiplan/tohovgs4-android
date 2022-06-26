@@ -5,7 +5,7 @@
 package com.suzukiplan.tohovgs.api
 
 import android.util.Log
-import com.suzukiplan.tohovgs.BuildConfig
+import com.suzukiplan.TOHOVGS.BuildConfig
 
 class Logger {
     companion object {

@@ -16,6 +16,8 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
+import com.suzukiplan.TOHOVGS.BuildConfig
+import com.suzukiplan.TOHOVGS.R
 import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Song
