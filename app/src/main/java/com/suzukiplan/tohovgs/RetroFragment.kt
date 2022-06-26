@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import com.suzukiplan.TOHOVGS.R
 import com.suzukiplan.tohovgs.api.JNI
 import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.Settings

@@ -8,7 +8,6 @@ import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.suzukiplan.TOHOVGS.BuildConfig
 
 class TOHOVGS : Application() {
     init {

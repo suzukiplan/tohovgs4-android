@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.reflect.TypeToken
-import com.suzukiplan.TOHOVGS.R
 import com.suzukiplan.tohovgs.model.Song
 import java.lang.reflect.Type
 

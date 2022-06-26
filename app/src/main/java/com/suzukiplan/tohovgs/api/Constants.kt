@@ -4,7 +4,7 @@
  */
 package com.suzukiplan.tohovgs.api
 
-import com.suzukiplan.TOHOVGS.BuildConfig
+import com.suzukiplan.tohovgs.BuildConfig
 
 class Constants {
     companion object {

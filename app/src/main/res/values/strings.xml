@@ -24,9 +24,11 @@
     <string name="contents">Content</string>
     <string name="sound">Sound</string>
     <string name="master_volume">Master Volume: %d%%</string>
-    <string name="support">Support</string>
-    <string name="support_twitter">Twitter: @suzukiplan</string>
-    <string name="support_github">Web: suzukiplan.github.io</string>
+    <string name="support">SUZUKI PLAN - Social Media</string>
+    <string name="support_twitter">Twitter</string>
+    <string name="support_youtube">YouTube</string>
+    <string name="support_tiktok">TikTok</string>
+    <string name="support_github">GitHub</string>
     <string name="communication_error">Communication with the server has failed. (status code: %d)</string>
     <string name="up_to_date">All songs are up to date.\nThe first update information for new songs will be posted on my Twitter, so please follow me if you like.</string>
     <string name="update_list_only">Only the song list has been updated. No new songs have been added.</string>

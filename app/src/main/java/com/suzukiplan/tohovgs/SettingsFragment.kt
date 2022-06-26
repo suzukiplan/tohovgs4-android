@@ -16,8 +16,6 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
-import com.suzukiplan.TOHOVGS.BuildConfig
-import com.suzukiplan.TOHOVGS.R
 import com.suzukiplan.tohovgs.api.Logger
 import com.suzukiplan.tohovgs.api.Settings
 import com.suzukiplan.tohovgs.model.Song
@@ -61,6 +59,22 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://twitter.com/suzukiplan")
+                )
+            )
+        }
+        view.findViewById<View>(R.id.youtube).setOnClickListener {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.youtube.com/channel/UCAIpmEfeuTAXQ0ERTSkb6oA")
+                )
+            )
+        }
+        view.findViewById<View>(R.id.tiktok).setOnClickListener {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.tiktok.com/@suzukiplan")
                 )
             )
         }
