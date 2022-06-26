@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private val procedureQueue = ArrayList<() -> Unit>(0)
     private lateinit var billingClient: BillingClient
     private var billingClientReady = false
-    private var billingProducts = ArrayList<SkuDetails>()
+    private var billingProducts = ArrayList<ProductDetails>()
     private var adView: AdView? = null
     private val skuRemoveRewardAds = "remove_reward_ads"
     private val skuRemoveBannerAds = "remove_banner_ads"
@@ -564,18 +564,27 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
             override fun onBillingSetupFinished(result: BillingResult) {
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val skuList = ArrayList<String>(2)
-                    skuList.add(skuRemoveRewardAds)
-                    skuList.add(skuRemoveBannerAds)
-                    val params = SkuDetailsParams.newBuilder()
-                        .setSkusList(skuList)
-                        .setType(BillingClient.SkuType.INAPP)
+                    val productList = ArrayList<QueryProductDetailsParams.Product>(2)
+                    productList.add(
+                        QueryProductDetailsParams.Product.newBuilder()
+                            .setProductId(skuRemoveRewardAds)
+                            .setProductType(BillingClient.ProductType.INAPP)
+                            .build()
+                    )
+                    productList.add(
+                        QueryProductDetailsParams.Product.newBuilder()
+                            .setProductId(skuRemoveBannerAds)
+                            .setProductType(BillingClient.ProductType.INAPP)
+                            .build()
+                    )
+                    val params = QueryProductDetailsParams.newBuilder()
+                        .setProductList(productList)
                         .build()
-                    billingClient.querySkuDetailsAsync(params) { result2, skuDetails ->
+                    billingClient.queryProductDetailsAsync(params) { result2, productDetails ->
                         if (result2.responseCode == BillingClient.BillingResponseCode.OK) {
-                            skuDetails?.forEach { skuDetail ->
-                                Logger.d("sku = ${skuDetail.sku}, title = ${skuDetail.title} price = ${skuDetail.price}")
-                                billingProducts.add(skuDetail)
+                            productDetails.forEach { productDetail ->
+                                Logger.d("sku = ${productDetail.productId}, title = ${productDetail.title} price = ${productDetail.oneTimePurchaseOfferDetails?.formattedPrice}")
+                                billingProducts.add(productDetail)
                             }
                             billingClientReady = true
                         }
@@ -586,10 +595,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun getPriceOfRemoveRewardAds() =
-        billingProducts.find { it.sku == skuRemoveRewardAds }?.price
+        billingProducts.find { it.productId == skuRemoveRewardAds }?.oneTimePurchaseOfferDetails?.formattedPrice
 
     fun getPriceOfRemoveBannerAds() =
-        billingProducts.find { it.sku == skuRemoveBannerAds }?.price
+        billingProducts.find { it.productId == skuRemoveBannerAds }?.oneTimePurchaseOfferDetails?.formattedPrice
 
     fun purchaseRemoveRewardAds() = purchase(skuRemoveRewardAds)
 
@@ -597,18 +606,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     private fun purchase(sku: String) {
         startProgress()
-        billingClient.querySkuDetailsAsync(
-            SkuDetailsParams.newBuilder()
-                .setType(BillingClient.SkuType.INAPP)
-                .setSkusList(listOf(sku))
+        val productList = ArrayList<QueryProductDetailsParams.Product>(2)
+        productList.add(
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(sku)
+                .setProductType(BillingClient.ProductType.INAPP)
                 .build()
-        ) { skuResult, skuDetails ->
+        )
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(productList)
+            .build()
+        billingClient.queryProductDetailsAsync(params) { result, productDetails ->
             endProgress()
-            if (null == skuDetails || skuResult.responseCode != BillingClient.BillingResponseCode.OK) {
+            if (result.responseCode != BillingClient.BillingResponseCode.OK) {
                 MessageDialog.start(this, getString(R.string.cannot_connect_google_play))
-                return@querySkuDetailsAsync
+                return@queryProductDetailsAsync
             }
-            val skuDetail = skuDetails[0]
             val message = when (sku) {
                 skuRemoveRewardAds -> getString(R.string.remove_reward_ads_about)
                 skuRemoveBannerAds -> getString(R.string.remove_banner_ads_about)
@@ -622,16 +635,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 object : AskDialog.Listener {
                     override fun onClick(isYes: Boolean) {
                         if (isYes) {
-                            startPurchase(skuDetail)
+                            startPurchase(
+                                listOf(
+                                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                                        .setProductDetails(productDetails[0])
+                                        .build()
+                                )
+                            )
                         }
                     }
                 })
         }
     }
 
-    private fun startPurchase(skuDetail: SkuDetails) {
+    private fun startPurchase(skuDetail: List<BillingFlowParams.ProductDetailsParams>) {
         val params = BillingFlowParams.newBuilder()
-            .setSkuDetails(skuDetail)
+            .setProductDetailsParamsList(skuDetail)
             .build()
         val responseCode = billingClient.launchBillingFlow(this, params).responseCode
         Logger.d("ResponseCode: $responseCode")
@@ -639,7 +658,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     fun restorePurchase() {
         startProgress()
-        billingClient.queryPurchasesAsync(BillingClient.SkuType.INAPP) { result, purchases ->
+        val params = QueryPurchasesParams.newBuilder()
+            .setProductType(BillingClient.ProductType.INAPP)
+            .build()
+        billingClient.queryPurchasesAsync(params) { result, purchases ->
             proceedPurchases(result, purchases)
             executeAsync {
                 Thread.sleep(1500)
@@ -653,7 +675,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun proceedPurchases(result: BillingResult, purchases: List<Purchase>?) {
         if (result.responseCode != BillingClient.BillingResponseCode.OK) return
         purchases?.forEach { purchase ->
-            purchase.skus.forEach { sku ->
+            purchase.products.forEach { sku ->
                 Logger.d("checking sku: $sku")
                 when (sku) {
                     skuRemoveRewardAds -> {

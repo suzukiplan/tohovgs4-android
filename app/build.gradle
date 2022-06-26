@@ -92,6 +92,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-perf-ktx'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-    implementation 'com.android.billingclient:billing:4.0.0'
-    implementation 'com.android.billingclient:billing-ktx:4.0.0'
+    implementation 'com.android.billingclient:billing:5.0.0'
+    implementation 'com.android.billingclient:billing-ktx:5.0.0'
 }
