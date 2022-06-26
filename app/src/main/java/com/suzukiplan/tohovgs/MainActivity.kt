@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 MobileAds.initialize(this) {
                     Logger.d("MobileAds initialized: $it")
                     val adView = AdView(this)
-                    adView.adSize = AdSize.BANNER
+                    adView.setAdSize(AdSize.BANNER)
                     adView.adUnitId = Constants.bannerAdsId
                     val layoutParams = RelativeLayout.LayoutParams(
                         RelativeLayout.LayoutParams.WRAP_CONTENT,
