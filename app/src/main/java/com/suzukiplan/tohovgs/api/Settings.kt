@@ -16,10 +16,6 @@ class Settings(context: Context?) {
         get() = preferences?.getString("last_selected_album_id", "th06")
         set(value) = save { editor -> editor.putString("last_selected_album_id", value) }
 
-    var initialPositionSequential: Int
-        get() = preferences?.getInt("initial_position_sequential", 0) ?: 0
-        set(value) = save { editor -> editor.putInt("initial_position_sequential", value) }
-
     fun commit() {
         Logger.d("commit shared preferences: ${preferences?.edit()?.commit()}")
     }
@@ -33,6 +29,10 @@ class Settings(context: Context?) {
     fun isLocked(song: Song): Boolean {
         val defaultLocked = song.parentAlbum?.defaultLocked ?: true
         return preferences?.getBoolean("locked_${song.mml}", defaultLocked) ?: defaultLocked
+    }
+
+    fun isFavorite(song: Song): Boolean {
+        return preferences?.getBoolean("favorite_${song.mml}", false) ?: false
     }
 
     fun unlock(album: Album) {
@@ -57,9 +57,11 @@ class Settings(context: Context?) {
         }
     }
 
-    var pageName: String?
-        get() = preferences?.getString("page_name", null)
-        set(value) = save { editor -> editor.putString("page_name", value) }
+    fun favorite(song: Song, value: Boolean) {
+        save { editor ->
+            editor.putBoolean("favorite_${song.mml}", value)
+        }
+    }
 
     var masterVolume: Int
         get() = preferences?.getInt("master_volume", 100) ?: 100

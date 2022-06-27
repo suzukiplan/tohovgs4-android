@@ -9,9 +9,19 @@
     <color name="black_alpha12">#20000000</color>
     <color name="black_alpha50">#80000000</color>
     <color name="black_alpha75">#A0000000</color>
+    <color name="white_alpha12">#20FFFFFF</color>
+    <color name="white_alpha25">#40FFFFFF</color>
+    <color name="white_alpha50">#80FFFFFF</color>
+    <color name="white_alpha75">#A0FFFFFF</color>
     <color name="grey">#FFAAAAAA</color>
     <color name="dark_grey">#FF888888</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="vgs_blue_screen">#FF000040</color>
+    <color name="seek_bar_background">#80404080</color>
+    <color name="light_blue">#FF0099CD</color>
+    <color name="dark_blue">#FF003366</color>
+    <color name="light_black">#FF111111</color>
+    <color name="button_background">#80404080</color>
+    <color name="button_border">#40404080</color>
 </resources>

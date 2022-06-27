@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">東方VGS</string>
     <string name="app_name_long">東方BGM on VGS</string>
-    <string name="sequential">ALL</string>
-    <string name="shuffle">SHUFFLE</string>
-    <string name="home">HOME</string>
+    <string name="home">Home</string>
+    <string name="sequential">All</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="retro_ui">Retro</string>
+    <string name="settings">Settings</string>
     <string name="please_wait">しばらくお待ち下さい…</string>
     <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
@@ -18,15 +20,16 @@
     <string name="seek_bar">シークバー</string>
     <string name="unlock_all_songs">全ての楽曲をアンロックする</string>
     <string name="hide_unlock_all_button">一時的に全ての楽曲アンロックボタンを隠す</string>
-    <string name="retro_ui">RETRO</string>
     <string name="launch_emulator_error">Cannot launch the VGS emulator.\nALL SONGS ARE LOCKED.</string>
     <string name="download">サーバーから最新楽曲をダウンロード</string>
     <string name="contents">コンテンツ</string>
     <string name="sound">サウンド</string>
     <string name="master_volume">マスターボリューム: %d%%</string>
-    <string name="support">サポート</string>
-    <string name="support_twitter">Twitter: @suzukiplan</string>
-    <string name="support_github">Web: suzukiplan.github.io</string>
+    <string name="support">SUZUKI PLAN - SNS</string>
+    <string name="support_twitter">Twitter</string>
+    <string name="support_youtube">YouTube</string>
+    <string name="support_tiktok">TikTok</string>
+    <string name="support_github">GitHub</string>
     <string name="communication_error">サーバーとの通信に失敗しました (状態コード: %d)</string>
     <string name="up_to_date">楽曲は全て最新の状態です。\n新曲のアップデート情報は Twitter でお知らせするので、よろしければフォローしてください。</string>
     <string name="update_list_only">楽曲リストの更新のみ行いました。追加された楽曲はありません。</string>
@@ -52,4 +55,6 @@
     <string name="lock_song">この楽曲をロックする</string>
     <string name="apple_music_not_exist">この楽曲はまだAppleMusicでは配信されていません。</string>
     <string name="kobusi_mode">KoBuSi モード</string>
+    <string name="all_songs">全楽曲</string>
+    <string name="favorites">お気に入り</string>
 </resources>

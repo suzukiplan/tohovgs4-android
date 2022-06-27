@@ -1,5 +1,5 @@
 {
-    "version": "2022.05.06",
+    "version": "2022.06.25",
     "albums": [
         {
             "appleId": "1438613504",
@@ -1090,6 +1090,14 @@
             "defaultLocked": true,
             "songs": [
                 {
+                    "appleId": "1581358393",
+                    "mml": "TH12-01",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "青空の影",
+                    "english": "Shadow of Blue Sky"
+                },
+                {
                     "appleId": "1581358394",
                     "mml": "TH12-02",
                     "ver": 0,
@@ -1160,6 +1168,89 @@
                     "loop": 1,
                     "name": "魔界地方都市エソテリア",
                     "english": "Esoteria, a local city in the magical world"
+                },
+                {
+                    "appleId": "1581358403",
+                    "mml": "TH12-11",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "虎柄の毘沙門天",
+                    "english": "Bishamonten with Tiger Pattern"
+                },
+                {
+                    "appleId": "1581358404",
+                    "mml": "TH12-12",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "法界の火",
+                    "english": "Fire of the Dharmadhatu"
+                },
+                {
+                    "appleId": "1581358405",
+                    "mml": "TH12-13",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "感情の摩天楼　〜 Cosmic Mind",
+                    "english": "Emotional Skyscrapers　〜 Cosmic Mind"
+                },
+                {
+                    "appleId": "1581358406",
+                    "mml": "TH12-14",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "夜空のユーフォーロマンス",
+                    "english": "UFO Romance in the Night Sky"
+                },
+                {
+                    "appleId": "1581358407",
+                    "mml": "TH12-15",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "平安のエイリアン",
+                    "english": "Alien in Heian"
+                },
+                {
+                    "appleId": "1581358408",
+                    "mml": "TH12-16",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "妖怪寺",
+                    "english": "Yokai Temple"
+                },
+                {
+                    "appleId": "1581358409",
+                    "mml": "TH12-17",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "空の帰り道　〜 Sky Dream",
+                    "english": "Way Home in the Sky　〜 Sky Dream"
+                }
+            ]
+        },
+        {
+            "appleId": "1581358610",
+            "albumId": "th12.8",
+            "name": "妖精大戦争",
+            "formalName": "妖精大戦争　〜 東方三月精",
+            "copyright": "(c)2010 上海アリス幻樂団",
+            "compatColor": 7,
+            "defaultLocked": true,
+            "songs": [
+                {
+                    "appleId": "1581358611",
+                    "mml": "TH12_8-01",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "春の氷精",
+                    "english": "Spring Ice Fairy"
+                },
+                {
+                    "appleId": "1581358613",
+                    "mml": "TH12_8-02",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "可愛い大戦争のリフレーン",
+                    "english": "Cute Great War Refrain"
                 }
             ]
         }

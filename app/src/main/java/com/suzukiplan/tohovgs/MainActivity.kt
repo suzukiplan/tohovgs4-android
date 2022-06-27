@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -26,6 +25,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
 import com.suzukiplan.tohovgs.api.*
 import com.suzukiplan.tohovgs.model.Album
@@ -44,8 +44,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var leftTime: TextView
     private lateinit var seekBar: AppCompatSeekBar
     private lateinit var seekBarContainer: View
-    private lateinit var badge: ImageView
-    private var footers = HashMap<Page, View>()
+    private lateinit var bottomNavigation: BottomNavigationView
     private var currentFragment: Fragment? = null
     private var currentLength = 0
     private var seekBarTouching = false
@@ -60,7 +59,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private val procedureQueue = ArrayList<() -> Unit>(0)
     private lateinit var billingClient: BillingClient
     private var billingClientReady = false
-    private var billingProducts = ArrayList<SkuDetails>()
+    private var billingProducts = ArrayList<ProductDetails>()
     private var adView: AdView? = null
     private val skuRemoveRewardAds = "remove_reward_ads"
     private val skuRemoveBannerAds = "remove_banner_ads"
@@ -94,7 +93,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         leftTime = findViewById(R.id.left_time)
         seekBar = findViewById(R.id.seek_bar)
         seekBarContainer = findViewById(R.id.seek_bar_container)
-        badge = findViewById(R.id.badge)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -112,13 +110,17 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 musicManager?.seek(seekBar?.progress)
             }
         })
-        footers.clear()
-        footers[Page.PerTitle] = findViewById(R.id.footer_per_title)
-        footers[Page.Sequential] = findViewById(R.id.footer_sequential)
-        footers[Page.Shuffle] = findViewById(R.id.footer_shuffle)
-        footers[Page.Retro] = findViewById(R.id.footer_retro_ui)
-        footers[Page.Settings] = findViewById(R.id.footer_settings)
-        footers.forEach { (page, view) -> view.setOnClickListener { movePage(page) } }
+        bottomNavigation = findViewById(R.id.bottom_navigation)
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> movePage(Page.PerTitle)
+                R.id.navigation_all -> movePage(Page.Sequential)
+                R.id.navigation_shuffle -> movePage(Page.Shuffle)
+                R.id.navigation_retro -> movePage(Page.Retro)
+                R.id.navigation_settings -> movePage(Page.Settings)
+            }
+            true
+        }
         findViewById<SwitchCompat>(R.id.infinity).setOnCheckedChangeListener { _, checked ->
             musicManager?.infinity = checked
         }
@@ -138,7 +140,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 runOnUiThread {
                     setupBanner()
                     resetSeekBar()
-                    movePage(settings?.pageName)
+                    movePage(Page.PerTitle)
                 }
             }
         }
@@ -150,7 +152,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 MobileAds.initialize(this) {
                     Logger.d("MobileAds initialized: $it")
                     val adView = AdView(this)
-                    adView.adSize = AdSize.BANNER
+                    adView.setAdSize(AdSize.BANNER)
                     adView.adUnitId = Constants.bannerAdsId
                     val layoutParams = RelativeLayout.LayoutParams(
                         RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -189,15 +191,12 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         if (false == settings?.badge) {
             api?.check(musicManager?.version) { updatable ->
                 runOnUiThread {
-                    badge.visibility = if (true == updatable) {
-                        settings?.badge = true
-                        View.VISIBLE
-                    } else View.GONE
+                    showBadge(updatable ?: false)
                 }
             }
         } else {
             runOnUiThread {
-                badge.visibility = View.VISIBLE
+                showBadge(true)
             }
         }
         initialized = true
@@ -214,14 +213,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         seekBarTouching = false
     }
 
-    private fun movePage(name: String?) = movePage(
-        when (name) {
-            Page.Sequential.value.second -> Page.Sequential
-            Page.Retro.value.second -> Page.Retro
-            else -> Page.PerTitle
-        }
-    )
-
     private fun movePage(page: Page) = executeWhileResume { movePageInternal(page) }
     private fun movePageInternal(page: Page) {
         if (currentPage != Page.NotSelected && page == currentPage) return
@@ -237,7 +228,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         val fragment = when (page) {
             Page.NotSelected -> return
             Page.PerTitle -> AlbumPagerFragment.create()
-            Page.Sequential -> SongListFragment.createAsSequential()
+            Page.Sequential -> AllPagerFragment.create()
             Page.Shuffle -> SongListFragment.createAsShuffle()
             Page.Retro -> RetroFragment.create()
             Page.Settings -> SettingsFragment.create()
@@ -260,21 +251,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         transaction.replace(fragmentContainer.id, fragment)
         currentFragment = fragment
         transaction.commit()
-        if (currentPage == Page.NotSelected) {
-            footers[Page.PerTitle]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
-            footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
-        } else {
-            footers[currentPage]?.setBackgroundResource(R.drawable.bottom_menu_unselected)
-            executeAsync {
-                Thread.sleep(300L)
-                runOnUiThread {
-                    if (page == currentPage) {
-                        footers[page]?.setBackgroundResource(R.drawable.bottom_menu_selected)
-                    }
-                }
-            }
-            settings?.pageName = page.value.second
-        }
         currentPage = page
     }
 
@@ -547,8 +523,15 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun hideBadge() {
-        badge.visibility = View.GONE
+        showBadge(false)
         settings?.badge = false
+    }
+
+    private fun showBadge(visible: Boolean) {
+        bottomNavigation.getOrCreateBadge(R.id.navigation_settings).apply {
+            clearNumber()
+            isVisible = visible
+        }
     }
 
     private fun setupBillingClient() {
@@ -562,18 +545,27 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
             override fun onBillingSetupFinished(result: BillingResult) {
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val skuList = ArrayList<String>(2)
-                    skuList.add(skuRemoveRewardAds)
-                    skuList.add(skuRemoveBannerAds)
-                    val params = SkuDetailsParams.newBuilder()
-                        .setSkusList(skuList)
-                        .setType(BillingClient.SkuType.INAPP)
+                    val productList = ArrayList<QueryProductDetailsParams.Product>(2)
+                    productList.add(
+                        QueryProductDetailsParams.Product.newBuilder()
+                            .setProductId(skuRemoveRewardAds)
+                            .setProductType(BillingClient.ProductType.INAPP)
+                            .build()
+                    )
+                    productList.add(
+                        QueryProductDetailsParams.Product.newBuilder()
+                            .setProductId(skuRemoveBannerAds)
+                            .setProductType(BillingClient.ProductType.INAPP)
+                            .build()
+                    )
+                    val params = QueryProductDetailsParams.newBuilder()
+                        .setProductList(productList)
                         .build()
-                    billingClient.querySkuDetailsAsync(params) { result2, skuDetails ->
+                    billingClient.queryProductDetailsAsync(params) { result2, productDetails ->
                         if (result2.responseCode == BillingClient.BillingResponseCode.OK) {
-                            skuDetails?.forEach { skuDetail ->
-                                Logger.d("sku = ${skuDetail.sku}, title = ${skuDetail.title} price = ${skuDetail.price}")
-                                billingProducts.add(skuDetail)
+                            productDetails.forEach { productDetail ->
+                                Logger.d("sku = ${productDetail.productId}, title = ${productDetail.title} price = ${productDetail.oneTimePurchaseOfferDetails?.formattedPrice}")
+                                billingProducts.add(productDetail)
                             }
                             billingClientReady = true
                         }
@@ -584,10 +576,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     }
 
     fun getPriceOfRemoveRewardAds() =
-        billingProducts.find { it.sku == skuRemoveRewardAds }?.price
+        billingProducts.find { it.productId == skuRemoveRewardAds }?.oneTimePurchaseOfferDetails?.formattedPrice
 
     fun getPriceOfRemoveBannerAds() =
-        billingProducts.find { it.sku == skuRemoveBannerAds }?.price
+        billingProducts.find { it.productId == skuRemoveBannerAds }?.oneTimePurchaseOfferDetails?.formattedPrice
 
     fun purchaseRemoveRewardAds() = purchase(skuRemoveRewardAds)
 
@@ -595,18 +587,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     private fun purchase(sku: String) {
         startProgress()
-        billingClient.querySkuDetailsAsync(
-            SkuDetailsParams.newBuilder()
-                .setType(BillingClient.SkuType.INAPP)
-                .setSkusList(listOf(sku))
+        val productList = ArrayList<QueryProductDetailsParams.Product>(2)
+        productList.add(
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(sku)
+                .setProductType(BillingClient.ProductType.INAPP)
                 .build()
-        ) { skuResult, skuDetails ->
+        )
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(productList)
+            .build()
+        billingClient.queryProductDetailsAsync(params) { result, productDetails ->
             endProgress()
-            if (null == skuDetails || skuResult.responseCode != BillingClient.BillingResponseCode.OK) {
+            if (result.responseCode != BillingClient.BillingResponseCode.OK) {
                 MessageDialog.start(this, getString(R.string.cannot_connect_google_play))
-                return@querySkuDetailsAsync
+                return@queryProductDetailsAsync
             }
-            val skuDetail = skuDetails[0]
             val message = when (sku) {
                 skuRemoveRewardAds -> getString(R.string.remove_reward_ads_about)
                 skuRemoveBannerAds -> getString(R.string.remove_banner_ads_about)
@@ -620,16 +616,22 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 object : AskDialog.Listener {
                     override fun onClick(isYes: Boolean) {
                         if (isYes) {
-                            startPurchase(skuDetail)
+                            startPurchase(
+                                listOf(
+                                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                                        .setProductDetails(productDetails[0])
+                                        .build()
+                                )
+                            )
                         }
                     }
                 })
         }
     }
 
-    private fun startPurchase(skuDetail: SkuDetails) {
+    private fun startPurchase(skuDetail: List<BillingFlowParams.ProductDetailsParams>) {
         val params = BillingFlowParams.newBuilder()
-            .setSkuDetails(skuDetail)
+            .setProductDetailsParamsList(skuDetail)
             .build()
         val responseCode = billingClient.launchBillingFlow(this, params).responseCode
         Logger.d("ResponseCode: $responseCode")
@@ -637,7 +639,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     fun restorePurchase() {
         startProgress()
-        billingClient.queryPurchasesAsync(BillingClient.SkuType.INAPP) { result, purchases ->
+        val params = QueryPurchasesParams.newBuilder()
+            .setProductType(BillingClient.ProductType.INAPP)
+            .build()
+        billingClient.queryPurchasesAsync(params) { result, purchases ->
             proceedPurchases(result, purchases)
             executeAsync {
                 Thread.sleep(1500)
@@ -651,7 +656,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun proceedPurchases(result: BillingResult, purchases: List<Purchase>?) {
         if (result.responseCode != BillingClient.BillingResponseCode.OK) return
         purchases?.forEach { purchase ->
-            purchase.skus.forEach { sku ->
+            purchase.products.forEach { sku ->
                 Logger.d("checking sku: $sku")
                 when (sku) {
                     skuRemoveRewardAds -> {

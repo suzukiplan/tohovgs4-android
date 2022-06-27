@@ -14,22 +14,18 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.suzukiplan.tohovgs.api.Settings
-import com.suzukiplan.tohovgs.model.Album
 
-class AlbumPagerFragment : Fragment() {
+class AllPagerFragment : Fragment() {
     companion object {
-        fun create(): AlbumPagerFragment {
-            return AlbumPagerFragment()
+        fun create(): AllPagerFragment {
+            return AllPagerFragment()
         }
     }
 
     private lateinit var mainActivity: MainActivity
-    private lateinit var unlockAll: View
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
-    private val settings: Settings? get() = mainActivity.settings
-    private lateinit var items: List<Album>
+    private lateinit var fragments: List<SongListFragment>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,43 +34,42 @@ class AlbumPagerFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         mainActivity = activity as MainActivity
-        val view = inflater.inflate(R.layout.fragment_album_pager, container, false)
-        unlockAll = view.findViewById(R.id.unlock_all)
+        fragments = listOf(
+            SongListFragment.createAsSequential(),
+            SongListFragment.createAsFavorite()
+        )
+        val view = inflater.inflate(R.layout.fragment_all_pager, container, false)
         tabLayout = view.findViewById(R.id.tab)
         pager = view.findViewById(R.id.pager)
-        items = mainActivity.musicManager?.albums ?: return null
         pager.adapter = Adapter(mainActivity)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 (activity as? MainActivity)?.stopSong()
-                settings?.lastSelectedAlbumId = items[position].id
+                fragments[0].reloadIfNeeded()
+                fragments[1].makeFavoriteSongsList()
                 super.onPageSelected(position)
             }
         })
-        val targetAlbumId = settings?.lastSelectedAlbumId
-        val index = items.indexOfFirst { it.id == targetAlbumId }
-        pager.setCurrentItem(index, false)
-        tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
+        pager.setCurrentItem(0, false)
+        tabLayout.tabMode = TabLayout.MODE_FIXED
         TabLayoutMediator(tabLayout, pager) { tab, position ->
-            tab.text = items[position].name
-        }.attach()
-        val allUnlocked = mainActivity.musicManager?.isExistLockedSong(settings)
-        unlockAll.visibility = if (true == allUnlocked) {
-            unlockAll.setOnClickListener {
-                mainActivity.onRequestUnlockAll(null)
+            tab.text = when (position) {
+                0 -> getString(R.string.all_songs)
+                1 -> getString(R.string.favorites)
+                else -> null
             }
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        }.attach()
         return view
     }
 
     inner class Adapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
-        override fun getItemCount() = items.count()
+        override fun getItemCount() = 2
 
         override fun createFragment(position: Int): Fragment {
-            val fragment = SongListFragment.create(items[position])
+            val fragment = when (position) {
+                0, 1 -> fragments[position]
+                else -> throw RuntimeException("logic error")
+            }
             fragment.listener = mainActivity
             return fragment
         }

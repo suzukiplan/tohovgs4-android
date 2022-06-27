@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
@@ -17,6 +19,7 @@
         android:layout_margin="16dp"
         android:contentDescription="@string/shuffle"
         android:src="@drawable/ic_baseline_shuffle_24"
+        android:backgroundTint="@color/light_blue"
         android:visibility="gone" />
 
     <RelativeLayout
@@ -48,7 +51,8 @@
                 android:layout_gravity="center_horizontal"
                 android:text="@string/generating_shuffle_play_list"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </RelativeLayout>
 
@@ -58,5 +62,8 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="@string/all_songs_are_locked"
-        android:visibility="gone" />
+        android:textColor="@color/white"
+        android:textSize="12dp"
+        android:visibility="gone"
+        tools:ignore="SpUsage" />
 </RelativeLayout>
