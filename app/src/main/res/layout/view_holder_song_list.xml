@@ -38,7 +38,7 @@
             android:layout_marginEnd="8dp"
             android:ellipsize="marquee"
             android:lines="1"
-            android:textColor="@color/black_alpha50"
+            android:textColor="@color/white_alpha75"
             android:textSize="10dp"
             android:textStyle="italic"
             tools:ignore="SmallSp,SpUsage" />
