@@ -10,7 +10,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -67,7 +66,6 @@ class SongListFragment : Fragment() {
     private lateinit var allLocked: View
     var listener: Listener? = null
     private var isSequentialMode = false
-    private var showSongIndex = false
     private var language = Language.Default
 
     enum class Language {
@@ -104,7 +102,7 @@ class SongListFragment : Fragment() {
             }
             "sequential" -> {
                 addAvailableSongs(songs)
-                if (songs.count() < 1) {
+                if (songs.isEmpty()) {
                     allLocked.visibility = View.VISIBLE
                 } else {
                     songs.forEach { song ->
@@ -114,10 +112,8 @@ class SongListFragment : Fragment() {
                     }
                 }
                 isSequentialMode = true
-                showSongIndex = true
             }
             "shuffle" -> {
-                showSongIndex = true
                 val shuffleButton = view.findViewById<View>(R.id.shuffle)
                 shuffleButton.visibility = View.VISIBLE
                 shuffleButton.setOnClickListener { executeShuffle() }
@@ -172,7 +168,7 @@ class SongListFragment : Fragment() {
             list.adapter?.notifyDataSetChanged()
             list.scrollToPosition(0)
             progress.visibility = View.GONE
-            allLocked.visibility = if (songs.count() < 1) View.VISIBLE else View.GONE
+            allLocked.visibility = if (songs.isEmpty()) View.VISIBLE else View.GONE
         }
     }
 
@@ -328,10 +324,9 @@ class SongListFragment : Fragment() {
     inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val root: View = itemView.findViewById(R.id.root)
         private val lock: View = itemView.findViewById(R.id.lock)
-        private val play: ImageView = itemView.findViewById(R.id.play)
+        private val pause: View = itemView.findViewById(R.id.pause)
         private val songTitle: TextView = itemView.findViewById(R.id.song_title)
         private val englishTitle: TextView = itemView.findViewById(R.id.english_title)
-        private val songIndex: TextView = itemView.findViewById(R.id.song_index)
 
         @SuppressLint("SetTextI18n")
         fun bind(song: Song?) {
@@ -339,8 +334,8 @@ class SongListFragment : Fragment() {
             val locked = settings?.isLocked(song)
             if (true == locked) {
                 lock.visibility = View.VISIBLE
-                play.visibility = View.GONE
-                root.setBackgroundResource(R.drawable.card_locked)
+                pause.visibility = View.GONE
+                root.setBackgroundResource(R.color.light_black)
                 root.setOnClickListener {
                     listener?.onRequestUnlockAll {
                         reloadIfNeeded()
@@ -354,20 +349,16 @@ class SongListFragment : Fragment() {
                 }
             } else {
                 lock.visibility = View.GONE
-                play.visibility = when (song.status) {
-                    Song.Status.Play -> {
-                        play.setImageResource(R.drawable.ic_baseline_play_circle_filled_24)
-                        View.VISIBLE
+                root.setBackgroundResource(
+                    when (song.status) {
+                        Song.Status.Pause, Song.Status.Play -> R.color.white_alpha25
+                        null, Song.Status.Stop -> R.color.light_black
                     }
-                    Song.Status.Pause -> {
-                        play.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                        View.VISIBLE
-                    }
-                    null, Song.Status.Stop -> {
-                        View.GONE
-                    }
+                )
+                pause.visibility = when (song.status) {
+                    Song.Status.Pause -> View.VISIBLE
+                    else -> View.GONE
                 }
-                root.setBackgroundResource(R.drawable.card)
                 root.setOnClickListener {
                     play(song)
                     reloadIfNeeded()
@@ -395,12 +386,6 @@ class SongListFragment : Fragment() {
                         englishTitle.visibility = View.GONE
                     }
                 }
-            }
-            songIndex.visibility = if (showSongIndex) {
-                songIndex.text = "#${songs.indexOf(song) + 1}"
-                View.VISIBLE
-            } else {
-                View.GONE
             }
         }
     }

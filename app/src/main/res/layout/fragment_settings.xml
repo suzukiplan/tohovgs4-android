@@ -2,7 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:theme="@style/Theme.MaterialComponents.DayNight">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -20,6 +22,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:textColor="@color/white_alpha50"
                 android:textSize="12sp" />
 
             <TextView
@@ -27,26 +30,35 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
+                android:alpha="0.9"
                 android:text="@string/contents"
+                android:textColor="@color/light_blue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/download"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_margin="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
+                android:enabled="false"
                 android:text="@string/download"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
+                android:alpha="0.9"
                 android:text="@string/sound"
+                android:textColor="@color/light_blue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -57,6 +69,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/master_volume"
+                android:textColor="@color/white_alpha75"
                 android:textSize="12sp" />
 
             <androidx.appcompat.widget.AppCompatSeekBar
@@ -71,7 +84,9 @@
                 android:contentDescription="@string/seek_bar"
                 android:max="100"
                 android:min="0"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:progressTint="@color/dark_blue"
+                android:thumbTint="@color/light_blue" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
@@ -88,6 +103,7 @@
                     android:layout_gravity="center_vertical|start"
                     android:layout_weight="1"
                     android:text="@string/kobusi_mode"
+                    android:textColor="@color/white_alpha75"
                     android:textSize="12sp" />
 
                 <androidx.appcompat.widget.AppCompatToggleButton
@@ -104,116 +120,162 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
+                android:alpha="0.9"
                 android:text="@string/support"
+                android:textColor="@color/light_blue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/twitter"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/support_twitter"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/youtube"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/support_youtube"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/tiktok"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/support_tiktok"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/github"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/support_github"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
+                android:alpha="0.9"
                 android:text="@string/info"
+                android:textColor="@color/light_blue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/apple_music"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/apple_music"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
+                android:alpha="0.9"
                 android:text="@string/remove_ads"
+                android:textColor="@color/light_blue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/remove_reward_ads"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/remove_reward_ads"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/remove_banner_ads"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/remove_banner_ads"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <TextView
                 android:id="@+id/restore_purchase"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginBottom="16dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/button"
+                android:clickable="true"
                 android:text="@string/restore_purchase"
-                android:textAllCaps="false" />
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </ScrollView>
 </FrameLayout>

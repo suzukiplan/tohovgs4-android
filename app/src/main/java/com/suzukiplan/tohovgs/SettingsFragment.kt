@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
@@ -94,25 +93,27 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
                 )
             )
         }
-        val removeRewardAdsButton = view.findViewById<Button>(R.id.remove_reward_ads)
+        val removeRewardAdsButton = view.findViewById<TextView>(R.id.remove_reward_ads)
         removeRewardAdsButton.text = getString(
             R.string.remove_reward_ads_with_price,
             mainActivity.getPriceOfRemoveRewardAds()
         )
         if (true == settings?.removeRewardAds) {
             removeRewardAdsButton.isEnabled = false
+            removeRewardAdsButton.setBackgroundResource(R.drawable.button_disabled)
         } else {
             removeRewardAdsButton.setOnClickListener {
                 mainActivity.purchaseRemoveRewardAds()
             }
         }
-        val removeBannerAdsButton = view.findViewById<Button>(R.id.remove_banner_ads)
+        val removeBannerAdsButton = view.findViewById<TextView>(R.id.remove_banner_ads)
         removeBannerAdsButton.text = getString(
             R.string.remove_banner_ads_with_price,
             mainActivity.getPriceOfRemoveBannerAds()
         )
         if (true == settings?.removeBannerAds) {
             removeBannerAdsButton.isEnabled = false
+            removeBannerAdsButton.setBackgroundResource(R.drawable.button_disabled)
         } else {
             removeBannerAdsButton.setOnClickListener {
                 mainActivity.purchaseRemoveBannerAds()
@@ -121,6 +122,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         val restoreButton = view.findViewById<View>(R.id.restore_purchase)
         if (true == settings?.removeRewardAds && true == settings?.removeBannerAds) {
             restoreButton.isEnabled = false
+            restoreButton.setBackgroundResource(R.drawable.button_disabled)
         } else {
             restoreButton.setOnClickListener {
                 mainActivity.restorePurchase()
