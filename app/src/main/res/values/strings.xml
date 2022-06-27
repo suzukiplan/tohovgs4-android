@@ -55,4 +55,6 @@
     <string name="lock_song">Lock this song</string>
     <string name="apple_music_not_exist">This music is not yet available on AppleMusic.</string>
     <string name="kobusi_mode">KoBuSi mode</string>
+    <string name="all_songs">All Songs</string>
+    <string name="favorites">Favorites</string>
 </resources>

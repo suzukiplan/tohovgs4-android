@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
     android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/unlock_all"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_margin="8dp"
-        android:background="@drawable/button"
-        android:clickable="true"
-        android:gravity="center"
-        android:text="@string/unlock_all_songs"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="12dp"
-        tools:ignore="SpUsage" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab"
@@ -28,8 +13,9 @@
         android:background="@color/black"
         android:elevation="4dp"
         android:orientation="horizontal"
-        app:tabGravity="center"
+        app:tabGravity="fill"
         app:tabIndicatorColor="@color/light_blue"
+        app:tabMode="fixed"
         app:tabSelectedTextColor="@color/white"
         app:tabTextColor="@color/white_alpha75" />
 
@@ -39,5 +25,4 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="horizontal" />
-
 </androidx.appcompat.widget.LinearLayoutCompat>

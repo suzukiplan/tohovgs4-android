@@ -10,6 +10,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,6 +44,13 @@ class SongListFragment : Fragment() {
             fragment.arguments?.putString("mode", "shuffle")
             return fragment
         }
+
+        fun createAsFavorite(): SongListFragment {
+            val fragment = SongListFragment()
+            fragment.arguments = Bundle()
+            fragment.arguments?.putString("mode", "favorite")
+            return fragment
+        }
     }
 
     interface Listener {
@@ -66,11 +74,11 @@ class SongListFragment : Fragment() {
     private lateinit var allLocked: View
     var listener: Listener? = null
     private var isSequentialMode = false
+    private var isFavoriteMode = false
     private var language = Language.Default
 
     enum class Language {
         Japanese,
-        French,
         Default
     }
 
@@ -83,7 +91,6 @@ class SongListFragment : Fragment() {
         this.inflater = inflater
         language = when (Locale.getDefault().language) {
             "ja" -> Language.Japanese
-            "fr" -> Language.French
             else -> Language.Default
         }
         mainActivity = activity as MainActivity
@@ -114,11 +121,13 @@ class SongListFragment : Fragment() {
                 isSequentialMode = true
             }
             "shuffle" -> {
-                val shuffleButton = view.findViewById<View>(R.id.shuffle)
-                shuffleButton.visibility = View.VISIBLE
-                shuffleButton.setOnClickListener { executeShuffle() }
+                enableShuffleFloatingButton(view)
                 mainActivity.showInterstitialAd()
                 needExecuteShuffle = true
+            }
+            "favorite" -> {
+                enableShuffleFloatingButton(view)
+                isFavoriteMode = true
             }
         }
         list = view.findViewById(R.id.list)
@@ -133,13 +142,16 @@ class SongListFragment : Fragment() {
         list.itemAnimator = null
         list.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        if (isSequentialMode) {
-            list.scrollToPosition(settings?.initialPositionSequential ?: 0)
-        }
         if (needExecuteShuffle) {
             executeShuffle()
         }
         return view
+    }
+
+    private fun enableShuffleFloatingButton(view: View) {
+        val shuffleButton = view.findViewById<View>(R.id.shuffle)
+        shuffleButton.visibility = View.VISIBLE
+        shuffleButton.setOnClickListener { executeShuffle() }
     }
 
     private fun executeShuffle() {
@@ -159,7 +171,11 @@ class SongListFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     private fun doShuffle() {
         val tmpItems = ArrayList<Song>()
-        addAvailableSongs(tmpItems)
+        if (isFavoriteMode) {
+            addFavoriteSongs(tmpItems)
+        } else {
+            addAvailableSongs(tmpItems)
+        }
         songs.clear()
         while (tmpItems.isNotEmpty()) {
             songs.add(tmpItems.removeAt(abs(random.nextInt()) % tmpItems.count()))
@@ -182,12 +198,30 @@ class SongListFragment : Fragment() {
         }
     }
 
+    private fun addFavoriteSongs(list: ArrayList<Song>) {
+        mainActivity.musicManager?.albums?.forEach { album ->
+            album.songs.forEach { song ->
+                if (false == settings?.isLocked(song) && true == settings?.isFavorite(song)) {
+                    list.add(song)
+                }
+            }
+        }
+    }
+
     override fun onResume() {
         reloadIfNeeded()
         super.onResume()
     }
 
-    private fun reloadIfNeeded() = songs.forEach { if (it.needReload) reload(it) }
+    @SuppressLint("NotifyDataSetChanged")
+    fun makeFavoriteSongsList() {
+        if (!isFavoriteMode) return
+        songs.clear()
+        addFavoriteSongs(songs)
+        songAdapter.notifyDataSetChanged()
+    }
+
+    fun reloadIfNeeded() = songs.forEach { if (it.needReload) reload(it) }
 
     private fun reload(song: Song?) {
         song ?: return
@@ -297,9 +331,6 @@ class SongListFragment : Fragment() {
     }
 
     private fun play(song: Song) {
-        if (isSequentialMode) {
-            settings?.initialPositionSequential = songs.indexOf(song)
-        }
         listener?.onPlay(song.parentAlbum!!, song) { onPlayEnded(song) }
         moveFocus(song)
     }
@@ -310,6 +341,24 @@ class SongListFragment : Fragment() {
         } else {
             songAdapter.focus(song)
         }
+    }
+
+    private fun switchFavorite(song: Song?): Boolean {
+        song ?: return false
+        val current = isFavorite(song)
+        settings?.favorite(song, !current)
+        if (current && isFavoriteMode) {
+            (activity as? MainActivity)?.stopSong()
+            val removeIndex = songs.indexOf(song)
+            songs.removeAt(removeIndex)
+            songAdapter.notifyItemRemoved(removeIndex)
+        }
+        return !current
+    }
+
+    private fun isFavorite(song: Song?): Boolean {
+        song ?: return false
+        return settings?.isFavorite(song) ?: false
     }
 
     inner class TitleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -327,6 +376,7 @@ class SongListFragment : Fragment() {
         private val pause: View = itemView.findViewById(R.id.pause)
         private val songTitle: TextView = itemView.findViewById(R.id.song_title)
         private val englishTitle: TextView = itemView.findViewById(R.id.english_title)
+        private val favorite: ImageView = itemView.findViewById(R.id.favorite)
 
         @SuppressLint("SetTextI18n")
         fun bind(song: Song?) {
@@ -335,6 +385,7 @@ class SongListFragment : Fragment() {
             if (true == locked) {
                 lock.visibility = View.VISIBLE
                 pause.visibility = View.GONE
+                favorite.visibility = View.GONE
                 root.setBackgroundResource(R.color.light_black)
                 root.setOnClickListener {
                     listener?.onRequestUnlockAll {
@@ -349,12 +400,28 @@ class SongListFragment : Fragment() {
                 }
             } else {
                 lock.visibility = View.GONE
-                root.setBackgroundResource(
-                    when (song.status) {
-                        Song.Status.Pause, Song.Status.Play -> R.color.white_alpha25
-                        null, Song.Status.Stop -> R.color.light_black
+                when (song.status) {
+                    Song.Status.Pause, Song.Status.Play -> {
+                        root.setBackgroundResource(R.color.white_alpha25)
+                        if (isFavorite(song)) {
+                            favorite.setImageResource(R.drawable.ic_like_on)
+                        } else {
+                            favorite.setImageResource(R.drawable.ic_like_off)
+                        }
+                        favorite.visibility = View.VISIBLE
+                        favorite.setOnClickListener {
+                            if (switchFavorite(song)) {
+                                favorite.setImageResource(R.drawable.ic_like_on)
+                            } else {
+                                favorite.setImageResource(R.drawable.ic_like_off)
+                            }
+                        }
                     }
-                )
+                    null, Song.Status.Stop -> {
+                        root.setBackgroundResource(R.color.light_black)
+                        favorite.visibility = View.GONE
+                    }
+                }
                 pause.visibility = when (song.status) {
                     Song.Status.Pause -> View.VISIBLE
                     else -> View.GONE
@@ -373,7 +440,6 @@ class SongListFragment : Fragment() {
                     songTitle.text = song.name
                     englishTitle.visibility = View.GONE
                 }
-                Language.French,
                 Language.Default -> {
                     songTitle.text = song.name
                     if (null != song.english) {

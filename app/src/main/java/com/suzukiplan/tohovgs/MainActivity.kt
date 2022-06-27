@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         val fragment = when (page) {
             Page.NotSelected -> return
             Page.PerTitle -> AlbumPagerFragment.create()
-            Page.Sequential -> SongListFragment.createAsSequential()
+            Page.Sequential -> AllPagerFragment.create()
             Page.Shuffle -> SongListFragment.createAsShuffle()
             Page.Retro -> RetroFragment.create()
             Page.Settings -> SettingsFragment.create()

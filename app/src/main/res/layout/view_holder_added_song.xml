@@ -16,9 +16,9 @@
         android:lines="1"
         android:text="Album name"
         android:textColor="@color/black_alpha50"
-        android:textSize="12sp"
+        android:textSize="12dp"
         android:textStyle="bold"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText,SpUsage" />
 
     <TextView
         android:id="@+id/name"
@@ -31,8 +31,8 @@
         android:lines="1"
         android:text="Song name"
         android:textColor="@color/black"
-        android:textSize="14sp"
-        tools:ignore="HardcodedText" />
+        android:textSize="14dp"
+        tools:ignore="HardcodedText,SpUsage" />
 
     <TextView
         android:id="@+id/kind"
@@ -45,5 +45,6 @@
         android:lines="1"
         android:text="@string/added"
         android:textColor="@color/black_alpha50"
-        android:textSize="12sp" />
+        android:textSize="12dp"
+        tools:ignore="SpUsage" />
 </androidx.appcompat.widget.LinearLayoutCompat>

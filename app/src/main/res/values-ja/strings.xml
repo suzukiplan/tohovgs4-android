@@ -55,4 +55,6 @@
     <string name="lock_song">この楽曲をロックする</string>
     <string name="apple_music_not_exist">この楽曲はまだAppleMusicでは配信されていません。</string>
     <string name="kobusi_mode">KoBuSi モード</string>
+    <string name="all_songs">全楽曲</string>
+    <string name="favorites">お気に入り</string>
 </resources>
