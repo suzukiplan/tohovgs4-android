@@ -57,10 +57,6 @@ class Settings(context: Context?) {
         }
     }
 
-    var pageName: String?
-        get() = preferences?.getString("page_name", null)
-        set(value) = save { editor -> editor.putString("page_name", value) }
-
     var masterVolume: Int
         get() = preferences?.getInt("master_volume", 100) ?: 100
         set(value) = save { editor -> editor.putInt("master_volume", value) }
