@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
+#include <android/log.h>
 
 class VgsAudioSystem {
 private:
@@ -45,6 +46,9 @@ public:
         this->bufferSize = bufferSize;
         this->buffer[0] = (char *) malloc(bufferSize);
         this->buffer[1] = (char *) malloc(bufferSize);
+        if (!this->buffer[0] || !this->buffer[1]) {
+            __android_log_print(ANDROID_LOG_ERROR, "TOHOVGS", "No memory (malloc failed)");
+        }
         this->buffering = buffering;
         init_sl();
     }
@@ -74,7 +78,12 @@ public:
             (*sl.slEngObj)->Destroy(sl.slEngObj);
             sl.slEngObj = NULL;
         }
-
+        for (int i = 0; i < 2; i++) {
+            if (buffer[i]) {
+                free(buffer[i]);
+                buffer[i] = NULL;
+            }
+        }
         pthread_mutex_destroy(&mutex);
     }
 
