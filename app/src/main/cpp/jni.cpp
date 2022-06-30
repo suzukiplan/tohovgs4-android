@@ -15,7 +15,6 @@
 
 static jobject android_java_asset_manager = nullptr;
 static VgsAudioSystem *audioSystem = nullptr;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_createDecoder(JNIEnv *, jclass) {
@@ -46,105 +45,79 @@ Java_com_suzukiplan_tohovgs_api_JNI_load(JNIEnv *env, jclass, jlong context, jby
     }
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_decode(JNIEnv *env, jclass, jlong context, jbyteArray buf_) {
+    if (context) {
+        jbyte *buf = env->GetByteArrayElements(buf_, nullptr);
+        auto size = (uint32_t) env->GetArrayLength(buf_);
+        if (buf) {
+            vgsdec_execute((void *) context, buf, size);
+            env->ReleaseByteArrayElements(buf_, buf, 0);
+        }
+    }
+}
+
 extern "C" JNIEXPORT jint JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_loopCount(JNIEnv *, jclass, jlong context) {
-    int result = 0;
     if (context) {
-        pthread_mutex_lock(&mutex);
-        result = vgsdec_get_value((void *) context, VGSDEC_REG_LOOP_COUNT);
-        pthread_mutex_unlock(&mutex);
+        return vgsdec_get_value((void *) context, VGSDEC_REG_LOOP_COUNT);
     }
-    return result;
+    return 0;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_fadeout(JNIEnv *, jclass, jlong context) {
     if (context) {
-        pthread_mutex_lock(&mutex);
         vgsdec_set_value((void *) context, VGSDEC_REG_FADEOUT, 100);
-        pthread_mutex_unlock(&mutex);
     }
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_isPlaying(JNIEnv *, jclass, jlong context) {
-    jboolean result = JNI_FALSE;
     if (context) {
-        pthread_mutex_lock(&mutex);
-        result = vgsdec_get_value((void *) context, VGSDEC_REG_PLAYING) ? JNI_TRUE : JNI_FALSE;
-        pthread_mutex_unlock(&mutex);
+        return vgsdec_get_value((void *) context, VGSDEC_REG_PLAYING) ? JNI_TRUE : JNI_FALSE;
     }
-    return result;
+    return JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_getTimeLength(JNIEnv *, jclass, jlong context) {
-    jint result = 0;
     if (context) {
-        pthread_mutex_lock(&mutex);
-        result = vgsdec_get_value((void *) context, VGSDEC_REG_TIME_LENGTH);
-        pthread_mutex_unlock(&mutex);
+        return vgsdec_get_value((void *) context, VGSDEC_REG_TIME_LENGTH);
+    } else {
+        return 0;
     }
-    return result;
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_getTime(JNIEnv *, jclass, jlong context) {
-    jint result = 0;
     if (context) {
-        pthread_mutex_lock(&mutex);
-        result = vgsdec_get_value((void *) context, VGSDEC_REG_TIME);
-        pthread_mutex_unlock(&mutex);
+        return vgsdec_get_value((void *) context, VGSDEC_REG_TIME);
+    } else {
+        return 0;
     }
-    return result;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_seek(JNIEnv *, jclass, jlong context, jint progress) {
     if (context) {
-        pthread_mutex_lock(&mutex);
         vgsdec_set_value((void *) context, VGSDEC_REG_TIME, progress);
-        pthread_mutex_unlock(&mutex);
     }
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_kobushi(JNIEnv *, jclass, jlong context, jint kobushi) {
     if (context) {
-        pthread_mutex_lock(&mutex);
         vgsdec_set_value((void *) context, VGSDEC_REG_KOBUSHI, kobushi);
-        pthread_mutex_unlock(&mutex);
     }
-}
-
-static void safeReleaseAudioSystem() {
-    pthread_mutex_lock(&mutex);
-    if (audioSystem) {
-        delete audioSystem;
-        audioSystem = nullptr;
-    }
-    pthread_mutex_unlock(&mutex);
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_startPlay(JNIEnv *, jclass, jlong context) {
-    static void *currentContext = (void *) context;
-    safeReleaseAudioSystem();
-    audioSystem = new VgsAudioSystem(22050, 16, 1, 8192, [](char *buf, size_t size) {
-        pthread_mutex_lock(&mutex);
-        vgsdec_execute(currentContext, buf, size);
-        pthread_mutex_unlock(&mutex);
-    });
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_suzukiplan_tohovgs_api_JNI_endPlay(JNIEnv *, jclass) {
-    safeReleaseAudioSystem();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *env, jclass) {
-    safeReleaseAudioSystem();
+    if (audioSystem) {
+        delete audioSystem;
+        audioSystem = nullptr;
+    }
     tohovgs_cleanUp();
     if (android_java_asset_manager != nullptr) {
         env->DeleteGlobalRef(android_java_asset_manager);

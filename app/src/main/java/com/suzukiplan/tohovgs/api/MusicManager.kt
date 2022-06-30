@@ -8,12 +8,14 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioTrack
 import com.suzukiplan.tohovgs.MainActivity
 import com.suzukiplan.tohovgs.model.Album
 import com.suzukiplan.tohovgs.model.Song
 import com.suzukiplan.tohovgs.model.SongList
 import java.io.File
-import java.util.*
 
 class MusicManager(private val mainActivity: MainActivity) {
     val version: String get() = songList.version
@@ -23,14 +25,23 @@ class MusicManager(private val mainActivity: MainActivity) {
     private var vgsContext = 0L
     private var playingAlbum: Album? = null
     private var playingSong: Song? = null
+    private var audioTrack: AudioTrack? = null
+    private val basicBufferSize = 4096
     private var fadeoutExecuted = false
+    private var decodeSize = 0
+    private var decodeAudioBuffers = arrayOf(
+        ByteArray(basicBufferSize),
+        ByteArray(basicBufferSize)
+    )
+    private var decodeAudioBufferLatch = 0
+    private var decodeAudioBufferFirst = ByteArray(basicBufferSize * 2)
+    private var decodeFirst = true
     var infinity = false
     var isBackground = false
     private var startedContext: Context? = null
     private var masterVolume = 100
     private var kobushi = 0
     private val downloadSongListFile: File get() = File("${mainActivity.filesDir}/songlist.json")
-    private var playMonitor: Timer? = null
 
     fun isExistLockedSong(settings: Settings?): Boolean? {
         if (null == settings) {
@@ -134,7 +145,7 @@ class MusicManager(private val mainActivity: MainActivity) {
 
     fun changeMasterVolume(masterVolume: Int) {
         this.masterVolume = masterVolume
-        //audioTrack?.setVolume(masterVolume / 100.0f)
+        audioTrack?.setVolume(masterVolume / 100.0f)
     }
 
     fun initialize() {
@@ -143,12 +154,10 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     fun terminate() {
-        releasePlayMonitor()
+        audioTrack?.release()
+        audioTrack = null
         if (0L != vgsContext) {
-            synchronized(locker) {
-                JNI.endPlay()
-                JNI.releaseDecoder(vgsContext)
-            }
+            synchronized(locker) { JNI.releaseDecoder(vgsContext) }
             vgsContext = 0L
         }
     }
@@ -164,8 +173,7 @@ class MusicManager(private val mainActivity: MainActivity) {
         if (isBackground) {
             stopJob(startedContext)
         }
-        releasePlayMonitor()
-        JNI.endPlay()
+        audioTrack?.release()
         playingSong?.needReload = true
         find(playingAlbum, playingSong)?.status = Song.Status.Stop
         playingAlbum = null
@@ -182,8 +190,8 @@ class MusicManager(private val mainActivity: MainActivity) {
         if (song.status == Song.Status.Play) {
             song.status = Song.Status.Pause
             song.needReload = true
-            releasePlayMonitor()
-            JNI.endPlay()
+            audioTrack?.release()
+            audioTrack = null
         } else {
             play(startedContext, album, song, onSeek, onPlayEnded, progress)
         }
@@ -213,7 +221,9 @@ class MusicManager(private val mainActivity: MainActivity) {
         playingAlbum = album
         playingSong = song
         playingSong?.needReload = true
+        decodeFirst = true
         fadeoutExecuted = false
+        decodeSize = 0
         song.readMML(mainActivity) {
             synchronized(locker) {
                 kobushi = mainActivity.settings?.compatKobushi ?: 0
@@ -238,12 +248,35 @@ class MusicManager(private val mainActivity: MainActivity) {
         onSeek: ((length: Int, time: Int) -> Unit)?,
         onPlayEnded: (() -> Unit)?
     ) {
-        releasePlayMonitor()
-        JNI.seek(vgsContext, seek * 22050)
-        JNI.kobushi(vgsContext, kobushi)
-        JNI.startPlay(vgsContext)
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
+        audioTrack?.release()
+        val attributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+        val format = AudioFormat.Builder()
+            .setSampleRate(22050)
+            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .build()
+        audioTrack = AudioTrack.Builder()
+            .setAudioAttributes(attributes)
+            .setAudioFormat(format)
+            .setBufferSizeInBytes(basicBufferSize * 2)
+            .setTransferMode(AudioTrack.MODE_STREAM)
+            .build()
+        audioTrack?.positionNotificationPeriod = basicBufferSize / 2
+        audioTrack?.setVolume(masterVolume / 100f)
+        audioTrack?.setPlaybackPositionUpdateListener(object :
+            AudioTrack.OnPlaybackPositionUpdateListener {
+            override fun onMarkerReached(audioTrack: AudioTrack?) {
+            }
+
+            override fun onPeriodicNotification(p0: AudioTrack?) {
+                audioTrack?.write(
+                    decodeAudioBuffers[decodeAudioBufferLatch],
+                    0,
+                    decodeAudioBuffers[decodeAudioBufferLatch].size
+                )
                 val timeLength: Int
                 val time: Int
                 synchronized(locker) {
@@ -264,18 +297,27 @@ class MusicManager(private val mainActivity: MainActivity) {
                 synchronized(locker) {
                     isPlaying = JNI.isPlaying(vgsContext)
                 }
-                if (!isPlaying) {
+                if (isPlaying) {
+                    decodeAudioBufferLatch = 1 - decodeAudioBufferLatch
+                    decode(decodeAudioBuffers[decodeAudioBufferLatch])
+                } else {
                     stop()
                     mainActivity.runOnUiThread { onPlayEnded?.invoke() }
                 }
             }
-        }, 100L, 100L)
+        })
+        JNI.seek(vgsContext, seek * 22050)
+        JNI.kobushi(vgsContext, kobushi)
+        decode(decodeAudioBufferFirst)
+        audioTrack?.write(decodeAudioBufferFirst, 0, decodeAudioBufferFirst.size)
+        audioTrack?.play()
+        decodeAudioBufferLatch = 0
+        decode(decodeAudioBuffers[decodeAudioBufferLatch])
     }
 
-    private fun releasePlayMonitor() {
-        playMonitor?.cancel()
-        playMonitor?.purge()
-        playMonitor = null
+    private fun decode(buffer: ByteArray) {
+        synchronized(locker) { JNI.decode(vgsContext, buffer) }
+        decodeSize += buffer.size
     }
 
     private fun jobIdOfSong(song: Song?): Int {

@@ -14,6 +14,8 @@ public class JNI {
 
     public static native void load(long context, byte[] mml);
 
+    public static native void decode(long context, byte[] buf);
+
     public static native int loopCount(long context);
 
     public static native void fadeout(long context);
@@ -27,10 +29,6 @@ public class JNI {
     public static native void seek(long context, int progress);
 
     public static native void kobushi(long context, int kobushi);
-
-    public static native void startPlay(long context);
-
-    public static native void endPlay();
 
     public static native void compatCleanUp();
 
