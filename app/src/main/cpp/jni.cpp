@@ -32,7 +32,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_load(JNIEnv *env, jclass, jlong context, jbyteArray mml_) {
     if (context) {
         jbyte *mml = env->GetByteArrayElements(mml_, nullptr);
-        size_t size = (uint32_t) env->GetArrayLength(mml_);
+        auto size = (uint32_t) env->GetArrayLength(mml_);
         if (mml) {
             VgsMmlErrorInfo err{};
             VgsBgmData *data = vgsmml_compile_from_memory2(mml, size, &err);
@@ -49,7 +49,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_decode(JNIEnv *env, jclass, jlong context, jbyteArray buf_) {
     if (context) {
         jbyte *buf = env->GetByteArrayElements(buf_, nullptr);
-        size_t size = (uint32_t) env->GetArrayLength(buf_);
+        auto size = (uint32_t) env->GetArrayLength(buf_);
         if (buf) {
             vgsdec_execute((void *) context, buf, size);
             env->ReleaseByteArrayElements(buf_, buf, 0);
@@ -149,7 +149,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatLoadGraphic(JNIEnv *env, jclass, jint 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatLoadKanji(JNIEnv *env, jclass, jbyteArray data_) {
     jbyte *data = env->GetByteArrayElements(data_, nullptr);
-    size_t size = (uint32_t) env->GetArrayLength(data_);
+    auto size = (uint32_t) env->GetArrayLength(data_);
     tohovgs_loadKanji(data, size);
     env->ReleaseByteArrayElements(data_, data, 0);
 }
@@ -161,10 +161,10 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAddTitle(JNIEnv *env, jclass,
                                                    jint songNum,
                                                    jbyteArray title_,
                                                    jbyteArray copyright_) {
-    jbyte *title = env->GetByteArrayElements(title_, nullptr);
-    size_t titleSize = (uint32_t) env->GetArrayLength(title_);
-    jbyte *copyright = env->GetByteArrayElements(copyright_, nullptr);
-    size_t copyrightSize = (uint32_t) env->GetArrayLength(copyright_);
+    auto title = env->GetByteArrayElements(title_, nullptr);
+    auto titleSize = (uint32_t) env->GetArrayLength(title_);
+    auto copyright = env->GetByteArrayElements(copyright_, nullptr);
+    auto copyrightSize = (uint32_t) env->GetArrayLength(copyright_);
     tohovgs_setTitle(index, id, songNum, title, titleSize, copyright, copyrightSize);
     env->ReleaseByteArrayElements(copyright_, copyright, 0);
     env->ReleaseByteArrayElements(title_, title, 0);
@@ -181,12 +181,12 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAddSong(JNIEnv *env, jclass,
                                                   jbyteArray titleJ_,
                                                   jbyteArray titleE_) {
     //__android_log_print(ANDROID_LOG_DEBUG, "TOHOVGS", "addSong:%04X-%d", id, no);
-    jbyte *titleJ = env->GetByteArrayElements(titleJ_, nullptr);
-    size_t titleSizeJ = (uint32_t) env->GetArrayLength(titleJ_);
-    jbyte *titleE = env->GetByteArrayElements(titleE_, nullptr);
-    size_t titleSizeE = (uint32_t) env->GetArrayLength(titleE_);
-    jbyte *mmlPath = env->GetByteArrayElements(mmlPath_, nullptr);
-    size_t mmlPathSize = (uint32_t) env->GetArrayLength(mmlPath_);
+    auto titleJ = env->GetByteArrayElements(titleJ_, nullptr);
+    auto titleSizeJ = (uint32_t) env->GetArrayLength(titleJ_);
+    auto titleE = env->GetByteArrayElements(titleE_, nullptr);
+    auto titleSizeE = (uint32_t) env->GetArrayLength(titleE_);
+    auto mmlPath = env->GetByteArrayElements(mmlPath_, nullptr);
+    auto mmlPathSize = (uint32_t) env->GetArrayLength(mmlPath_);
     tohovgs_setSong(index,
                     id,
                     no,
