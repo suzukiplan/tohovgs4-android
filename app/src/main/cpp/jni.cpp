@@ -14,7 +14,7 @@
 #include "audio.hpp"
 
 static jobject android_java_asset_manager = nullptr;
-static VgsAudioSystem *compatAudioSystem = nullptr;
+static VgsAudioSystem *audioSystem = nullptr;
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_createDecoder(JNIEnv *, jclass) {
@@ -114,9 +114,9 @@ Java_com_suzukiplan_tohovgs_api_JNI_kobushi(JNIEnv *, jclass, jlong context, jin
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatCleanUp(JNIEnv *env, jclass) {
-    if (compatAudioSystem) {
-        delete compatAudioSystem;
-        compatAudioSystem = nullptr;
+    if (audioSystem) {
+        delete audioSystem;
+        audioSystem = nullptr;
     }
     tohovgs_cleanUp();
     if (android_java_asset_manager != nullptr) {
@@ -135,7 +135,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAllocate(JNIEnv *env,
     android_java_asset_manager = env->NewGlobalRef(assetManager);
     android_fopen_set_asset_manager(AAssetManager_fromJava(env, android_java_asset_manager));
     tohovgs_allocate(nTitle, nSong);
-    compatAudioSystem = new VgsAudioSystem(22050, 16, 1, 800, vgsbuf);
+    audioSystem = new VgsAudioSystem(22050, 16, 1, 800, vgsbuf);
 }
 
 extern "C" JNIEXPORT void JNICALL
