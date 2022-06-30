@@ -33,6 +33,7 @@ class MusicManager(private val mainActivity: MainActivity) {
         ByteArray(basicBufferSize),
         ByteArray(basicBufferSize)
     )
+    private var emptyAudioBuffer = ByteArray(basicBufferSize * 2)
     private var decodeAudioBufferLatch = 0
     private var decodeAudioBufferFirst = ByteArray(basicBufferSize * 2)
     private var decodeFirst = true
@@ -309,6 +310,7 @@ class MusicManager(private val mainActivity: MainActivity) {
         JNI.seek(vgsContext, seek * 22050)
         JNI.kobushi(vgsContext, kobushi)
         decode(decodeAudioBufferFirst)
+        audioTrack?.write(emptyAudioBuffer, 0, emptyAudioBuffer.size)
         audioTrack?.write(decodeAudioBufferFirst, 0, decodeAudioBufferFirst.size)
         audioTrack?.play()
         decodeAudioBufferLatch = 0
