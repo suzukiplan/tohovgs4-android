@@ -135,7 +135,7 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatAllocate(JNIEnv *env,
     android_java_asset_manager = env->NewGlobalRef(assetManager);
     android_fopen_set_asset_manager(AAssetManager_fromJava(env, android_java_asset_manager));
     tohovgs_allocate(nTitle, nSong);
-    compatAudioSystem = new VgsAudioSystem(22050, 16, 1);
+    compatAudioSystem = new VgsAudioSystem(22050, 16, 1, 800, vgsbuf);
 }
 
 extern "C" JNIEXPORT void JNICALL
