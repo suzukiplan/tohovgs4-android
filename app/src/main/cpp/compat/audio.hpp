@@ -12,9 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
-#include "vge.h"
-
-#define SOUND_BUFFER_SIZE 800
 
 class VgsAudioSystem {
 private:
@@ -32,15 +29,23 @@ private:
     int sampling;
     int bit;
     SLuint32 channel;
-    char buffer[2][SOUND_BUFFER_SIZE]{};
+    int bufferSize;
+    char *buffer[2]{NULL, NULL};
     int bufferLatch;
 
+    void (*buffering)(char *, size_t);
+
 public:
-    VgsAudioSystem(int sampling, int bit, int channel) {
+    VgsAudioSystem(int sampling, int bit, int channel, int bufferSize,
+                   void (*buffering)(char *, size_t)) {
         pthread_mutex_init(&mutex, NULL);
         this->sampling = sampling;
         this->bit = bit;
         this->channel = (SLuint32) channel;
+        this->bufferSize = bufferSize;
+        this->buffer[0] = (char *) malloc(bufferSize);
+        this->buffer[1] = (char *) malloc(bufferSize);
+        this->buffering = buffering;
         init_sl();
     }
 
@@ -85,9 +90,9 @@ public:
         VgsAudioSystem *context = (VgsAudioSystem *) c;
         context->lock();
         if (!context->isEnded()) {
-            (*bq)->Enqueue(bq, context->buffer[context->bufferLatch], SOUND_BUFFER_SIZE);
+            (*bq)->Enqueue(bq, context->buffer[context->bufferLatch], context->bufferSize);
             context->bufferLatch = 1 - context->bufferLatch;
-            vgsbuf(context->buffer[context->bufferLatch], SOUND_BUFFER_SIZE);
+            context->buffering(context->buffer[context->bufferLatch], context->bufferSize);
         }
         context->unlock();
     }
@@ -289,9 +294,9 @@ private:
             return -1;
         }
         bufferLatch = 1;
-        vgsbuf(buffer[0], SOUND_BUFFER_SIZE);
-        vgsbuf(buffer[1], SOUND_BUFFER_SIZE);
-        res = (*sl.slBufQ)->Enqueue(sl.slBufQ, buffer[0], SOUND_BUFFER_SIZE);
+        buffering(buffer[0], bufferSize);
+        buffering(buffer[1], bufferSize);
+        res = (*sl.slBufQ)->Enqueue(sl.slBufQ, buffer[0], bufferSize);
         if (SL_RESULT_SUCCESS != res) {
             __android_log_print(ANDROID_LOG_ERROR, "AudioSystem", "Enqueue first data failed: %08X",
                                 res);
