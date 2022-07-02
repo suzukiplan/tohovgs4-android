@@ -57,4 +57,7 @@
     <string name="kobusi_mode">KoBuSi モード</string>
     <string name="all_songs">全楽曲</string>
     <string name="favorites">お気に入り</string>
+    <string name="sort_by_artwork">作品順にソート</string>
+    <string name="shuffle_list">シャッフル</string>
+    <string name="edit_favorites">お気に入り編集</string>
 </resources>

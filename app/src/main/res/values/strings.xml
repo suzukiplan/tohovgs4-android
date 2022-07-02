@@ -57,4 +57,7 @@
     <string name="kobusi_mode">KoBuSi mode</string>
     <string name="all_songs">All Songs</string>
     <string name="favorites">Favorites</string>
+    <string name="sort_by_artwork">Sort by Art-Work</string>
+    <string name="shuffle_list">Shuffle</string>
+    <string name="edit_favorites">Edit Favorites</string>
 </resources>
