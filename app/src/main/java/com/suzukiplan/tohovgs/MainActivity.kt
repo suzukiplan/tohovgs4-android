@@ -319,7 +319,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     0 -> {
                         Logger.d("appleId: album=${song.parentAlbum?.appleId} song=${song.appleId}")
                         if (null != song.appleMusicURL) {
-                            startActivity(
+                            safeStartIntent(
                                 Intent(
                                     Intent.ACTION_VIEW,
                                     Uri.parse(song.appleMusicURL)
@@ -333,6 +333,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                 }
             }
             .show()
+    }
+
+    fun safeStartIntent(intent: Intent) {
+        if (packageManager.queryIntentActivities(intent, 0).isNotEmpty()) {
+            startActivity(intent)
+        } else {
+            MessageDialog.start(this, getString(R.string.cannot_start_browser))
+        }
     }
 
     override fun onRequestUnlockAll(done: ((unlocked: Boolean) -> Unit)?) {
