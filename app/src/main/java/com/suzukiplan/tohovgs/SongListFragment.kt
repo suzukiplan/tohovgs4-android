@@ -126,7 +126,7 @@ class SongListFragment : Fragment() {
                 needExecuteShuffle = true
             }
             "favorite" -> {
-                enableShuffleFloatingButton(view)
+                enableFavoriteFunctions(view)
                 isFavoriteMode = true
             }
         }
@@ -152,6 +152,19 @@ class SongListFragment : Fragment() {
         val shuffleButton = view.findViewById<View>(R.id.shuffle)
         shuffleButton.visibility = View.VISIBLE
         shuffleButton.setOnClickListener { executeShuffle() }
+    }
+
+    private fun enableFavoriteFunctions(view: View) {
+        view.findViewById<View>(R.id.favorite_functions_container).visibility = View.VISIBLE
+        view.findViewById<View>(R.id.favorite_shuffle).setOnClickListener { doShuffle() }
+        view.findViewById<View>(R.id.favorite_sort).setOnClickListener { makeFavoriteSongsList() }
+        view.findViewById<View>(R.id.favorite_edit).setOnClickListener { editFavorites() }
+    }
+
+    private fun editFavorites() {
+        mainActivity.editFavorites {
+            makeFavoriteSongsList()
+        }
     }
 
     private fun executeShuffle() {

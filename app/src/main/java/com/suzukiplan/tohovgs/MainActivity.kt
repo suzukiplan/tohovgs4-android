@@ -522,6 +522,19 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         }
     }
 
+    fun editFavorites(onClose: () -> Unit) {
+        executeWhileResume {
+            supportFragmentManager.beginTransaction()
+                .replace(
+                    R.id.modal_fragment_container,
+                    EditFavoritesFragment.create(object : EditFavoritesFragment.Listener {
+                        override fun onClose() = onClose()
+                    })
+                )
+                .commit()
+        }
+    }
+
     fun hideBadge() {
         showBadge(false)
         settings?.badge = false

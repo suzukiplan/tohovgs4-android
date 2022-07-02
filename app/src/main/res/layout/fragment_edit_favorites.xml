@@ -26,7 +26,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="8dp"
             android:gravity="center"
-            android:text="@string/added_songs"
+            android:text="@string/edit_favorites"
             android:textColor="@color/white"
             android:textSize="16dp"
             android:textStyle="bold"
