@@ -14,7 +14,7 @@ android {
         minSdk 26
         targetSdk 31
         versionCode 4211
-        versionName "4.21"
+        versionName "4.21a"
         ndk {
             moduleName "native-lib"
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
