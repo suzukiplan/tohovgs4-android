@@ -54,7 +54,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         seekBar.progress = masterVolume
         seekBar.setOnSeekBarChangeListener(this)
         view.findViewById<View>(R.id.twitter).setOnClickListener {
-            startActivity(
+            mainActivity.safeStartIntent(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://twitter.com/suzukiplan")
@@ -62,7 +62,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             )
         }
         view.findViewById<View>(R.id.youtube).setOnClickListener {
-            startActivity(
+            mainActivity.safeStartIntent(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://www.youtube.com/channel/UCAIpmEfeuTAXQ0ERTSkb6oA")
@@ -70,7 +70,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             )
         }
         view.findViewById<View>(R.id.tiktok).setOnClickListener {
-            startActivity(
+            mainActivity.safeStartIntent(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://www.tiktok.com/@suzukiplan")
@@ -78,7 +78,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             )
         }
         view.findViewById<View>(R.id.github).setOnClickListener {
-            startActivity(
+            mainActivity.safeStartIntent(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://suzukiplan.github.io/tohovgs4-android")
@@ -86,7 +86,7 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             )
         }
         view.findViewById<View>(R.id.apple_music).setOnClickListener {
-            startActivity(
+            mainActivity.safeStartIntent(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://music.apple.com/jp/artist/1190977068")

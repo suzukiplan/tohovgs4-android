@@ -60,4 +60,5 @@
     <string name="sort_by_artwork">作品順にソート</string>
     <string name="shuffle_list">シャッフル</string>
     <string name="edit_favorites">お気に入り編集</string>
+    <string name="cannot_start_browser">起動可能なアプリがインストールされていないため操作をキャンセルしました。</string>
 </resources>

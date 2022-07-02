@@ -60,4 +60,5 @@
     <string name="sort_by_artwork">Sort by Art-Work</string>
     <string name="shuffle_list">Shuffle</string>
     <string name="edit_favorites">Edit Favorites</string>
+    <string name="cannot_start_browser">Operation canceled because no bootable application is installed.</string>
 </resources>
