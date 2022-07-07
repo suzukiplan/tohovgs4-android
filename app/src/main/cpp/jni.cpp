@@ -281,6 +281,16 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatGetKobushi(JNIEnv *, jclass) {
     return tohovgs_getPreference()->kobushi;
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_setPlaybackSpeed(JNIEnv *, jclass, jint speed) {
+    vgsmml_playback_speed = speed;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatMasterVolume(JNIEnv *, jclass, jint volume) {
+    compat_master_volume = volume;
+}
+
 extern "C" JNIEXPORT jint JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatGetLocaleId(JNIEnv *, jclass) {
     return tohovgs_getPreference()->localeId;

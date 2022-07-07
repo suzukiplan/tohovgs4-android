@@ -67,6 +67,13 @@ class Settings(context: Context?) {
         get() = preferences?.getInt("master_volume", 100) ?: 100
         set(value) = save { editor -> editor.putInt("master_volume", value) }
 
+    var playbackSpeed: Int
+        get() = preferences?.getInt("playback_speed", 100) ?: 100
+        set(value) = save { editor ->
+            JNI.setPlaybackSpeed(value)
+            editor.putInt("playback_speed", value)
+        }
+
     var badge: Boolean
         get() = preferences?.getBoolean("badge", false) ?: false
         set(value) = save { editor -> editor.putBoolean("badge", value) }

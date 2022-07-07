@@ -18,6 +18,8 @@
 extern "C" {
 #endif
 
+extern int vgsmml_playback_speed;
+
 struct VgsBgmData {
     void *data;
     size_t size;

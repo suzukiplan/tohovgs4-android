@@ -23,7 +23,7 @@
     <string name="launch_emulator_error">Cannot launch the VGS emulator.\nALL SONGS ARE LOCKED.</string>
     <string name="download">Download latest songs from server</string>
     <string name="contents">Content</string>
-    <string name="sound">Sound</string>
+    <string name="sound">Playback Settings</string>
     <string name="master_volume">Master Volume: %d%%</string>
     <string name="support">SUZUKI PLAN - Social Media</string>
     <string name="support_twitter">Twitter</string>
@@ -61,4 +61,7 @@
     <string name="shuffle_list">Shuffle</string>
     <string name="edit_favorites">Edit Favorites</string>
     <string name="cannot_start_browser">Operation canceled because no bootable application is installed.</string>
+    <string name="playback_speed">x%d.%02d</string>
+    <string name="playback_speed_setting">Playback Speed: x%d.%02d</string>
+    <string name="reset">Reset</string>
 </resources>

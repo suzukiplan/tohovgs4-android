@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private lateinit var fragmentContainer: ViewGroup
     private lateinit var currentPage: Page
     private lateinit var playTime: TextView
-    private lateinit var leftTime: TextView
+    private lateinit var playbackSpeed: TextView
     private lateinit var seekBar: AppCompatSeekBar
     private lateinit var seekBarContainer: View
     private lateinit var bottomNavigation: BottomNavigationView
@@ -90,14 +90,14 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         adBgText = findViewById(R.id.ad_bg_text)
         fragmentContainer = findViewById(R.id.fragment_container)
         playTime = findViewById(R.id.play_time)
-        leftTime = findViewById(R.id.left_time)
+        playbackSpeed = findViewById(R.id.playback_speed)
+        playbackSpeed.setOnClickListener { showPlaybackSettings() }
         seekBar = findViewById(R.id.seek_bar)
         seekBarContainer = findViewById(R.id.seek_bar_container)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     playTime.text = duration(progress)
-                    leftTime.text = duration(currentLength - progress)
                 }
             }
 
@@ -138,12 +138,18 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         executeAsync {
             initialize {
                 runOnUiThread {
+                    updatePlaybackSpeedText()
                     setupBanner()
                     resetSeekBar()
                     movePage(Page.PerTitle)
                 }
             }
         }
+    }
+
+    private fun updatePlaybackSpeedText() {
+        val speed = settings?.playbackSpeed ?: 100
+        playbackSpeed.text = getString(R.string.playback_speed, speed / 100, speed % 100)
     }
 
     private fun setupBanner() {
@@ -208,7 +214,6 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         seekBar.min = 0
         seekBar.max = 0
         playTime.text = "00:00"
-        leftTime.text = "00:00"
         currentLength = 0
         seekBarTouching = false
     }
@@ -216,6 +221,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun movePage(page: Page) = executeWhileResume { movePageInternal(page) }
     private fun movePageInternal(page: Page) {
         if (currentPage != Page.NotSelected && page == currentPage) return
+        if (currentPage == Page.Settings) updatePlaybackSpeedText()
         stopSong()
         seekBarContainer.visibility = if (page == Page.Retro || page == Page.Settings) {
             View.GONE
@@ -430,11 +436,9 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun seek(length: Int, time: Int) {
         if (!seekBarTouching) {
             runOnUiThread {
-                val left = length - time
                 seekBar.max = length
                 seekBar.progress = time
                 playTime.text = duration(time)
-                leftTime.text = duration(left)
                 currentLength = length
             }
         }
@@ -537,6 +541,20 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                     R.id.modal_fragment_container,
                     EditFavoritesFragment.create(object : EditFavoritesFragment.Listener {
                         override fun onClose() = onClose()
+                    })
+                )
+                .commit()
+        }
+    }
+
+    private fun showPlaybackSettings() {
+        musicManager?.stop()
+        executeWhileResume {
+            supportFragmentManager.beginTransaction()
+                .replace(
+                    R.id.modal_fragment_container,
+                    PlaybackSettingsFragment.create(object : PlaybackSettingsFragment.Listener {
+                        override fun onClose() = updatePlaybackSpeedText()
                     })
                 )
                 .commit()

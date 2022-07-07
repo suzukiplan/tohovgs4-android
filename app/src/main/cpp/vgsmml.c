@@ -55,6 +55,8 @@ struct MML {
     int kbase[6];
 };
 
+int vgsmml_playback_speed = 100;
+
 /* internal functions */
 static struct VgsBgmData *phase3(char *buf, int *pos, struct VgsMmlErrorInfo *err);
 
@@ -280,7 +282,7 @@ static struct VgsBgmData *phase3(char *buf, int *pos, struct VgsMmlErrorInfo *er
         free_mml(mml);
         return NULL;
     }
-    mml->tempo = (HZ * 60) / 120 * 4;
+    mml->tempo = (HZ * 60) / (120 * vgsmml_playback_speed / 100) * 4;
     for (i = 0; i < 6; i++) {
         mml->ch[i].oct = 4;
         mml->ch[i].len = 4;
@@ -923,7 +925,7 @@ static int canl(struct MML *mml, struct VgsMmlErrorInfo *err, int line, int cn, 
                 rc = 4;
                 goto ENDPROC;
             }
-            mml->tempo = (HZ * 60) / i * 4;
+            mml->tempo = (HZ * 60) / (i * vgsmml_playback_speed / 100) * 4;
         } else if ('L' == *cp) {
             cp++;
             i = getval(&cp);

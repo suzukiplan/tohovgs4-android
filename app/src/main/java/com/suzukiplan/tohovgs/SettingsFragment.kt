@@ -26,7 +26,10 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
 
     private lateinit var mainActivity: MainActivity
     private val settings: Settings? get() = mainActivity.settings
+    private lateinit var masterVolumeSeekBar: SeekBar
     private lateinit var masterVolumeText: TextView
+    private lateinit var playbackSpeedSeekBar: SeekBar
+    private lateinit var playbackSpeedText: TextView
     private var checked = false
 
     @SuppressLint("SetTextI18n")
@@ -40,9 +43,6 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         view.findViewById<TextView>(R.id.version).text = "Version ${BuildConfig.VERSION_NAME}"
         view.findViewById<View>(R.id.download).setOnClickListener { updateSongList() }
-        masterVolumeText = view.findViewById(R.id.master_volume_text)
-        val masterVolume = settings?.masterVolume ?: 100
-        masterVolumeText.text = getString(R.string.master_volume, masterVolume)
         val kobusiToggle = view.findViewById<AppCompatToggleButton>(R.id.kobusi_toggle)
         kobusiToggle.isChecked = 0 != mainActivity.settings?.compatKobushi
         kobusiToggle.setOnCheckedChangeListener { _, value ->
@@ -50,9 +50,14 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
             mainActivity.settings?.compatKobushi = if (value) 1 else 0
             Logger.d("KoBuSi: $before -> ${mainActivity.settings?.compatKobushi}")
         }
-        val seekBar = view.findViewById<SeekBar>(R.id.master_volume_seek_bar)
-        seekBar.progress = masterVolume
-        seekBar.setOnSeekBarChangeListener(this)
+        masterVolumeText = view.findViewById(R.id.master_volume_text)
+        masterVolumeSeekBar = view.findViewById(R.id.master_volume_seek_bar)
+        masterVolumeSeekBar.setOnSeekBarChangeListener(this)
+        masterVolumeSeekBar.progress = settings?.masterVolume ?: 100
+        playbackSpeedText = view.findViewById(R.id.playback_speed_text)
+        playbackSpeedSeekBar = view.findViewById(R.id.playback_speed_seek_bar)
+        playbackSpeedSeekBar.setOnSeekBarChangeListener(this)
+        playbackSpeedSeekBar.progress = ((settings?.playbackSpeed ?: 100) - 25) / 5
         view.findViewById<View>(R.id.twitter).setOnClickListener {
             mainActivity.safeStartIntent(
                 Intent(
@@ -132,19 +137,33 @@ class SettingsFragment : Fragment(), SeekBar.OnSeekBarChangeListener {
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        masterVolumeText.text = getString(R.string.master_volume, progress)
-        mainActivity.musicManager?.changeMasterVolume(progress)
+        when (seekBar) {
+            masterVolumeSeekBar -> {
+                masterVolumeText.text = getString(R.string.master_volume, progress)
+                mainActivity.musicManager?.changeMasterVolume(progress)
+                settings?.masterVolume = progress
+            }
+            playbackSpeedSeekBar -> {
+                val speed = (progress * 5) + 25
+                mainActivity.settings?.playbackSpeed = speed
+                playbackSpeedText.text =
+                    getString(R.string.playback_speed_setting, speed / 100, speed % 100)
+            }
+        }
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        val album = mainActivity.musicManager?.albums?.get(0)
-        val song = album?.songs?.get(0)
-        mainActivity.musicManager?.play(context, album, song)
+        if (seekBar == masterVolumeSeekBar) {
+            val album = mainActivity.musicManager?.albums?.get(0)
+            val song = album?.songs?.get(0)
+            mainActivity.musicManager?.play(context, album, song)
+        }
     }
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        mainActivity.musicManager?.stop()
-        settings?.masterVolume = seekBar?.progress ?: return
+        if (seekBar == masterVolumeSeekBar) {
+            mainActivity.musicManager?.stop()
+        }
     }
 
     private fun updateSongList() {

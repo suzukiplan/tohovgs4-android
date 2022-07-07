@@ -78,12 +78,12 @@
                 android:thumbTint="@color/light_blue" />
 
             <TextView
-                android:id="@+id/left_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="8dp"
-                android:text="00:00"
+                android:id="@+id/playback_speed"
+                android:layout_width="52dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/transparent_button"
+                android:gravity="center"
+                android:text="x?.??"
                 android:textColor="@color/white_alpha75"
                 android:textSize="12dp"
                 tools:ignore="HardcodedText,SpUsage" />
