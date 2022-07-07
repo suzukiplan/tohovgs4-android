@@ -16,6 +16,7 @@ struct _SLOT _slot[MAXSLOT];
 struct _TOUCH _touch;
 void *_psg;
 static int fs_bstop;
+int compat_master_volume = 100;
 
 /* 内部関数 */
 static int gclip(unsigned char n, int *sx, int *sy, int *xs, int *ys, int *dx, int *dy);
@@ -284,4 +285,15 @@ void vgsbuf(char *buf, size_t size) {
     memset(buf, 0, size);
     if (fs_bstop) return;
     vgsdec_execute(_psg, buf, size);
+    if (100 != compat_master_volume) {
+        short *sbuf = (short *) buf;
+        for (size_t i = 0; i < size / 2; i++) {
+            int w = (int) sbuf[i];
+            w *= compat_master_volume;
+            w /= 100;
+            if (w < -32768) w = -32768;
+            else if (32767 < w) w = 32767;
+            sbuf[i] = (short) w;
+        }
+    }
 }

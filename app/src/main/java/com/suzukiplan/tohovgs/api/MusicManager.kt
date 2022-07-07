@@ -66,6 +66,7 @@ class MusicManager(private val mainActivity: MainActivity) {
 
     fun load(): MusicManager {
         changeMasterVolume(mainActivity.settings?.masterVolume ?: 100)
+        JNI.setPlaybackSpeed(mainActivity.settings?.playbackSpeed ?: 100)
         val assetSongListInput = mainActivity.assets.open("songlist.json")
         val assetSongListJson = String(assetSongListInput.readBytes(), Charsets.UTF_8)
         assetSongListInput.close()
@@ -146,6 +147,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     fun changeMasterVolume(masterVolume: Int) {
         this.masterVolume = masterVolume
         audioTrack?.setVolume(masterVolume / 100.0f)
+        JNI.compatMasterVolume(masterVolume)
     }
 
     fun initialize() {

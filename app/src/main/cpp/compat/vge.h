@@ -55,6 +55,7 @@ extern short *TONE4[85];
 extern void *_psg;
 extern int g_flingY;
 extern int g_flingX;
+extern int compat_master_volume;
 
 void tohovgs_cleanUp();
 

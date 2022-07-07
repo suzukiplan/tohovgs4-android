@@ -23,7 +23,7 @@
     <string name="launch_emulator_error">Cannot launch the VGS emulator.\nALL SONGS ARE LOCKED.</string>
     <string name="download">サーバーから最新楽曲をダウンロード</string>
     <string name="contents">コンテンツ</string>
-    <string name="sound">サウンド</string>
+    <string name="sound">再生設定</string>
     <string name="master_volume">マスターボリューム: %d%%</string>
     <string name="support">SUZUKI PLAN - SNS</string>
     <string name="support_twitter">Twitter</string>
@@ -61,4 +61,7 @@
     <string name="shuffle_list">シャッフル</string>
     <string name="edit_favorites">お気に入り編集</string>
     <string name="cannot_start_browser">起動可能なアプリがインストールされていないため操作をキャンセルしました。</string>
+    <string name="playback_speed">x%d.%02d</string>
+    <string name="playback_speed_setting">再生速度: x%d.%02d</string>
+    <string name="reset">リセット</string>
 </resources>

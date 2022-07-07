@@ -30,6 +30,10 @@ public class JNI {
 
     public static native void kobushi(long context, int kobushi);
 
+    public static native void setPlaybackSpeed(int speed);
+
+    public static native void compatMasterVolume(int volume);
+
     public static native void compatCleanUp();
 
     public static native void compatAllocate(int nTitle, int nSong, AssetManager assetManager);

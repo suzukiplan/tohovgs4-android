@@ -91,6 +91,33 @@
                 android:progressTint="@color/dark_blue"
                 android:thumbTint="@color/light_blue" />
 
+            <TextView
+                android:id="@+id/playback_speed_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/playback_speed_setting"
+                android:textColor="@color/white_alpha75"
+                android:textSize="12dp"
+                tools:ignore="SpUsage" />
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/playback_speed_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/seek_bar"
+                android:max="35"
+                android:min="0"
+                android:padding="8dp"
+                android:progressTint="@color/dark_blue"
+                android:thumbTint="@color/light_blue" />
+
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
