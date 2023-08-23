@@ -1,5 +1,5 @@
 {
-    "version": "2022.06.25",
+    "version": "2023.06.08",
     "albums": [
         {
             "appleId": "1438613504",
@@ -745,12 +745,44 @@
                     "english": "Flowering Knight"
                 },
                 {
+                    "appleId": "1581516126",
+                    "mml": "TH09-05",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "東方妖々夢　〜 Ancient Temple",
+                    "english": "Mystic Oriental Dream　〜 Ancient Temple"
+                },
+                {
+                    "appleId": "1581516127",
+                    "mml": "TH09-06",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "狂気の瞳　〜 Invisible Full Moon",
+                    "english": "Lunatic Eyes　〜 Invisible Full Moon"
+                },
+                {
                     "appleId": "1581516128",
                     "mml": "TH09-07",
                     "ver": 0,
                     "loop": 1,
                     "name": "おてんば恋娘の冒険",
                     "english": "Adventure of the Lovestruck Tomboy"
+                },
+                {
+                    "appleId": "1581516129",
+                    "mml": "TH09-08",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "幽霊楽団　〜 Phantom Ensemble",
+                    "english": "Phantom Ensemble"
+                },
+                {
+                    "appleId": "1581516130",
+                    "mml": "TH09-09",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "もう歌しか聞こえない　～ Flower Mix",
+                    "english": "Unwittingly，Distracted with her Song　～ Flower Mix"
                 },
                 {
                     "appleId": "1581516131",
@@ -767,6 +799,30 @@
                     "loop": 1,
                     "name": "風神少女 (ShortVersion)",
                     "english": "Fujin Maiden (ShortVersion)"
+                },
+                {
+                    "appleId": "1581516133",
+                    "mml": "TH09-12",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "ポイズンボディ　～ Forsaken Doll",
+                    "english": "Poison Body　～ Forsaken Doll"
+                },
+                {
+                    "appleId": "1581516134",
+                    "mml": "TH09-13",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "今昔幻想郷　～ Flower Land",
+                    "english": "Konjaku Gensokyo　～ Flower Land"
+                },
+                {
+                    "appleId": "1581516135",
+                    "mml": "TH09-14",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "彼岸帰航　〜 Riverside View",
+                    "english": "Higan Homeward Voyage　〜 Riverside View"
                 },
                 {
                     "appleId": "1581516136",
@@ -1251,6 +1307,193 @@
                     "loop": 1,
                     "name": "可愛い大戦争のリフレーン",
                     "english": "Cute Great War Refrain"
+                },
+                {
+                    "appleId": "1581358614",
+                    "mml": "TH12_8-03",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "いたずらに命をかけて",
+                    "english": "Risking Life for the Sake of Mischief"
+                },
+                {
+                    "appleId": "1581358615",
+                    "mml": "TH12_8-04",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "年中夢中の好奇心",
+                    "english": "Year Round Preoccupied Curiosity"
+                },
+                {
+                    "appleId": "1581358616",
+                    "mml": "TH12_8-05",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "真夜中のフェアリーダンス",
+                    "english": "Midnight Fairy Dance"
+                },
+                {
+                    "appleId": "1581358617",
+                    "mml": "TH12_8-06",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "妖精大戦争　～ Faily Wars",
+                    "english": "Fairy Wars　～ Faily Wars"
+                },
+                {
+                    "appleId": "1581358620",
+                    "mml": "TH12_8-07",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "春の氷精 - 静 -",
+                    "english": "Spring Ice Fairy - Silent -"
+                },
+                {
+                    "appleId": "1581358621",
+                    "mml": "TH12_8-08",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "ルーズレイン",
+                    "english": "Loose Rain"
+                },
+                {
+                    "appleId": "1581358622",
+                    "mml": "TH12_8-09",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "メイガスナイト",
+                    "english": "Magus Night"
+                },
+                {
+                    "appleId": "1581358623",
+                    "mml": "TH12_8-10",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "プレイヤーズスコア",
+                    "english": "Players Score"
+                }
+            ]
+        },
+        {
+            "appleId": "1581358516",
+            "albumId": "TH13",
+            "name": "東方神霊廟",
+            "formalName": "東方神霊廟　～ Ten Desires.",
+            "copyright": "(c)2011 上海アリス幻樂団",
+            "compatColor": 35,
+            "defaultLocked": true,
+            "songs": [
+                {
+                    "appleId": "1581358517",
+                    "mml": "TH13-01",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "欲深き霊魂",
+                    "english": "The Greedy Spirits"
+                },
+                {
+                    "appleId": "1581358518",
+                    "mml": "TH13-02",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "死霊の夜桜",
+                    "english": "Deadly Night Cherry Blossoms"
+                },
+                {
+                    "appleId": "1581358519",
+                    "mml": "TH13-03",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "ゴーストリード",
+                    "english": "Ghost Lead"
+                },
+                {
+                    "appleId": "1581358520",
+                    "mml": "TH13-04",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "妖怪寺へようこそ",
+                    "english": "Welcome to Yokai Temple"
+                },
+                {
+                    "appleId": "1581358521",
+                    "mml": "TH13-05",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "門前の妖怪小娘",
+                    "english": "Yokai Girl who at the Gate"
+                },
+                {
+                    "appleId": "1581358522",
+                    "mml": "TH13-06",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "素敵な墓場で暮しましょ",
+                    "english": "Let's Live in Nice Cemetery"
+                },
+                {
+                    "appleId": "1581358523",
+                    "mml": "TH13-07",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "リジッドパラダイス",
+                    "english": "Rigid Paradise"
+                },
+                {
+                    "appleId": "1581358524",
+                    "mml": "TH13-08",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "デザイアドライブ",
+                    "english": "Desire Drive"
+                },
+                {
+                    "appleId": "1581358525",
+                    "mml": "TH13-09",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "古きユアンシェン",
+                    "english": "Ancient Yuan-Sheng"
+                },
+                {
+                    "appleId": "1581358526",
+                    "mml": "TH13-10",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "夢殿大祀廟",
+                    "english": "Grand Enshrined Mausoleum at Yumedono"
+                },
+                {
+                    "appleId": "1581358528",
+                    "mml": "TH13-11",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "大神神話伝",
+                    "english": "Story of Mythomiwa"
+                },
+                {
+                    "appleId": "1581358530",
+                    "mml": "TH13-13",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "聖徳伝説　～ True Administrator",
+                    "english": "Shotoku Legend　〜 True Administrator"
+                },
+                {
+                    "appleId": "1581358531",
+                    "mml": "TH13-14",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "妖怪裏参道",
+                    "english": "Yokai Backstreet"
+                },
+                {
+                    "appleId": "1581358532",
+                    "mml": "TH13-15",
+                    "ver": 0,
+                    "loop": 1,
+                    "name": "佐渡の二ッ岩",
+                    "english": "Futatsuiwa from Sado"
                 }
             ]
         }
