@@ -7,14 +7,13 @@ plugins {
 }
 
 android {
-    compileSdk 31
-
     defaultConfig {
         applicationId "com.suzukiplan.TOHOVGS"
         minSdk 26
-        targetSdk 31
-        versionCode 4220
-        versionName "4.22"
+        compileSdk 33
+        targetSdk 33
+        versionCode 4231
+        versionName "4.23a"
         ndk {
             moduleName "native-lib"
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
@@ -82,17 +81,23 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.code.gson:gson:2.8.9'
-    implementation 'com.google.android.gms:play-services-ads:21.0.0'
+    implementation 'com.google.android.gms:play-services-ads:22.3.0'
+    implementation 'com.google.android.gms:play-services-appset:16.0.2'
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
-    implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.3.0'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-perf-ktx'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-    implementation 'com.android.billingclient:billing:5.0.0'
-    implementation 'com.android.billingclient:billing-ktx:5.0.0'
+    implementation 'com.android.billingclient:billing:6.0.1'
+    implementation 'com.android.billingclient:billing-ktx:6.0.1'
+}
+
+configurations.implementation {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
 }

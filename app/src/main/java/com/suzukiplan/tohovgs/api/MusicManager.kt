@@ -115,10 +115,12 @@ class MusicManager(private val mainActivity: MainActivity) {
                 Logger.d("use preset songlist.json ${assetSongList!!.version} (not downloaded)")
                 assetSongList
             }
+
             null != assetSongList && assetSongList.version < downloadSongList.version -> {
                 Logger.d("use downloaded songlist.json ${downloadSongList.version}")
                 downloadSongList
             }
+
             else -> {
                 Logger.d("use preset songlist.json ${assetSongList!!.version} (newer than downloaded)")
                 assetSongList
