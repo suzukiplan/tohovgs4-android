@@ -18,7 +18,7 @@ class AddedSongsFragment : Fragment() {
         fun create(
             mainActivity: MainActivity,
             songs: List<Song>,
-            listener: AddedSongsFragment.Listener
+            listener: Listener
         ): AddedSongsFragment {
             val result = AddedSongsFragment()
             result.arguments = Bundle()

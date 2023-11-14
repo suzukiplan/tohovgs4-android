@@ -54,7 +54,7 @@ data class Song(
                 assetInputStream.close()
                 return true
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
         return getDownloadFile(context).exists()
     }
@@ -100,7 +100,7 @@ data class Song(
                         inputStream.close()
                         return "mml/$mml.mml"
                     }
-                } catch (e: java.lang.Exception) {
+                } catch (_: java.lang.Exception) {
                 }
                 return getDownloadFile(context).path
             }
