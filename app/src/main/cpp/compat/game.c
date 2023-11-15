@@ -613,7 +613,7 @@ int vge_tick() {
             put_kanji(8 + bx, dp + 15, 255,
                       "This app is an alternative fiction of the Touhou Project.");
             put_kanji(140 + bx, dp + 30, 255, "Arranged by Yoji Suzuki.");
-            put_kanji(100 + bx, dp + 42, 255, "(c)2013, Presented by SUZUKI PLAN.");
+            put_kanji(80 + bx, dp + 42, 255, "(c)2013-2023, Presented by SUZUKI PLAN.");
         } else {
             put_kanji(4 + bx, dp + 15, 255,
                       "This app is an alternative fiction of Touhou Project.");
