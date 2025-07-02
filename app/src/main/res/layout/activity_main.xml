@@ -114,7 +114,7 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:theme="@style/Theme.MaterialComponents.DayNight"
-            app:itemIconSize="48dp"
+            app:itemIconSize="44dp"
             app:itemIconTint="@drawable/bottom_menu_state"
             app:itemRippleColor="@color/white"
             app:labelVisibilityMode="unlabeled"
