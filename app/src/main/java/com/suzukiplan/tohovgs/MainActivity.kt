@@ -272,7 +272,10 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         }
     }
 
-    override fun onBackPressed() = finish()
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
 
     override fun finish() {
         super.finish()
@@ -335,6 +338,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                             MessageDialog.start(this, getString(R.string.apple_music_not_exist))
                         }
                     }
+
                     1 -> doLock(song, unlocked)
                 }
             }
@@ -576,7 +580,13 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
     private fun setupBillingClient() {
         billingClient = BillingClient.newBuilder(this)
             .setListener { result, purchases -> proceedPurchases(result, purchases) }
-            .enablePendingPurchases()
+            .enablePendingPurchases(
+                PendingPurchasesParams
+                    .newBuilder()
+                    .enablePrepaidPlans()
+                    .enableOneTimeProducts()
+                    .build()
+            )
             .build()
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingServiceDisconnected() {
@@ -602,7 +612,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                         .build()
                     billingClient.queryProductDetailsAsync(params) { result2, productDetails ->
                         if (result2.responseCode == BillingClient.BillingResponseCode.OK) {
-                            productDetails.forEach { productDetail ->
+                            productDetails.productDetailsList.forEach { productDetail ->
                                 Logger.d("sku = ${productDetail.productId}, title = ${productDetail.title} price = ${productDetail.oneTimePurchaseOfferDetails?.formattedPrice}")
                                 billingProducts.add(productDetail)
                             }
@@ -658,7 +668,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                             startPurchase(
                                 listOf(
                                     BillingFlowParams.ProductDetailsParams.newBuilder()
-                                        .setProductDetails(productDetails[0])
+                                        .setProductDetails(productDetails.productDetailsList[0])
                                         .build()
                                 )
                             )
@@ -703,6 +713,7 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
                             settings?.removeRewardAds = true
                         }
                     }
+
                     skuRemoveBannerAds -> {
                         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                             settings?.removeBannerAds = true
