@@ -220,6 +220,11 @@ Java_com_suzukiplan_tohovgs_api_JNI_compatTick(JNIEnv *env, jclass, jobject bitm
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_suzukiplan_tohovgs_api_JNI_compatTickWithoutRender(JNIEnv *env, jclass) {
+    vge_tick();
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_suzukiplan_tohovgs_api_JNI_compatOnTouch(JNIEnv *,
                                                   jclass,
                                                   jint cx,

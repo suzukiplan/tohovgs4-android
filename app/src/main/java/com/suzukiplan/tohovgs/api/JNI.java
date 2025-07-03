@@ -48,6 +48,8 @@ public class JNI {
 
     public static native void compatTick(Bitmap bitmap);
 
+    public static native void compatTickWithoutRender();
+
     public static native void compatOnTouch(int cx, int cy, int dx, int dy);
 
     public static native void compatOnReleaseTouch();
