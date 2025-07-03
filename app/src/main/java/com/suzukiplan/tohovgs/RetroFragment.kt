@@ -54,7 +54,8 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             holder.addCallback(this)
             surfaceView.isClickable = true
             surfaceView.isFocusable = false
-            gestureDetector = GestureDetector(context,
+            gestureDetector = GestureDetector(
+                context,
                 object : GestureDetector.SimpleOnGestureListener() {
                     override fun onFling(
                         e1: MotionEvent?,
@@ -87,6 +88,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
                         previousX = cx
                         previousY = cy
                     }
+
                     MotionEvent.ACTION_UP,
                     MotionEvent.ACTION_POINTER_UP,
                     MotionEvent.ACTION_CANCEL -> JNI.compatOnReleaseTouch()
@@ -100,6 +102,7 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     override fun onDestroyView() {
+        stopRenderThread()
         vram.recycle()
         super.onDestroyView()
     }
@@ -109,8 +112,9 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             holder.surface.setFrameRate(60.0f, Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
         }
-        stopRenderThread()
-        startRenderThread()
+        if (!alive) {
+            startRenderThread()
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, f: Int, w: Int, h: Int) {
@@ -120,7 +124,6 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
         Logger.d("surfaceDestroyed")
-        stopRenderThread()
     }
 
     private fun startRenderThread() {
@@ -217,13 +220,24 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             settings?.compatLocaleId ?: 0,
             settings?.compatListType ?: 0
         )
+        var isBackground = false
         while (alive) {
             start = System.currentTimeMillis()
             val canvas = holder.lockHardwareCanvas()
             if (null != canvas) {
+                if (isBackground) {
+                    Logger.d("Return from Background Mode")
+                    isBackground = false
+                }
                 JNI.compatTick(vram)
                 canvas.drawBitmap(vram, vramRect, surfaceRect, paint)
                 holder.unlockCanvasAndPost(canvas)
+            } else {
+                if (!isBackground) {
+                    Logger.d("Into the Background Mode")
+                    isBackground = true
+                }
+                JNI.compatTickWithoutRender()
             }
             procTime = System.currentTimeMillis() - start
             currentInterval++
