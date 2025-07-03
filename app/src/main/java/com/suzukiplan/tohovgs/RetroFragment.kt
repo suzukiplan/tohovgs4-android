@@ -220,14 +220,23 @@ class RetroFragment : Fragment(), SurfaceHolder.Callback {
             settings?.compatLocaleId ?: 0,
             settings?.compatListType ?: 0
         )
+        var isBackground = false
         while (alive) {
             start = System.currentTimeMillis()
             val canvas = holder.lockHardwareCanvas()
             if (null != canvas) {
+                if (isBackground) {
+                    Logger.d("Return from Background Mode")
+                    isBackground = false
+                }
                 JNI.compatTick(vram)
                 canvas.drawBitmap(vram, vramRect, surfaceRect, paint)
                 holder.unlockCanvasAndPost(canvas)
             } else {
+                if (!isBackground) {
+                    Logger.d("Into the Background Mode")
+                    isBackground = true
+                }
                 JNI.compatTickWithoutRender()
             }
             procTime = System.currentTimeMillis() - start
