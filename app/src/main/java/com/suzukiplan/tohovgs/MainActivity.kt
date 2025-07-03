@@ -279,6 +279,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
         finish()
     }
 
+    override fun onDestroy() {
+        finish()
+        super.onDestroy()
+    }
+
     override fun finish() {
         super.finish()
         executeAsync {
@@ -468,19 +473,11 @@ class MainActivity : AppCompatActivity(), SongListFragment.Listener {
 
     override fun onPause() {
         pausing = true
-        if (initialized) {
-            musicManager?.isBackground = true
-            musicManager?.startJob(this)
-        }
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        if (initialized) {
-            musicManager?.stopJob(this)
-            musicManager?.isBackground = false
-        }
         pausing = false
         while (procedureQueue.isNotEmpty()) {
             procedureQueue.removeAt(0).invoke()

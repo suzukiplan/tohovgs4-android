@@ -4,10 +4,8 @@
  */
 package com.suzukiplan.tohovgs.api
 
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
@@ -30,18 +28,17 @@ class MusicManager(private val mainActivity: MainActivity) {
     private var fadeoutExecuted = false
     private var decodeSize = 0
     private var decodeAudioBuffers = arrayOf(
-        ByteArray(basicBufferSize),
-        ByteArray(basicBufferSize)
+        ByteArray(basicBufferSize), ByteArray(basicBufferSize)
     )
     private var emptyAudioBuffer = ByteArray(basicBufferSize * 4)
     private var decodeAudioBufferLatch = 0
     private var decodeFirst = true
     var infinity = false
-    var isBackground = false
     private var startedContext: Context? = null
     private var masterVolume = 100
     private var kobushi = 0
     private val downloadSongListFile: File get() = File("${mainActivity.filesDir}/songlist.json")
+    private var serviceIntent = Intent(mainActivity, MusicService::class.java)
 
     fun isExistLockedSong(settings: Settings?): Boolean? {
         if (null == settings) {
@@ -155,6 +152,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     fun initialize() {
         terminate()
         synchronized(locker) { vgsContext = JNI.createDecoder() }
+        mainActivity.startForegroundService(serviceIntent)
     }
 
     fun terminate() {
@@ -164,6 +162,7 @@ class MusicManager(private val mainActivity: MainActivity) {
             synchronized(locker) { JNI.releaseDecoder(vgsContext) }
             vgsContext = 0L
         }
+        mainActivity.stopService(serviceIntent)
     }
 
     private fun find(album: Album?, song: Song?): Song? {
@@ -174,9 +173,6 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     fun stop() {
-        if (isBackground) {
-            stopJob(startedContext)
-        }
         audioTrack?.release()
         playingSong?.needReload = true
         find(playingAlbum, playingSong)?.status = Song.Status.Stop
@@ -185,9 +181,7 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     fun pause(
-        progress: Int,
-        onSeek: ((length: Int, time: Int) -> Unit)?,
-        onPlayEnded: (() -> Unit)?
+        progress: Int, onSeek: ((length: Int, time: Int) -> Unit)?, onPlayEnded: (() -> Unit)?
     ) {
         val song = playingSong ?: return
         val album = playingAlbum ?: return
@@ -233,7 +227,6 @@ class MusicManager(private val mainActivity: MainActivity) {
                 kobushi = mainActivity.settings?.compatKobushi ?: 0
                 JNI.load(vgsContext, it)
                 createAudioTrack(seek, onSeek, onPlayEnded)
-                if (isBackground) startJob(context)
                 startedContext = context
             }
         }
@@ -248,25 +241,16 @@ class MusicManager(private val mainActivity: MainActivity) {
     }
 
     private fun createAudioTrack(
-        seek: Int,
-        onSeek: ((length: Int, time: Int) -> Unit)?,
-        onPlayEnded: (() -> Unit)?
+        seek: Int, onSeek: ((length: Int, time: Int) -> Unit)?, onPlayEnded: (() -> Unit)?
     ) {
         audioTrack?.release()
-        val attributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-        val format = AudioFormat.Builder()
-            .setSampleRate(22050)
-            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-            .build()
-        audioTrack = AudioTrack.Builder()
-            .setAudioAttributes(attributes)
-            .setAudioFormat(format)
-            .setBufferSizeInBytes(basicBufferSize * 2)
-            .setTransferMode(AudioTrack.MODE_STREAM)
+        val attributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+        val format =
+            AudioFormat.Builder().setSampleRate(22050).setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT).build()
+        audioTrack = AudioTrack.Builder().setAudioAttributes(attributes).setAudioFormat(format)
+            .setBufferSizeInBytes(basicBufferSize * 2).setTransferMode(AudioTrack.MODE_STREAM)
             .build()
         audioTrack?.positionNotificationPeriod = basicBufferSize / 2
         audioTrack?.setVolume(masterVolume / 100f)
@@ -321,37 +305,5 @@ class MusicManager(private val mainActivity: MainActivity) {
     private fun decode(buffer: ByteArray) {
         synchronized(locker) { JNI.decode(vgsContext, buffer) }
         decodeSize += buffer.size
-    }
-
-    private fun jobIdOfSong(song: Song?): Int {
-        val albumIndex = albums.indexOf(song?.parentAlbum)
-        val songIndex = song?.parentAlbum?.songs?.indexOf(song) ?: 0
-        return (albumIndex + 1) * 1000 + songIndex + 1
-    }
-
-    fun startJob(context: Context?) {
-        if (playingSong == null) {
-            Logger.d("Job not scheduled, because any music playing")
-            return
-        }
-        val scheduler = context?.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-        val componentName = ComponentName(context, MusicJobService::class.java)
-        val jobInfo = JobInfo.Builder(jobIdOfSong(playingSong), componentName)
-            .apply {
-                setBackoffCriteria(10000, JobInfo.BACKOFF_POLICY_LINEAR)
-                setPersisted(false)
-                setPeriodic(1000 * 60 * 15)
-                setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
-                setRequiresCharging(false)
-            }.build()
-        scheduler.schedule(jobInfo)
-        Logger.d("Job Scheduled: ${playingSong?.name} (id: ${jobIdOfSong(playingSong)})")
-    }
-
-    fun stopJob(context: Context?) {
-        val playingSong = this.playingSong ?: return
-        val scheduler = context?.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-        scheduler.cancel(jobIdOfSong(playingSong))
-        Logger.d("Job Canceled: ${playingSong.name} (id: ${jobIdOfSong(playingSong)})")
     }
 }
