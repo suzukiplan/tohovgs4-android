@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">東方VGS</string>
     <string name="app_name_long">東方BGM on VGS</string>
+    <string name="service_description">Playback on the Background</string>
+    <string name="notify_channel_id">com_suzukiplan_tohovgs_background_playback</string>
     <string name="home">Home</string>
     <string name="sequential">All</string>
     <string name="shuffle">Shuffle</string>

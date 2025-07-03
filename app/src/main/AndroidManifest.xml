@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name="com.suzukiplan.tohovgs.TOHOVGS"
@@ -33,7 +37,10 @@
             </intent-filter>
         </activity>
         <service
-            android:name="com.suzukiplan.tohovgs.api.MusicJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:name="com.suzukiplan.tohovgs.api.MusicService"
+            android:description="@string/service_description"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            android:icon="@drawable/ic_launcher_foreground" />
     </application>
 </manifest>
